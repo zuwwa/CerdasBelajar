@@ -1,0 +1,133 @@
+<?php
+session_start();
+include('../../koneksi.php');
+
+// Validasi login siswa
+if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'siswa') {
+  echo "<script>alert('Akses ditolak!'); window.location='../../logout.php';</script>";
+  exit();
+}
+
+$email = $_SESSION['email'];
+$siswa = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id FROM siswa WHERE email = '$email'"));
+$siswa_id = $siswa['id'];
+
+$kode = $_GET['kode'] ?? '';
+if (empty($kode)) {
+  echo "<script>alert('Kode mapel tidak ditemukan.'); window.location='index.php';</script>";
+  exit();
+}
+
+// Ambil data mapel
+$mapelQuery = mysqli_query($conn, "
+  SELECT m.*, g.nama AS nama_guru, k.kelas AS nama_kelas 
+  FROM mapel m
+  LEFT JOIN guru g ON m.guru_id = g.id
+  LEFT JOIN kelas k ON m.kelas_id = k.id
+  WHERE m.kode_mapel = '$kode'
+");
+$mapel = mysqli_fetch_assoc($mapelQuery);
+if (!$mapel) {
+  echo "<script>alert('Mata pelajaran tidak ditemukan.'); window.location='index.php';</script>";
+  exit();
+}
+
+// Ambil materi
+$materiQuery = mysqli_query($conn, "
+  SELECT * FROM materi
+  WHERE mapel_id = {$mapel['id']}
+  ORDER BY tanggal_upload DESC
+");
+
+// Cek apakah sudah absen hari ini untuk mapel ini
+$cekAbsen = mysqli_query($conn, "
+  SELECT * FROM absensi 
+  WHERE siswa_id = $siswa_id 
+    AND mapel_id = {$mapel['id']} 
+    AND tanggal = CURDATE()
+");
+$sudahAbsen = mysqli_num_rows($cekAbsen) > 0;
+?>
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Materi - <?= htmlspecialchars($mapel['nama_mapel']) ?></title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="shortcut icon" href="../images/sma.png" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .container {
+      max-width: 900px;
+    }
+    .card {
+      border-radius: 16px;
+    }
+    .btn-download {
+      background-color: #2e86de;
+      color: white;
+      border-radius: 20px;
+      padding: 6px 18px;
+      font-weight: 500;
+    }
+    .btn-download:hover {
+      background-color: #1c5fac;
+    }
+    .btn-absen {
+      background-color: #28a745;
+      color: white;
+      border-radius: 20px;
+      padding: 6px 18px;
+      font-weight: 500;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="container mt-5 mb-5">
+  <div class="card shadow p-4">
+    <h3 class="mb-3 text-primary">📚 Materi: <?= htmlspecialchars($mapel['nama_mapel']) ?></h3>
+    <p><strong>Guru Pengampu:</strong> <?= htmlspecialchars($mapel['nama_guru']) ?></p>
+    <p><strong>Kelas:</strong> <?= htmlspecialchars($mapel['nama_kelas']) ?></p>
+    <?php if ($sudahAbsen): ?>
+      <p><span class="badge badge-success">✅ Kamu sudah absen hari ini</span></p>
+    <?php endif; ?>
+    <hr>
+
+    <?php if (mysqli_num_rows($materiQuery) < 1): ?>
+      <div class="alert alert-info">Belum ada materi pembelajaran untuk mata pelajaran ini.</div>
+    <?php else: ?>
+      <ul class="list-group">
+        <?php while ($materi = mysqli_fetch_assoc($materiQuery)) : ?>
+          <li class="list-group-item">
+            <div>
+              <h5><?= htmlspecialchars($materi['judul']); ?></h5>
+              <p><?= nl2br(htmlspecialchars($materi['deskripsi'])); ?></p>
+              <small class="text-muted">Diunggah: <?= date('d M Y', strtotime($materi['tanggal_upload'])); ?></small>
+              <div class="mt-2">
+                <?php if (!empty($materi['file'])): ?>
+                  <a href="../uploads/<?= urlencode($materi['file']); ?>" class="btn btn-download" download>📥 Unduh</a>
+                <?php endif; ?>
+                <?php if (!$sudahAbsen): ?>
+                  <form method="post" action="proses_absen.php?kode=<?= urlencode($kode); ?>" class="d-inline">
+                    <input type="hidden" name="mapel_id" value="<?= $mapel['id']; ?>">
+                    <input type="hidden" name="materi_id" value="<?= $materi['id']; ?>">
+                    <button type="submit" class="btn btn-absen">📅 Absen</button>
+                  </form>
+                <?php endif; ?>
+              </div>
+            </div>
+          </li>
+        <?php endwhile; ?>
+      </ul>
+    <?php endif; ?>
+
+    <a href="mapel.php?kode=<?= urlencode($mapel['kode_mapel']); ?>" class="btn btn-secondary mt-4">← Kembali ke Mapel</a>
+  </div>
+</div>
+</body>
+</html>
