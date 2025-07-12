@@ -2,79 +2,56 @@
 session_start();
 include("koneksi.php");
 
-// Cek apakah user sudah login dari Google
 if (!isset($_SESSION['email'])) {
     echo "<script>alert('⚠️ Sesi tidak valid. Silakan login ulang.'); window.location='index.php';</script>";
     exit;
 }
 
-$email     = strtolower(trim($_SESSION['email']));
-$fullname  = $_SESSION['username'];
-$picture   = $_SESSION['picture'] ?? '';
-$created   = date("Y-m-d H:i:s");
-$lastLogin = $created;
-$role_dipilih = $_SESSION['dipilih'] ?? null;
+$email = strtolower(trim($_SESSION['email']));
 
-// Cek apakah user sudah terdaftar
+// Cek ke tabel users
 $query = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email'");
 $data = mysqli_fetch_assoc($query);
 
-if (!$data) {
-    // Insert user baru ke tabel users saja
-    $stmt = $conn->prepare("INSERT INTO users (fullname, email, password, status, picture, type, last_login, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-    $password = "-";
-    $status   = 1;
-    $stmt->bind_param("ssssssss", $fullname, $email, $password, $status, $picture, $role_dipilih, $lastLogin, $created);
-    $stmt->execute();
+if ($data) {
+    $userId   = $data['id'];
+    $userName = $data['fullname'];
+    $userType = $data['id_role']; // ✅ INI yang benar
 
-    // Ambil ulang data user baru
-    $data = [
-        'id'       => $conn->insert_id,
-        'fullname' => $fullname,
-        'email'    => $email,
-        'type'     => $role_dipilih,
-    ];
-}
+    // Simpan ke session
+    $_SESSION['id_user'] = $userId;
+    $_SESSION['nama']    = $userName;
+    $_SESSION['type']    = $userType;
 
-// Simpan session user
-$_SESSION['id_user'] = $data['id'];
-$_SESSION['nama']    = $data['fullname'];
-$_SESSION['role']    = $data['type'];
-$_SESSION['email']   = $data['email'];
-
-// Jika role adalah siswa, pastikan siswa sudah ada di tabel `siswa`
-if ($data['type'] === 'siswa') {
-    $cek = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email'");
-
-    if (mysqli_num_rows($cek) === 0) {
-        echo "<script>alert('⚠️ Data siswa belum terdaftar. Hubungi admin.'); window.location='logout.php';</script>";
-        exit;
+    // Arahkan sesuai role
+    switch ($userType) {
+        case 1:
+            header("Location: administrator/index.php");
+            break;
+        case 2:
+            // Cek apakah siswa sudah ada di t_siswa
+            $cek = mysqli_query($conn, "SELECT * FROM t_siswa WHERE nis = '$userId'");
+            if (mysqli_num_rows($cek) == 0) {
+                mysqli_query($conn, "INSERT INTO t_siswa (nis, nama, id_sekolah, jurusan) VALUES ('$userId', '$userName', 1, 'IPA')");
+            }
+            header("Location: siswa/index.php?page=dashboard");
+            break;
+        case 3:
+            header("Location: guru/index.php");
+            break;
+        case 4:
+            header("Location: ortu/index.php");
+            break;
+        case 5:
+            header("Location: kepsek/index.php");
+            break;
+        case 6:
+            header("Location: perpus/index.php");
+            break;
+        default:
+            echo "<script>alert('⚠️ Akses tidak dikenali'); window.location='logout.php';</script>";
     }
+    exit;
+} else {
+    echo "<script>alert('⚠️ Akun tidak terdaftar.'); window.location='logout.php';</script>";
 }
-
-// Redirect berdasarkan role
-switch ($data['type']) {
-    case 'admin':
-        header("Location: administrator/index.php");
-        break;
-    case 'siswa':
-        header("Location: siswa/index.php?page=dashboard");
-        break;
-    case 'guru':
-        header("Location: guru/index.php");
-        break;
-    case 'ortu':
-        header("Location: ortu/index.php");
-        break;
-    case 'kepsek':
-        header("Location: kepsek/index.php");
-        break;
-    case 'perpus':
-        header("Location: perpus/index.php");
-        break;
-    default:
-        echo "<script>alert('⚠️ Role tidak dikenali.'); window.location='logout.php';</script>";
-        break;
-}
-exit;
-?>
