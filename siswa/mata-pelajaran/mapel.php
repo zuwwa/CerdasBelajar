@@ -3,9 +3,9 @@ session_start();
 include('../../koneksi.php');
 
 // Validasi login siswa
-if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'siswa') {
-  echo "<script>alert('Akses ditolak!'); window.location='../../logout.php';</script>";
-  exit();
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'siswa') {
+    header("Location: ../logout.php");
+    exit;
 }
 
 // Ambil kode mapel
@@ -17,12 +17,12 @@ if (empty($kode)) {
 
 // Ambil data mapel + guru + kelas
 $query = mysqli_query($conn, "
-  SELECT m.*, g.nama AS nama_guru, k.kelas AS nama_kelas 
-  FROM mapel m
-  LEFT JOIN guru g ON m.guru_id = g.id
-  LEFT JOIN kelas k ON m.kelas_id = k.id
-  WHERE m.kode_mapel = '$kode'
+  SELECT m.*, m.nama_guru AS nama_guru, k.kelas AS nama_kelas 
+  FROM t_mapel m
+  LEFT JOIN t_kelas k ON m.id_kelas = k.id
+  WHERE m.kode = '$kode'
 ");
+
 $mapel = mysqli_fetch_assoc($query);
 
 if (!$mapel) {
@@ -112,14 +112,14 @@ if (!$mapel) {
 
     <h2><?= strtoupper(htmlspecialchars($mapel['nama_mapel'])); ?></h2>
     <p>Oleh <?= htmlspecialchars($mapel['nama_guru']); ?></p>
-    <small>Kode Mapel: <?= htmlspecialchars($mapel['kode_mapel']); ?> | Kelas: <?= htmlspecialchars($mapel['nama_kelas']); ?></small>
+    <small>Kode Mapel: <?= htmlspecialchars($mapel['kode']); ?></small>
   </div>
 
   <!-- TOMBOL FITUR MAPEL -->
   <div class="text-center mt-4">
-    <a href="absensi.php?kode=<?= urlencode($mapel['kode_mapel']); ?>" class="btn btn-info btn-action">📅 Absensi</a>
-    <a href="tugas.php?kode=<?= urlencode($mapel['kode_mapel']); ?>" class="btn btn-primary btn-action">📘 Tugas</a>
-    <a href="materi.php?kode=<?= urlencode($mapel['kode_mapel']); ?>" class="btn btn-success btn-action">📚 Materi</a>
+    <a href="absensi.php?kode=<?= urlencode($mapel['kode']); ?>" class="btn btn-info btn-action">📅 Absensi</a>
+    <a href="tugas.php?kode=<?= urlencode($mapel['kode']); ?>" class="btn btn-primary btn-action">📘 Tugas</a>
+    <a href="materi.php?kode=<?= urlencode($mapel['kode']); ?>" class="btn btn-success btn-action">📚 Materi</a>
   </div>
 
   <!-- KONTEN MATERI -->
@@ -150,7 +150,7 @@ if (!$mapel) {
   <div class="modal fade" id="modalPengaturan" tabindex="-1" role="dialog" aria-labelledby="pengaturanLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <form action="proses_keluar.php" method="POST" class="modal-content">
-        <input type="hidden" name="kode_mapel" value="<?= htmlspecialchars($mapel['kode_mapel']) ?>">
+        <input type="hidden" name="kode_mapel" value="<?= htmlspecialchars($mapel['kode']) ?>">
         <div class="modal-header bg-danger text-white">
           <h5 class="modal-title" id="pengaturanLabel">Keluar dari Mata Pelajaran</h5>
           <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">

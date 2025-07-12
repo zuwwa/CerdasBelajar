@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 10, 2025 at 10:27 AM
+-- Generation Time: Jul 12, 2025 at 05:14 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -24,58 +24,33 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `absensi`
---
-
-CREATE TABLE `absensi` (
-  `id` int NOT NULL,
-  `siswa_id` int DEFAULT NULL,
-  `mapel_id` int DEFAULT NULL,
-  `tanggal` date DEFAULT NULL,
-  `waktu_kehadiran` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `status` enum('Hadir','Izin','Sakit','Alfa') DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `absensi`
---
-
-INSERT INTO `absensi` (`id`, `siswa_id`, `mapel_id`, `tanggal`, `waktu_kehadiran`, `status`) VALUES
-(4, 20231001, 20, '2025-07-02', '2025-07-02 00:10:00', 'Sakit'),
-(5, 20231001, 20, '2025-07-04', '2025-07-04 00:00:00', 'Hadir'),
-(6, 20231001, 20, '2025-07-09', '2025-07-09 00:03:00', 'Hadir'),
-(7, 20231001, 19, '2025-07-10', '2025-07-10 00:10:10', 'Hadir');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `administrator`
---
-
-CREATE TABLE `administrator` (
-  `id` int NOT NULL,
-  `foto` varchar(255) DEFAULT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `user_id` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `agenda_guru`
 --
 
 CREATE TABLE `agenda_guru` (
   `id` int NOT NULL,
-  `guru_id` int DEFAULT NULL,
-  `kelas_id` int DEFAULT NULL,
-  `mapel_id` int DEFAULT NULL,
-  `tanggal` date DEFAULT NULL,
-  `pertemuan` int DEFAULT NULL,
-  `materi` varchar(255) DEFAULT NULL,
-  `sub_materi` text,
-  `jam` varchar(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `tanggal` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `pertemuan` int NOT NULL,
+  `materi` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `sub_materi` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nama_guru` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kelas` varchar(2) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `mata_pelajaran` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nuptk` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jam` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `agenda_guru`
+--
+
+INSERT INTO `agenda_guru` (`id`, `tanggal`, `pertemuan`, `materi`, `sub_materi`, `nama_guru`, `kelas`, `mata_pelajaran`, `nuptk`, `jam`) VALUES
+(1, '2023-07-21', 10, 'Integral', 'Mengenal dan latihan integral', 'Kim Minji', '1', 'Fisika', '040507', '10:20'),
+(10, '2023-07-28', 6, 'Eksponen 2', 'Ulangan Harian', 'Danielle Marsh', '11', 'Matematika', '050411', '9:00'),
+(11, '19/07/2023', 3, 'Kalkulus', 'Penjelasan kalkulus', 'Kang Haerin', '11', 'Matematika', '060515', ''),
+(12, '18/07/2023', 8, 'Aritmatika', 'UAS', 'Lee Hyein', '11', 'Matematika', '080421', ''),
+(21, '17/07/2023', 1, 'test delete', 'Test delete', 'Test Delete', '10', 'Matematika', '080808', ''),
+(22, '17/07/2023', 1, 'Test Edit', 'Test Edit', 'Test Edit', '10', 'Matematika', '212121', '');
 
 -- --------------------------------------------------------
 
@@ -85,37 +60,21 @@ CREATE TABLE `agenda_guru` (
 
 CREATE TABLE `agenda_kegiatan` (
   `id` int NOT NULL,
-  `judul` varchar(100) NOT NULL,
+  `judul` varchar(255) NOT NULL,
   `deskripsi` text,
-  `tanggal_mulai` date NOT NULL,
+  `tempat` varchar(255) DEFAULT NULL,
+  `tanggal_mulai` date DEFAULT NULL,
   `tanggal_selesai` date DEFAULT NULL,
-  `tempat` varchar(100) DEFAULT NULL,
-  `penanggung_jawab` varchar(100) DEFAULT NULL,
-  `peserta` varchar(100) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  `penanggung_jawab` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `agenda_kegiatan`
 --
 
-INSERT INTO `agenda_kegiatan` (`id`, `judul`, `deskripsi`, `tanggal_mulai`, `tanggal_selesai`, `tempat`, `penanggung_jawab`, `peserta`, `created_at`) VALUES
-(1, 'MPLS 2025', 'Masa Pengenalan Lingkungan Sekolah untuk siswa baru.', '2025-07-15', '2025-07-17', 'Aula Utama', 'Waka Kesiswaan', 'Siswa Baru', '2025-07-10 05:02:53'),
-(2, 'Upacara Hari Kemerdekaan', 'Peringatan Hari Kemerdekaan Republik Indonesia ke-80.', '2025-08-17', NULL, 'Lapangan SMAN 1', 'Kepala Sekolah', 'Semua Siswa & Guru', '2025-07-10 05:02:53'),
-(3, 'Lomba 17 Agustus', 'Lomba-lomba seperti balap karung, makan kerupuk, dll.', '2025-08-18', '2025-08-18', 'Halaman Sekolah', 'OSIS', 'Seluruh Kelas', '2025-07-10 05:02:53');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `anggota_ekskul`
---
-
-CREATE TABLE `anggota_ekskul` (
-  `id` int NOT NULL,
-  `siswa_id` int DEFAULT NULL,
-  `ekskul_id` int DEFAULT NULL,
-  `tahun_ajaran` varchar(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+INSERT INTO `agenda_kegiatan` (`id`, `judul`, `deskripsi`, `tempat`, `tanggal_mulai`, `tanggal_selesai`, `penanggung_jawab`) VALUES
+(1, 'MPLS 2025', 'Masa Pengenalan Lingkungan Sekolah untuk siswa baru.', 'Aula Utama', '2025-07-15', '2025-07-17', 'Wakasek Kesiswaan'),
+(2, 'Lomba 17 Agustus', 'Berbagai lomba kemerdekaan antar kelas.', 'Lapangan', '2025-08-17', NULL, 'OSIS');
 
 -- --------------------------------------------------------
 
@@ -125,9 +84,9 @@ CREATE TABLE `anggota_ekskul` (
 
 CREATE TABLE `anggota_mapel` (
   `id` int NOT NULL,
-  `siswa_id` int NOT NULL,
+  `siswa_id` varchar(12) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
   `mapel_id` int NOT NULL,
-  `tanggal_gabung` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  `tanggal_gabung` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -135,81 +94,72 @@ CREATE TABLE `anggota_mapel` (
 --
 
 INSERT INTO `anggota_mapel` (`id`, `siswa_id`, `mapel_id`, `tanggal_gabung`) VALUES
-(1, 20231001, 19, '2025-07-07 12:48:52'),
-(2, 20231001, 20, '2025-07-09 22:42:28');
+(4, '2330511036', 1, '2025-07-12 00:08:22'),
+(5, '2330511036', 13, '2025-07-12 10:34:57');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `anggota_perpus`
+-- Table structure for table `books`
 --
 
-CREATE TABLE `anggota_perpus` (
+CREATE TABLE `books` (
   `id` int NOT NULL,
-  `user_id` int DEFAULT NULL,
-  `role` enum('siswa','guru') NOT NULL,
-  `no_anggota` varchar(20) DEFAULT NULL,
-  `alamat` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `BookID` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `Title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Author` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Publisher` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `PublicationYear` int DEFAULT NULL,
+  `Category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `AvailableCount` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `books`
+--
+
+INSERT INTO `books` (`id`, `BookID`, `Title`, `Author`, `Publisher`, `PublicationYear`, `Category`, `AvailableCount`) VALUES
+(1, '2', 'Book 2', 'Author 2', 'Publisher 2', 2002, 'Category 2', NULL),
+(2, '3', 'Book 3', 'Author 3', 'Publisher 3', 2003, 'Category 1', NULL),
+(3, '4', 'Book 4', 'Author 4', 'Publisher 4', 2004, 'Category 3', NULL),
+(4, '5', 'Book 5', 'Author 5', 'Publisher 5', 2005, 'Category 2', NULL),
+(5, '6', 'Book 6', 'Author 6', 'Publisher 6', 2006, 'Category 1', NULL),
+(6, '7', 'Book 7', 'Author 7', 'Publisher 7', 2007, 'Category 2', NULL),
+(7, '8', 'Book 8', 'Author 8', 'Publisher 8', 2008, 'Category 3', NULL),
+(8, '9', 'Book 9', 'Author 9', 'Publisher 9', 2009, 'Category 1', NULL),
+(10, 'oghje;kgle', 'Petruk Gareng', 'UMMI', 'UMMI', 2020, 'Fiksi', NULL);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `buku`
+-- Table structure for table `books_0`
 --
 
-CREATE TABLE `buku` (
-  `id` int NOT NULL,
-  `kode_buku` varchar(20) DEFAULT NULL,
-  `judul` varchar(255) DEFAULT NULL,
-  `pengarang` varchar(100) DEFAULT NULL,
-  `penerbit` varchar(100) DEFAULT NULL,
-  `tahun_terbit` int DEFAULT NULL,
-  `kategori` varchar(50) DEFAULT NULL,
-  `stok` int DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- --------------------------------------------------------
+CREATE TABLE `books_0` (
+  `BookID` int NOT NULL,
+  `Title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Author` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Publisher` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `PublicationYear` int DEFAULT NULL,
+  `Category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `AvailableCount` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Table structure for table `ekstrakurikuler`
+-- Dumping data for table `books_0`
 --
 
-CREATE TABLE `ekstrakurikuler` (
-  `id` int NOT NULL,
-  `nama_ekstrakurikuler` varchar(100) DEFAULT NULL,
-  `deskripsi` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `guru`
---
-
-CREATE TABLE `guru` (
-  `id` int NOT NULL,
-  `nip` varchar(20) DEFAULT NULL,
-  `nama` varchar(100) DEFAULT NULL,
-  `jenis_kelamin` enum('L','P') DEFAULT NULL,
-  `tempat_lahir` varchar(50) DEFAULT NULL,
-  `tanggal_lahir` date DEFAULT NULL,
-  `no_telepon` varchar(15) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  `foto` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `guru`
---
-
-INSERT INTO `guru` (`id`, `nip`, `nama`, `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `no_telepon`, `email`, `foto`) VALUES
-(1001, '197801010012', 'Lina Kartikasari, M.Pd.', 'P', 'Sukabumi', '1980-02-10', '081234567812', 'lina@sma.sch.id', 'lina.jpg'),
-(1002, '197801010013', 'Yoga Pratama Putra, S.Pd.', 'L', 'Bandung', '1981-03-15', '081234567813', 'yoga@sma.sch.id', 'yoga.jpg'),
-(1003, '197801010014', 'Sinta Marlina, S.Pd.', 'P', 'Bogor', '1982-04-20', '081234567814', 'sinta@sma.sch.id', 'sinta.jpg'),
-(1004, '197801010015', 'Andi Saputra, S.Kom.', 'L', 'Sukabumi', '1983-05-25', '081234567815', 'andi@sma.sch.id', 'andi.jpg'),
-(1005, '197801010016', 'Rani Nurhayati, S.Pd.', 'P', 'Cianjur', '1984-06-30', '081234567816', 'rani@sma.sch.id', 'rani.jpg'),
-(1006, '197801010017', 'Drs. Dedi Firmansyah, M.Pd.', 'L', 'Garut', '1979-07-05', '081234567817', 'dedi@sma.sch.id', 'dedi.jpg');
+INSERT INTO `books_0` (`BookID`, `Title`, `Author`, `Publisher`, `PublicationYear`, `Category`, `AvailableCount`) VALUES
+(1, 'Book 1', 'Author 1', NULL, NULL, 'Category 1', NULL),
+(2, 'Book 2', 'Author 2', NULL, NULL, 'Category 2', NULL),
+(3, 'Book 3', 'Author 3', NULL, NULL, 'Category 1', NULL),
+(4, 'Book 4', 'Author 4', NULL, NULL, 'Category 3', NULL),
+(5, 'Book 5', 'Author 5', NULL, NULL, 'Category 2', NULL),
+(6, 'Book 6', 'Author 6', NULL, NULL, 'Category 1', NULL),
+(7, 'Book 7', 'Author 7', NULL, NULL, 'Category 2', NULL),
+(8, 'Book 8', 'Author 8', NULL, NULL, 'Category 3', NULL),
+(9, 'Book 9', 'Author 9', NULL, NULL, 'Category 1', NULL),
+(10, 'Book 10', 'Author 10', NULL, NULL, 'Category 2', NULL);
 
 -- --------------------------------------------------------
 
@@ -219,179 +169,188 @@ INSERT INTO `guru` (`id`, `nip`, `nama`, `jenis_kelamin`, `tempat_lahir`, `tangg
 
 CREATE TABLE `jadwal` (
   `id` int NOT NULL,
-  `kelas_id` int DEFAULT NULL,
-  `mapel_id` int DEFAULT NULL,
-  `hari` enum('Senin','Selasa','Rabu','Kamis','Jumat') DEFAULT NULL,
-  `jam_mulai` time DEFAULT NULL,
-  `jam_selesai` time DEFAULT NULL,
-  `ruang` varchar(20) DEFAULT NULL
+  `id_mapel` int NOT NULL,
+  `id_kelas` int NOT NULL,
+  `hari` enum('Senin','Selasa','Rabu','Kamis','Jumat','Sabtu') NOT NULL,
+  `jam_mulai` time NOT NULL,
+  `jam_selesai` time NOT NULL,
+  `ruang` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `jadwal`
 --
 
-INSERT INTO `jadwal` (`id`, `kelas_id`, `mapel_id`, `hari`, `jam_mulai`, `jam_selesai`, `ruang`) VALUES
-(1, 5, 19, 'Senin', '07:00:00', '08:30:00', 'Ruang 1'),
-(2, 5, 20, 'Senin', '08:30:00', '10:00:00', 'Ruang 1'),
-(3, 5, 20, 'Rabu', '10:15:00', '11:45:00', 'Ruang 2'),
-(4, 5, 19, 'Kamis', '09:00:00', '10:30:00', 'Ruang 1');
+INSERT INTO `jadwal` (`id`, `id_mapel`, `id_kelas`, `hari`, `jam_mulai`, `jam_selesai`, `ruang`, `created_at`) VALUES
+(1, 13, 20, 'Senin', '07:00:00', '08:30:00', 'Ruang 1', '2025-07-12 03:23:55'),
+(2, 13, 20, 'Selasa', '07:00:00', '08:30:00', 'Ruang 1', '2025-07-12 03:23:55'),
+(3, 13, 20, 'Rabu', '07:00:00', '08:30:00', 'Ruang 1', '2025-07-12 03:23:55'),
+(4, 13, 20, 'Kamis', '07:00:00', '08:30:00', 'Ruang 1', '2025-07-12 03:23:55'),
+(5, 13, 20, 'Jumat', '07:00:00', '08:30:00', 'Ruang 1', '2025-07-12 03:23:55');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `kelas`
+-- Table structure for table `loans`
 --
 
-CREATE TABLE `kelas` (
-  `id` int NOT NULL,
-  `kelas` varchar(30) NOT NULL,
-  `tingkat` enum('X','XI','XII') NOT NULL,
-  `tahun_ajaran` varchar(9) NOT NULL,
-  `wali_kelas` varchar(100) DEFAULT NULL,
-  `jumlah_siswa` int DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `loans` (
+  `LoanID` int NOT NULL,
+  `BookID` int DEFAULT NULL,
+  `MemberID` int DEFAULT NULL,
+  `LoanDate` date DEFAULT NULL,
+  `DueDate` date DEFAULT NULL,
+  `ReturnDate` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `kelas`
+-- Dumping data for table `loans`
 --
 
-INSERT INTO `kelas` (`id`, `kelas`, `tingkat`, `tahun_ajaran`, `wali_kelas`, `jumlah_siswa`) VALUES
-(1, 'XII-1', 'XII', '2022/2023', 'Lina Kartikasari, M.Pd.', 32),
-(2, 'XII-2', 'XII', '2022/2023', 'Yoga Pratama Putra, S.Pd.', 30),
-(3, 'XI-1', 'XI', '2023/2024', 'Sinta Marlina, S.Pd.', 29),
-(4, 'XI-2', 'XI', '2023/2024', 'Andi Saputra, S.Kom.', 27),
-(5, 'X-1', 'X', '2024/2025', 'Rani Nurhayati, S.Pd.', 30),
-(6, 'X-2', 'X', '2024/2025', 'Drs. Dedi Firmansyah, M.Pd.', 28);
+INSERT INTO `loans` (`LoanID`, `BookID`, `MemberID`, `LoanDate`, `DueDate`, `ReturnDate`) VALUES
+(4, 4, 4, '2002-02-02', '2002-02-09', '2002-04-04'),
+(2, 2, 2, '2023-07-17', '2023-07-24', '2023-07-19'),
+(500, 900, 900, '2023-07-18', '2023-07-25', '2003-04-04'),
+(4, 4, 4, '2002-02-02', '2002-02-09', '2002-04-04'),
+(4, 4, 4, '2002-02-02', '2002-02-09', '2002-04-04'),
+(3, 0, 0, '2023-07-28', '2023-08-04', '2023-07-28');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `kepsek`
+-- Table structure for table `loans_0`
 --
 
-CREATE TABLE `kepsek` (
-  `id` int NOT NULL,
-  `nip` varchar(20) DEFAULT NULL,
-  `nama` varchar(100) DEFAULT NULL,
-  `jabatan` varchar(50) DEFAULT NULL,
-  `masa_jabatan` varchar(50) DEFAULT NULL,
-  `foto` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `loans_0` (
+  `LoanID` int NOT NULL,
+  `BookID` int DEFAULT NULL,
+  `MemberID` int DEFAULT NULL,
+  `LoanDate` date DEFAULT NULL,
+  `DueDate` date DEFAULT NULL,
+  `ReturnDate` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `loans_0`
+--
+
+INSERT INTO `loans_0` (`LoanID`, `BookID`, `MemberID`, `LoanDate`, `DueDate`, `ReturnDate`) VALUES
+(1, 1, 1, '2023-05-01', '2023-05-15', '2023-05-16'),
+(2, 2, 2, '2023-05-02', '2023-05-16', '2023-05-14'),
+(3, 3, 3, '2023-05-03', '2023-05-17', '2023-05-19'),
+(4, 4, 4, '2023-05-04', '2023-05-18', '2023-05-17'),
+(5, 5, 5, '2023-05-05', '2023-05-19', '2023-05-20'),
+(6, 6, 6, '2023-05-06', '2023-05-20', '2023-05-21'),
+(7, 7, 7, '2023-05-07', '2023-05-21', '2023-05-23'),
+(8, 8, 8, '2023-05-08', '2023-05-22', '2023-05-20'),
+(9, 9, 9, '2023-05-09', '2023-05-23', '2023-05-24'),
+(10, 10, 10, '2023-05-10', '2023-05-24', '2023-05-23'),
+(11, 1, 1, '2023-05-01', '2023-05-15', NULL),
+(12, 2, 2, '2023-05-01', '2023-05-15', NULL),
+(13, 3, 3, '2023-05-01', '2023-05-15', NULL),
+(14, 4, 4, '2023-05-01', '2023-05-15', NULL),
+(15, 5, 5, '2023-05-01', '2023-05-15', NULL),
+(16, 1, 1, '2023-05-09', '2023-06-01', NULL),
+(17, 1, 4, '2023-05-11', '2023-06-01', NULL),
+(18, 1, 1, '2023-05-12', '2023-06-01', NULL),
+(19, 2, 6, '2023-05-12', '2023-06-07', NULL),
+(20, 4, 4, '2023-05-13', '2023-06-01', NULL);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `mapel`
+-- Table structure for table `mata_pelajaran`
 --
 
-CREATE TABLE `mapel` (
+CREATE TABLE `mata_pelajaran` (
   `id` int NOT NULL,
-  `nama_mapel` varchar(50) DEFAULT NULL,
-  `kode_mapel` varchar(10) DEFAULT NULL,
-  `guru_id` int DEFAULT NULL,
-  `kelas_id` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `Kode` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `Nama` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `Guru` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `mapel`
+-- Dumping data for table `mata_pelajaran`
 --
 
-INSERT INTO `mapel` (`id`, `nama_mapel`, `kode_mapel`, `guru_id`, `kelas_id`) VALUES
-(19, 'Pendidikan Pancasila', 'PPX1', 1005, 5),
-(20, 'Matematika Wajib', 'MTX1', 1005, 5),
-(21, 'Bahasa Indonesia', 'BIX2', 1006, 6),
-(22, 'Informatika', 'IFX2', 1006, 6),
-(23, 'Fisika', 'FSXI1', 1003, 3),
-(24, 'Kimia', 'KMXI1', 1003, 3),
-(25, 'Biologi', 'BGXI2', 1004, 4),
-(26, 'Sosiologi', 'SSXI2', 1004, 4),
-(27, 'Bahasa Inggris', 'ENXII1', 1001, 1),
-(28, 'Ekonomi', 'EKXII1', 1001, 1),
-(29, 'Geografi', 'GGXII2', 1002, 2),
-(30, 'Sejarah', 'SJXII2', 1002, 2);
+INSERT INTO `mata_pelajaran` (`id`, `Kode`, `Nama`, `Guru`) VALUES
+(2, '002', 'Bahasa Indonesia', 'Imas Kusmiati'),
+(3, '003', 'Bahasa Inggris', 'Dina Mardiah'),
+(4, '004', 'Kimia', 'Lilis Nurlela'),
+(5, '005', 'Biologi', 'Ade Rustandy'),
+(6, '006', 'PPKn', 'Eni Nurhaeni'),
+(7, '007', 'Geografi', 'Iman Suratman'),
+(8, '008', 'Sosiologi', 'Anggia Amanda'),
+(9, '009', 'Fisika', 'Lilis Kurniasih'),
+(10, '010', 'PAI', 'Herwan'),
+(11, '011', 'Bahasa Arab', 'Elsan Nasrillah'),
+(12, '012', 'Seni Budaya', 'Kusuma Dwi Prasetia'),
+(13, '013', 'PKWU', 'Peni Apriani'),
+(14, '014', 'Sejarah Minat', 'Putri Permata Sakti'),
+(15, '015', 'PJOK', 'Kartika Pamungkas');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `materi`
+-- Table structure for table `members`
 --
 
-CREATE TABLE `materi` (
-  `id` int NOT NULL,
-  `mapel_id` int DEFAULT NULL,
-  `judul` varchar(255) DEFAULT NULL,
-  `deskripsi` text,
-  `file` varchar(100) DEFAULT NULL,
-  `tanggal_upload` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `members` (
+  `MemberID` int NOT NULL,
+  `Name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `PhoneNumber` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `materi`
+-- Dumping data for table `members`
 --
 
-INSERT INTO `materi` (`id`, `mapel_id`, `judul`, `deskripsi`, `file`, `tanggal_upload`) VALUES
-(1, 19, 'Nilai Pancasila', 'Penjelasan nilai-nilai dasar dalam Pancasila.', 'nilai_pancasila.pdf', '2025-07-01'),
-(2, 20, 'Persamaan Kuadrat', 'Materi tentang rumus umum dan penyelesaian persamaan kuadrat.', 'persamaan_kuadrat.docx', '2025-07-02'),
-(3, 21, 'Teks Eksposisi', 'Struktur dan ciri khas teks eksposisi dalam Bahasa Indonesia.', 'teks_eksposisi.pptx', '2025-07-03'),
-(4, 22, 'Dasar Pemrograman', 'Konsep logika pemrograman dasar dan algoritma.', 'dasar_pemrograman.pdf', '2025-07-03'),
-(5, 24, 'Ikatan Kimia', 'Jenis dan contoh ikatan ion dan kovalen dalam senyawa kimia.', 'ikatan_kimia.pdf', '2025-07-04');
+INSERT INTO `members` (`MemberID`, `Name`, `Address`, `PhoneNumber`, `Email`) VALUES
+(0, NULL, NULL, NULL, NULL),
+(1, 'John Doe', '123 Main Street', '1234567890', 'johndoe@example.com'),
+(2, 'Jane Smith', '456 Elm Street', '9876543210', 'janesmith@example.com'),
+(3, 'Michael Johnson', '789 Oak Street', '1111111111', 'michaeljohnson@example.com'),
+(4, 'Emily Davis', '321 Pine Street', '2222222222', 'emilydavis@example.com'),
+(5, 'Daniel Wilson', '654 Maple Street', '3333333333', 'danielwilson@example.com'),
+(6, 'Olivia Brown', '987 Cedar Street', '4444444444', 'oliviabrown@example.com'),
+(7, 'William Taylor', '654 Birch Street', '5555555555', 'williamtaylor@example.com'),
+(8, 'Sophia Anderson', '321 Spruce Street', '6666666666', 'sophiaanderson@example.com'),
+(9, 'James Lee', '789 Walnut Street', '7777777777', 'jameslee@example.com'),
+(10, 'Ava Martinez', '123 Cherry Street', '8888888888', 'avamartinez@example.com');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `menu`
+-- Table structure for table `members_0`
 --
 
-CREATE TABLE `menu` (
-  `id` int NOT NULL,
-  `nama_menu` varchar(50) DEFAULT NULL,
-  `ikon` varchar(50) DEFAULT NULL,
-  `keterangan` text,
-  `aktif` tinyint(1) DEFAULT '1',
-  `untuk_role` enum('admin','siswa','guru','kepsek','ortu') DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `members_0` (
+  `MemberID` int NOT NULL,
+  `Name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `PhoneNumber` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `Email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `menu`
+-- Dumping data for table `members_0`
 --
 
-INSERT INTO `menu` (`id`, `nama_menu`, `ikon`, `keterangan`, `aktif`, `untuk_role`) VALUES
-(1, 'Beranda', 'typcn-device-desktop', 'Halaman utama siswa', 1, 'siswa'),
-(2, 'Profil Siswa', 'typcn-user', 'Lihat dan edit data diri', 1, 'siswa'),
-(3, 'Absensi', 'typcn-calendar-outline', 'Lihat kehadiran harian', 1, 'siswa'),
-(4, 'Nilai', 'typcn-chart-bar', 'Cek nilai akademik', 1, 'siswa'),
-(5, 'Jadwal Pelajaran', 'typcn-time', 'Lihat jadwal harian', 1, 'siswa'),
-(6, 'Agenda', 'typcn-clipboard', 'Agenda kegiatan belajar', 1, 'siswa'),
-(7, 'Pembayaran', 'typcn-credit-card', 'Tagihan dan riwayat bayar', 1, 'siswa');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `nilai`
---
-
-CREATE TABLE `nilai` (
-  `id` int NOT NULL,
-  `siswa_id` int DEFAULT NULL,
-  `mapel_id` int DEFAULT NULL,
-  `semester` varchar(10) DEFAULT NULL,
-  `tahun_ajaran` varchar(10) DEFAULT NULL,
-  `nilai_tugas` int DEFAULT NULL,
-  `nilai_uts` int DEFAULT NULL,
-  `nilai_uas` int DEFAULT NULL,
-  `predikat_tugas` varchar(5) DEFAULT NULL,
-  `predikat_uts` varchar(5) DEFAULT NULL,
-  `predikat_uas` varchar(5) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `nilai`
---
-
-INSERT INTO `nilai` (`id`, `siswa_id`, `mapel_id`, `semester`, `tahun_ajaran`, `nilai_tugas`, `nilai_uts`, `nilai_uas`, `predikat_tugas`, `predikat_uts`, `predikat_uas`) VALUES
-(1, 20231001, 19, '1', '2024/2025', 85, 88, 90, 'B', 'B', 'A'),
-(2, 20231001, 20, '1', '2024/2025', 78, 80, 75, 'C', 'B', 'C');
+INSERT INTO `members_0` (`MemberID`, `Name`, `Address`, `PhoneNumber`, `Email`) VALUES
+(0, NULL, NULL, NULL, NULL),
+(1, 'John Doe', '123 Main Street', '1234567890', 'johndoe@example.com'),
+(2, 'Jane Smith', '456 Elm Street', '9876543210', 'janesmith@example.com'),
+(3, 'Michael Johnson', '789 Oak Street', '1111111111', 'michaeljohnson@example.com'),
+(4, 'Emily Davis', '321 Pine Street', '2222222222', 'emilydavis@example.com'),
+(5, 'Daniel Wilson', '654 Maple Street', '3333333333', 'danielwilson@example.com'),
+(6, 'Olivia Brown', '987 Cedar Street', '4444444444', 'oliviabrown@example.com'),
+(7, 'William Taylor', '654 Birch Street', '5555555555', 'williamtaylor@example.com'),
+(8, 'Sophia Anderson', '321 Spruce Street', '6666666666', 'sophiaanderson@example.com'),
+(9, 'James Lee', '789 Walnut Street', '7777777777', 'jameslee@example.com'),
+(10, 'Ava Martinez', '123 Cherry Street', '8888888888', 'avamartinez@example.com');
 
 -- --------------------------------------------------------
 
@@ -401,25 +360,10 @@ INSERT INTO `nilai` (`id`, `siswa_id`, `mapel_id`, `semester`, `tahun_ajaran`, `
 
 CREATE TABLE `notifikasi` (
   `id` int NOT NULL,
-  `siswa_id` int NOT NULL,
-  `judul` varchar(255) NOT NULL,
+  `siswa_id` int DEFAULT NULL,
+  `judul` varchar(100) DEFAULT NULL,
   `isi` text,
-  `dibaca` tinyint(1) DEFAULT '0',
-  `waktu` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `ortu`
---
-
-CREATE TABLE `ortu` (
-  `id` int NOT NULL,
-  `nama` varchar(100) DEFAULT NULL,
-  `anak_id` int DEFAULT NULL,
-  `no_hp` varchar(20) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL
+  `waktu` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -429,40 +373,37 @@ CREATE TABLE `ortu` (
 --
 
 CREATE TABLE `pembayaran` (
-  `id` int NOT NULL,
-  `siswa_id` int DEFAULT NULL,
-  `tagihan_id` int DEFAULT NULL,
-  `jumlah_bayar` decimal(12,2) DEFAULT NULL,
-  `tanggal` date DEFAULT NULL,
-  `status` enum('Lunas','Belum Lunas','Menunggu','Diproses') DEFAULT 'Belum Lunas',
-  `keterangan` text,
-  `kode_va` varchar(50) DEFAULT NULL,
-  `metode` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `nis` int NOT NULL,
+  `nama` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kelas` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `alamat` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jml_bayar` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jenis_tagihan` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `pembayaran`
 --
 
-INSERT INTO `pembayaran` (`id`, `siswa_id`, `tagihan_id`, `jumlah_bayar`, `tanggal`, `status`, `keterangan`, `kode_va`, `metode`) VALUES
-(1, 20231001, 1, '200000.00', '2025-07-04', 'Lunas', 'Transfer via BCA, bukti sudah dikirim', '88820100000001', 'Transfer Bank'),
-(2, 20231001, 2, '150000.00', '2025-07-05', 'Menunggu', 'Menunggu konfirmasi admin', '88820100000002', 'QRIS'),
-(3, 20231001, 3, '100000.00', '2025-07-06', 'Diproses', 'Pembayaran sebagian, akan dilanjut', '88820100000003', 'Transfer Mandiri');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `peminjaman`
---
-
-CREATE TABLE `peminjaman` (
-  `id` int NOT NULL,
-  `anggota_id` int DEFAULT NULL,
-  `buku_id` int DEFAULT NULL,
-  `tanggal_pinjam` date DEFAULT NULL,
-  `tanggal_kembali` date DEFAULT NULL,
-  `status` enum('Dipinjam','Dikembalikan') DEFAULT 'Dipinjam'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+INSERT INTO `pembayaran` (`nis`, `nama`, `kelas`, `alamat`, `jml_bayar`, `jenis_tagihan`) VALUES
+(2130511001, 'Aldy Ramadani', '9A', 'Sukalarang, Kabupaten Sukabumi', 'Rp. 500.000', 'SPP'),
+(2130511002, 'Sandia Anggara', '9B', 'Kadudampit, Kabupaten Sukabumi', 'Rp. 1.000.000', 'Study Tour'),
+(2130511003, 'Kayla Sandi Putri', '9C', 'Cisaat, Kabupaten Sukabumi', 'Rp. 200.000', 'UTS'),
+(2130511004, 'Abdul Gofar Fauzan', '9D', 'Gunung Puyuh, Kota Sukabumi', 'Rp. 300.000', 'UAS'),
+(2130511005, 'Haikal Lukman', '9E', 'Sukalarang, Kabupaten Sukabumi', 'Rp. 1.500.000', 'Seragam'),
+(2130511006, 'Muhamad Agan Suganda', '9A', 'Sukalarang, Kabupaten Sukabumi', 'Rp. 300.000', 'LKS'),
+(2130511007, 'Alviani Nur Rahmadanti', '9B', 'Baros, Kota Sukabumi', 'Lunas', 'SPP'),
+(2130511008, 'Reyhan Khidir', '9C', 'Cisaat, Kabupaten Sukabumi', 'Lunas', 'SPP'),
+(2130511009, 'M. Herdi Al-Fachri', '9D', 'Citamiang, Kota Sukabumi', 'Lunas', 'Study Tour'),
+(2130511010, 'Agung Prayoga', '9E', 'Jampang Kulon, Kabupaten Sukabumi', 'Lunas', 'Study Tour'),
+(2130511011, 'Raihan Herlambang', '9A', 'Cikole, Kota Sukabumi', 'Lunas', 'LKS'),
+(2130511012, 'Aisya Syakira Purnama', '9B', 'Cicurug, Kabupaten Sukabumi', 'Lunas', 'LKS'),
+(2130511013, 'Ziyah Sakinah', '9C', 'Cikodang, Kota Sukabumi', 'Lunas', 'Seragam'),
+(2130511014, 'Raina Rahmawati', '9D', 'Nangeleng, Kota Sukabumi', 'Lunas', 'Seragam'),
+(2130511015, 'Siti Nurazizah', '9E', 'Cicurug, Kabupaten Sukabumi', 'Lunas', 'UTS'),
+(2130511016, 'Kevin Saputra', '9A', 'Ciaul, Kota Sukabumi', 'Lunas', 'UTS'),
+(2130511017, 'Agung Syahril', '9B', 'Sagaranten, Kabupaten Sukabumi', 'Lunas', 'UAS'),
+(2130511018, 'Wili Septiandi', '9C', 'Sagaranten, Kabupaten Sukabumi', 'Lunas', 'UAS');
 
 -- --------------------------------------------------------
 
@@ -472,76 +413,20 @@ CREATE TABLE `peminjaman` (
 
 CREATE TABLE `pengumpulan_tugas` (
   `id` int NOT NULL,
-  `tugas_id` int DEFAULT NULL,
-  `siswa_id` int DEFAULT NULL,
+  `tugas_id` int NOT NULL,
+  `siswa_id` int NOT NULL,
   `file_jawaban` varchar(255) DEFAULT NULL,
-  `tanggal_kumpul` datetime DEFAULT NULL,
+  `catatan` text,
   `nilai` int DEFAULT NULL,
-  `feedback` text,
-  `status` enum('Terkumpul','Terlambat') DEFAULT 'Terkumpul'
+  `tanggal_upload` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `pengumpulan_tugas`
 --
 
-INSERT INTO `pengumpulan_tugas` (`id`, `tugas_id`, `siswa_id`, `file_jawaban`, `tanggal_kumpul`, `nilai`, `feedback`, `status`) VALUES
-(1, 1, 20231001, 'jawaban_makalah.pdf', '2025-07-11 09:30:00', 85, 'Sudah bagus, tapi perhatikan struktur paragraf.', 'Terkumpul'),
-(2, 2, 20231001, 'diskusi_online.pdf', '2025-07-15 08:00:00', NULL, NULL, 'Terkumpul'),
-(3, 3, 20231001, 'jawaban_kuadrat.pdf', '2025-07-13 10:15:00', 92, 'Jawaban sangat tepat.', 'Terkumpul'),
-(4, 4, 20231001, 'quiz_aljabar.pdf', '2025-07-19 07:45:00', 60, 'Terlambat sedikit, harap perhatikan waktu.', 'Terlambat');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `penilaian`
---
-
-CREATE TABLE `penilaian` (
-  `id` int NOT NULL,
-  `id_guru` int DEFAULT NULL,
-  `id_mapel` int DEFAULT NULL,
-  `id_siswa` int DEFAULT NULL,
-  `semester` varchar(10) DEFAULT NULL,
-  `kedisiplinan` int DEFAULT NULL,
-  `kehadiran` int DEFAULT NULL,
-  `sikap` int DEFAULT NULL,
-  `tugas` int DEFAULT NULL,
-  `uts` int DEFAULT NULL,
-  `uas` int DEFAULT NULL,
-  `evaluasi` varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `penilaian`
---
-
-INSERT INTO `penilaian` (`id`, `id_guru`, `id_mapel`, `id_siswa`, `semester`, `kedisiplinan`, `kehadiran`, `sikap`, `tugas`, `uts`, `uas`, `evaluasi`) VALUES
-(1, 1005, 19, 20231001, '1', 90, 95, 88, 85, 88, 90, 'Aktif dan disiplin, hasil belajar baik.'),
-(2, 1005, 20, 20231001, '1', 85, 90, 80, 78, 80, 75, 'Perlu peningkatan di UAS, kehadiran baik.');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `role`
---
-
-CREATE TABLE `role` (
-  `id` int NOT NULL,
-  `nama_role` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `role`
---
-
-INSERT INTO `role` (`id`, `nama_role`) VALUES
-(1, 'admin'),
-(3, 'guru'),
-(5, 'kepsek'),
-(4, 'ortu'),
-(6, 'perpus'),
-(2, 'siswa');
+INSERT INTO `pengumpulan_tugas` (`id`, `tugas_id`, `siswa_id`, `file_jawaban`, `catatan`, `nilai`, `tanggal_upload`) VALUES
+(1, 1, 3, '1752279917_WhatsApp_Image_2024_07_04_at_20.11.31_6d3aa99c.jpg', NULL, NULL, '2025-07-12 00:25:17');
 
 -- --------------------------------------------------------
 
@@ -550,26 +435,57 @@ INSERT INTO `role` (`id`, `nama_role`) VALUES
 --
 
 CREATE TABLE `siswa` (
-  `id` int NOT NULL,
   `nisn` varchar(12) NOT NULL,
-  `nama` varchar(100) NOT NULL,
-  `jenis_kelamin` enum('Laki-laki','Perempuan') NOT NULL,
-  `agama` enum('Islam','Kristen Protestan','Katolik','Hindu','Buddha','Konghucu','Lainnya') DEFAULT NULL,
-  `tempat_lahir` varchar(50) DEFAULT NULL,
-  `tanggal_lahir` date DEFAULT NULL,
-  `alamat` text,
-  `no_telepon` varchar(15) DEFAULT NULL,
+  `nama` varchar(30) NOT NULL,
   `email` varchar(100) DEFAULT NULL,
-  `kelas_id` int DEFAULT NULL,
-  `foto` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `tempat_lahir` varchar(30) NOT NULL,
+  `tanggal_lahir` date NOT NULL,
+  `jenis_kelamin` enum('Laki-laki','Perempuan') NOT NULL,
+  `agama` varchar(20) NOT NULL,
+  `alamat` varchar(100) NOT NULL,
+  `no_telepon` varchar(12) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `siswa`
 --
 
-INSERT INTO `siswa` (`id`, `nisn`, `nama`, `jenis_kelamin`, `agama`, `tempat_lahir`, `tanggal_lahir`, `alamat`, `no_telepon`, `email`, `kelas_id`, `foto`) VALUES
-(20231001, '004312789011', 'Nazwa Akmalia Padla', 'Perempuan', 'Islam', 'Sukabumi', '2007-06-01', 'Jl. Merdeka No.12', '083838592645', 'nazwaakmalia036@ummi.ac.id', 5, 'foto_686b486407a770.80697071.jpg');
+INSERT INTO `siswa` (`nisn`, `nama`, `email`, `tempat_lahir`, `tanggal_lahir`, `jenis_kelamin`, `agama`, `alamat`, `no_telepon`) VALUES
+('12345', 'Raden Ajeng Ayu Hanum Trihapsa', NULL, 'Ngayojoakrto Hadiningrat', '2021-01-10', 'Perempuan', 'Islam', 'Panembahan Senopati Raya 60,Yogyakarta', '02746728293'),
+('1430511056', 'HAMZAH MAULANA PRATAMA', NULL, 'Jakarta', '2000-02-01', 'Laki-laki', 'Islam', 'Jalan Gatot Subroto No. 10, Sukabumi', '085758857775'),
+('1730511026', 'ALFRIDA SALSA FEBIOLA', NULL, 'Jakarta', '1998-05-02', 'Laki-laki', 'Islam', 'Jalan Raya Cissat  No. 15, Cisaat Sukabumi', '085789892909'),
+('1830511002', 'HANDIKA FEBRIAN', NULL, 'Purwokerto', '1999-05-15', 'Laki-laki', 'Islam', 'Sukaraja Sukabumi', '085669919769'),
+('1830511003', 'TAUFIQ HIDAYATULLAH', NULL, 'Sukabumi', '1999-12-19', 'Laki-laki', 'Islam', 'Jalan Radin Intan No. 77, Karang Tengah, Sukabumi', '089977955772'),
+('1830511120', 'RHEZA FAHRY ABDILLAH', NULL, 'Jakarta', '1995-06-06', 'Perempuan', 'Islam', 'Jalan Ahmad Yani,Sukabumi', '081388955767'),
+('1830521019', 'DITO ADITYA', NULL, 'Manado', '2001-01-20', 'Laki-laki', 'Islam', 'Jalan Pemuda Sukabumi', '081269962201'),
+('2330511036', 'Nazwa Akmalia Padla', 'nazwaakmalia036@ummi.ac.id', 'Sukabumi', '2004-01-10', 'Perempuan', 'Islam', 'Jl. Pajajaran 1 KM.4', '08123456789');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tabel_pinjaman`
+--
+
+CREATE TABLE `tabel_pinjaman` (
+  `id_pinjam` int NOT NULL,
+  `nama` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nis` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `judul_buku` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tgl_peminjaman` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tgl_pengembalian` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `no_tlp` int NOT NULL,
+  `id_sekolah` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tabel_pinjaman`
+--
+
+INSERT INTO `tabel_pinjaman` (`id_pinjam`, `nama`, `nis`, `judul_buku`, `tgl_peminjaman`, `tgl_pengembalian`, `no_tlp`, `id_sekolah`) VALUES
+(1, 'Aldy Ramadani', '101', 'Laskar Pelangi', '2 April 2023', '10 April 2023', 628131415, 0),
+(2, 'Salman Dermawan', '102', 'The Lord of the Rings', '14 April 2023', '20 April 2023', 628131416, 0),
+(3, 'Aziel', '103', 'Komik Detektive Conan', '1 Mei 2023', '13 Mei 2023', 628131417, 0),
+(5, 'asep', '21', 'test', '2 April 2023', '2 April 2023', 98, 0);
 
 -- --------------------------------------------------------
 
@@ -578,25 +494,56 @@ INSERT INTO `siswa` (`id`, `nisn`, `nama`, `jenis_kelamin`, `agama`, `tempat_lah
 --
 
 CREATE TABLE `tagihan` (
-  `id` int NOT NULL,
-  `nama_tagihan` varchar(100) DEFAULT NULL,
-  `jenis_tagihan` varchar(50) DEFAULT NULL,
-  `total` decimal(12,2) DEFAULT NULL,
-  `keterangan` text,
-  `ditujukan_kepada` enum('semua','kelas','siswa') DEFAULT 'semua',
-  `kelas_id` int DEFAULT NULL,
-  `siswa_id` int DEFAULT NULL,
-  `tanggal_tagihan` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `nis` int NOT NULL,
+  `nama` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kelas` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `alamat` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jml_tagihan` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jenis_tagihan` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `tagihan`
 --
 
-INSERT INTO `tagihan` (`id`, `nama_tagihan`, `jenis_tagihan`, `total`, `keterangan`, `ditujukan_kepada`, `kelas_id`, `siswa_id`, `tanggal_tagihan`) VALUES
-(1, 'SPP Juli 2025', 'SPP', '200000.00', 'Pembayaran SPP bulan Juli', 'siswa', 5, 20231001, '2025-07-01'),
-(2, 'Ekstrakurikuler Pramuka', 'Ekstrakurikuler', '150000.00', 'Iuran kegiatan ekstrakurikuler Pramuka', 'siswa', 5, 20231001, '2025-07-02'),
-(3, 'Buku Paket Semester Ganjil', 'Buku', '250000.00', 'Pembayaran buku paket semester ganjil', 'siswa', 5, 20231001, '2025-07-03');
+INSERT INTO `tagihan` (`nis`, `nama`, `kelas`, `alamat`, `jml_tagihan`, `jenis_tagihan`) VALUES
+(2130511001, 'Aldy Ramadani', '9A', 'Sukalarang, Kabupaten Sukabumi', 'Rp. 500.000', 'SPP'),
+(2130511002, 'Sandia Anggara', '9B', 'Kadudampit, Kabupaten Sukabumi', 'Rp. 1.000.000', 'Study Tour'),
+(2130511003, 'Kayla Sandi Putri', '9C', 'Cisaat, Kabupaten Sukabumi', 'Rp. 200.000', 'UTS'),
+(2130511004, 'Abdul Gofar Fauzan', '9D', 'Gunung Puyuh, Kota Sukabumi', 'Rp. 300.000', 'UAS'),
+(2130511005, 'Haikal Lukman', '9E', 'Sukalarang, Kabupaten Sukabumi', 'Rp. 1.500.000', 'Seragam'),
+(2130511006, 'Muhamad Agan Suganda', '9A', 'Sukalarang, Kabupaten Sukabumi', 'Rp. 300.000', 'LKS');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tb_nilai`
+--
+
+CREATE TABLE `tb_nilai` (
+  `id_siswa` int NOT NULL,
+  `mata_pelajaran` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kkm` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai_mapel` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `predikat_mapel` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai_tugas` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `predikat_tugas` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai_uts` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `predikat_uts` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai_uas` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `predikat_uas` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tb_nilai`
+--
+
+INSERT INTO `tb_nilai` (`id_siswa`, `mata_pelajaran`, `kkm`, `nilai_mapel`, `predikat_mapel`, `nilai_tugas`, `predikat_tugas`, `nilai_uts`, `predikat_uts`, `nilai_uas`, `predikat_uas`) VALUES
+(25, 'Matematika', '70', '80', 'B', '80', 'B', '80', 'B', '80', 'B'),
+(26, 'Akidah Ahklak', '80', '90', 'A', '90', 'A', '90', 'A', '90', 'A'),
+(27, 'B.Inggris', '70', '85', 'B', '85', 'B', '85', 'B', '85', 'B'),
+(36, 'Fisika', '70', '85', 'A', '85', 'A', '85', 'A', '85', 'A'),
+(37, 'Sejarah', '70', '90', 'A', '90', 'A', '90', 'A', '90', 'A');
 
 -- --------------------------------------------------------
 
@@ -606,24 +553,794 @@ INSERT INTO `tagihan` (`id`, `nama_tagihan`, `jenis_tagihan`, `total`, `keterang
 
 CREATE TABLE `tugas` (
   `id` int NOT NULL,
-  `mapel_id` int DEFAULT NULL,
-  `judul` varchar(255) DEFAULT NULL,
+  `mapel_id` int NOT NULL,
+  `judul` varchar(255) NOT NULL,
   `deskripsi` text,
-  `deadline` date DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `file_tugas` varchar(255) DEFAULT NULL
+  `deadline` datetime NOT NULL,
+  `dibuat_pada` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `tugas`
 --
 
-INSERT INTO `tugas` (`id`, `mapel_id`, `judul`, `deskripsi`, `deadline`, `created_at`, `file_tugas`) VALUES
-(1, 19, 'Makalah Pancasila', 'Tulis makalah tentang nilai-nilai Pancasila dalam kehidupan sehari-hari.', '2025-07-12', '2025-07-01 01:00:00', 'makalah_pancasila.pdf'),
-(2, 19, 'Diskusi Online', 'Ikuti forum diskusi online tentang Bhineka Tunggal Ika.', '2025-07-15', '2025-07-03 02:30:00', NULL),
-(3, 20, 'Latihan Soal Persamaan Kuadrat', 'Kerjakan 10 soal tentang persamaan kuadrat di buku paket halaman 45-46.', '2025-07-14', '2025-07-02 03:00:00', 'latihan_kuadrat.pdf'),
-(4, 20, 'Quiz Online Aljabar', 'Kerjakan quiz aljabar di Google Form yang telah diberikan.', '2025-07-18', '2025-07-05 01:20:00', NULL),
-(5, 21, 'Analisis Puisi', 'Analisis puisi Chairil Anwar dalam 200 kata.', '2025-07-13', '2025-07-04 04:00:00', 'analisis_puisi.docx');
+INSERT INTO `tugas` (`id`, `mapel_id`, `judul`, `deskripsi`, `deadline`, `dibuat_pada`) VALUES
+(1, 1, 'Tugas Fisika Bab 1', 'Kerjakan soal dari buku halaman 20-25', '2025-07-15 23:59:00', '2025-07-11 04:28:48'),
+(2, 2, 'Tugas Bahasa Indonesia', 'Tulis ringkasan cerpen', '2025-07-14 18:00:00', '2025-07-11 04:28:48');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_absensi`
+--
+
+CREATE TABLE `t_absensi` (
+  `id` int NOT NULL,
+  `nama` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kelas` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `waktu_kehadiran` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id_siswa` int NOT NULL,
+  `id_mapel` int NOT NULL,
+  `materi_id` int DEFAULT NULL,
+  `id_kelas` int NOT NULL,
+  `id_sekolah` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_absensi`
+--
+
+INSERT INTO `t_absensi` (`id`, `nama`, `kelas`, `waktu_kehadiran`, `id_siswa`, `id_mapel`, `materi_id`, `id_kelas`, `id_sekolah`) VALUES
+(160, 'Nazwa Akmalia Padla', '20', '2025-07-11 23:02:16', 11, 1, 1, 10, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_administrator`
+--
+
+CREATE TABLE `t_administrator` (
+  `id` int NOT NULL,
+  `nama_pengguna` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kata_kunci` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nama_sekolah` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `Jenjang` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `foto_sekolah` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `email_pengguna` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_administrator`
+--
+
+INSERT INTO `t_administrator` (`id`, `nama_pengguna`, `username`, `kata_kunci`, `nama_sekolah`, `Jenjang`, `foto_sekolah`, `email_pengguna`) VALUES
+(1, 'admin SMP 1', 'adminsmp', '202cb962ac59075b964b07152d234b70', 'SMP Negeri 1', '', '', 'asriladi@ummi.ac.id'),
+(2, 'Admin Sekolah', 'smp2', '202cb962ac59075b964b07152d234b70', 'SMP Negeri 2 Kota Sukabumi', 'SMP', '', 'smp2@gmail.com');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_data`
+--
+
+CREATE TABLE `t_data` (
+  `id` int NOT NULL,
+  `nama` varchar(50) NOT NULL,
+  `noinduk` varchar(10) NOT NULL,
+  `kelas` varchar(20) NOT NULL,
+  `kehadiran` varchar(3) NOT NULL,
+  `tugas` varchar(3) NOT NULL,
+  `evaluasi` varchar(3) NOT NULL,
+  `kedisiplinan` varchar(3) NOT NULL,
+  `nilai` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `t_data`
+--
+
+INSERT INTO `t_data` (`id`, `nama`, `noinduk`, `kelas`, `kehadiran`, `tugas`, `evaluasi`, `kedisiplinan`, `nilai`) VALUES
+(1, 'Reyhan', '2113322', '12 IPA 4', '90', '85', '85', '90', 90),
+(2, 'Muhamad Zildan TM', '2114433', '12 IPA 4', '85', '90', '90', '85', 85),
+(3, 'Muhammad Rafi', '2115544', '12 IPA 4', '90', '90', '85', '85', 90),
+(4, 'M. Herdi Al-Fachri', '2116655', '12 IPA 4', '85', '85', '90', '85', 85),
+(5, 'M. Ripal Perdiansyah', '2117766', '12 IPA 4', '90', '85', '90', '85', 90),
+(6, 'Zulhaydar Fathurrahman Sidiq', '2118899', '12 IPA 4', '90', '85', '85', '90', 85);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_ekstrakurikuler`
+--
+
+CREATE TABLE `t_ekstrakurikuler` (
+  `id` int NOT NULL,
+  `ekstrakurikuler` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `deskripsi` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id_sekolah` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_ekstrakurikuler`
+--
+
+INSERT INTO `t_ekstrakurikuler` (`id`, `ekstrakurikuler`, `deskripsi`, `id_sekolah`) VALUES
+(1, 'Senam', 'Senam lantai', 0),
+(2, 'Futsal', 'Olahraga', 0),
+(100, 'Basket', 'Olahraga', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_grafiknilai`
+--
+
+CREATE TABLE `t_grafiknilai` (
+  `id` int NOT NULL,
+  `mata_pelajaran` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kkm` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai_mapel` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai_keterampilan` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai_uts` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai_uas` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id_kelas` int NOT NULL,
+  `id_sekolah` int NOT NULL,
+  `tahun_pelajaran` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `semester` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nis` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_grafiknilai`
+--
+
+INSERT INTO `t_grafiknilai` (`id`, `mata_pelajaran`, `kkm`, `nilai_mapel`, `nilai_keterampilan`, `nilai_uts`, `nilai_uas`, `id_kelas`, `id_sekolah`, `tahun_pelajaran`, `semester`, `nis`) VALUES
+(1, 'Matematika', '70', '80', '89', '78', '90', 1, 1, '2021/2022', 'genap', 1),
+(2, 'Matematika', '70', '80', '78', '60', '80', 2, 1, '2022/2023', 'genap', 1),
+(3, 'Matematika', '80', '90', '90', '87', '78', 1, 1, '2023/2024', 'genap', 1),
+(4, 'IPA', '70', '85', '85', '90', '98', 1, 1, '2021/2022', 'genap', 1),
+(5, 'IPA', '70', '85', '85', '78', '80', 1, 1, '2022/2023', 'genap', 1),
+(6, 'IPA', '70', '90', '90', '89', '80', 1, 1, '2023/2024', 'genap', 1),
+(7, 'Sejarah', '80', '90', '90', '89', '95', 2, 1, '2021/2022', 'genap', 1),
+(8, 'Sejarah', '80', '85', '85', '67', '90', 3, 1, '2022/2023', 'genap', 1),
+(9, 'Bahasa Indonesia', '70', '75', '80', '90', '86', 3, 1, '2021/2022', 'genap', 1),
+(10, 'Bahasa Indonesia', '70', '90', '75', '80', '90', 1, 1, '2022/2023', 'genap', 1),
+(11, 'Bahasa Indonesia', '80', '80', '75', '90', '90', 1, 1, '2023/2024', 'genap', 1),
+(12, 'Bahasa Inggris', '70', '80', '75', '85', '80', 1, 1, '2021/2022', 'genap', 1),
+(13, 'Bahasa Inggris', '70', '80', '75', '90', '87', 1, 1, '2022/2023', 'genap', 1),
+(14, 'Bahasa Inggris', '80', '85', '78', '80', '80', 1, 1, '2023/2024', 'genap', 2),
+(15, 'Sejarah', '70', '80', '75', '85', '85', 1, 1, '2023/2024', 'genap', 2);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_guru`
+--
+
+CREATE TABLE `t_guru` (
+  `id` int NOT NULL,
+  `nip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nama` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jenis_kelamin` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tempat_lahir` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tanggal_lahir` date NOT NULL,
+  `kelas` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id_sekolah` int NOT NULL,
+  `password` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `foto` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jk` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_guru`
+--
+
+INSERT INTO `t_guru` (`id`, `nip`, `nama`, `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `kelas`, `id_sekolah`, `password`, `foto`, `jk`) VALUES
+(1, '1', 'Luhut Binsar Panjaitan', 'L', 'Sukabumi', '2023-06-25', '2', 1, 'c4ca4238a0b923820dcc509a6f75849b', '2ewdw.jpg', 'L'),
+(124, '124', 'ASEP, S.Pd', 'L', 'Bandung', '1980-01-01', '-', 1, '202cb962ac59075b964b07152d234b70', 'default.jpg', 'L'),
+(2333, '2333', 'UJANG, S.Si', 'L', 'Sukabumi', '1979-02-02', '-', 1, '202cb962ac59075b964b07152d234b70', 'default.jpg', 'L'),
+(2344, '2344', 'USEP, M.Pd', 'L', 'Bogor', '1982-03-03', '-', 1, '202cb962ac59075b964b07152d234b70', 'default.jpg', 'L'),
+(2544, '2544', 'ABI, S.Pd', 'L', 'Tasikmalaya', '1981-04-04', '-', 1, '202cb962ac59075b964b07152d234b70', 'default.jpg', 'L'),
+(2545, '2545', 'SITA, S.Pd', 'P', 'Ciamis', '1983-05-05', '-', 1, '202cb962ac59075b964b07152d234b70', 'default.jpg', 'P'),
+(2546, '2546', 'WAHYU, S.Pd', 'L', 'Cirebon', '1984-06-06', '-', 1, '202cb962ac59075b964b07152d234b70', 'default.jpg', 'L'),
+(3333, '3333', 'RINA, S.Kom', 'P', 'Jakarta', '1985-07-07', '-', 1, '202cb962ac59075b964b07152d234b70', 'default.jpg', 'P'),
+(3334, '3334', 'NINA, S.Pd', 'P', 'Bekasi', '1986-08-08', '-', 1, '202cb962ac59075b964b07152d234b70', 'default.jpg', 'P'),
+(3335, '3335', 'RONY, S.E', 'L', 'Depok', '1987-09-09', '-', 1, '202cb962ac59075b964b07152d234b70', 'default.jpg', 'L'),
+(3336, '3336', 'YANTI, M.Sos', 'P', 'Garut', '1988-10-10', '-', 1, '202cb962ac59075b964b07152d234b70', 'default.jpg', 'P'),
+(3337, '3337', 'ANDI, M.Si', 'L', 'Bandung', '1989-11-11', '-', 1, '202cb962ac59075b964b07152d234b70', 'default.jpg', 'L'),
+(3338, '3338', 'HERU, S.Pd', 'L', 'Bogor', '1990-12-12', '-', 1, '202cb962ac59075b964b07152d234b70', 'default.jpg', 'L'),
+(3339, '3339', 'INA, S.Pd', 'P', 'Sukabumi', '1991-01-13', '-', 1, '202cb962ac59075b964b07152d234b70', 'default.jpg', 'P');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_guru_penilaian`
+--
+
+CREATE TABLE `t_guru_penilaian` (
+  `id` int NOT NULL,
+  `nama` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `noinduk` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kelas` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kehadiran` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tugas` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `evaluasi` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kedisiplinan` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_guru_penilaian`
+--
+
+INSERT INTO `t_guru_penilaian` (`id`, `nama`, `noinduk`, `kelas`, `kehadiran`, `tugas`, `evaluasi`, `kedisiplinan`, `nilai`) VALUES
+(1, 'Raihan Herlambang', '2113322', '12 IPA 4', '90', '85', '85', '90', 90),
+(2, 'Muhamad Zildan TM', '2114433', '12 IPA 4', '85', '90', '90', '85', 85),
+(3, 'Muhammad Rafi', '2115544', '12 IPA 4', '90', '90', '85', '85', 90),
+(4, 'M. Herdi Al-Fachri', '2116655', '12 IPA 4', '85', '85', '90', '85', 85),
+(5, 'M. Ripal Perdiansyah', '2117766', '12 IPA 4', '90', '85', '90', '85', 90),
+(6, 'Zulhaydar Fathurrahman Sidiq', '2118899', '12 IPA 4', '90', '85', '85', '90', 85),
+(7, 'Faiz Akhmad Daulay', '2119910', '12 IPA 4', '85', '90', '85', '90', 90),
+(8, 'Faisal Al-Munawar Fathur Rahman', '2119911', '12 IPA 4', '85', '85', '90', '90', 85),
+(9, 'Garuh Meidy Putra', '2119912', '12 IPA 4', '85', '80', '85', '85', 85),
+(10, 'Reyhan Khidir', '2119913', '12 IPA 4', '85', '90', '85', '85', 85),
+(11, 'Ahmad', '2112231', '12 IPA 4', '', '', '', '', 0),
+(12, 'Budi', '2112232', '12 IPA 4', '', '', '', '', 0),
+(13, 'Cinta', '2112233', '12 IPA 4', '', '', '', '', 0),
+(14, 'Dian', '2112231', '12 IPA 4', '', '', '', '', 0),
+(15, 'Eko', '2112234', '12 IPA 4', '', '', '', '', 0),
+(16, 'Fitri', '2112235', '12 IPA 4', '', '', '', '', 0),
+(17, 'Gunawan', '2112236', '12 IPA 4', '', '', '', '', 0),
+(18, 'Hadi', '2112237', '12 IPA 4', '', '', '', '', 0),
+(19, 'Indah', '2112238', '12 IPA 4', '', '', '', '', 0),
+(20, 'Joko', '2112239', '12 IPA 4', '', '', '', '', 0),
+(21, 'Kurniawan', '2112239', '12 IPA 4', '', '', '', '', 0),
+(22, 'Lina', '2112240', '12 IPA 4', '', '', '', '', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_kelas`
+--
+
+CREATE TABLE `t_kelas` (
+  `id` int NOT NULL,
+  `idsekolah` int NOT NULL,
+  `kelas` varchar(30) NOT NULL,
+  `jumlah_siswa` int NOT NULL,
+  `angkatan` varchar(30) NOT NULL,
+  `wali_kelas` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `t_kelas`
+--
+
+INSERT INTO `t_kelas` (`id`, `idsekolah`, `kelas`, `jumlah_siswa`, `angkatan`, `wali_kelas`) VALUES
+(10, 1, 'X 1', 0, '2023', 'Pa Kevin S.Kom'),
+(11, 1, 'X 2', 0, '2023', 'Agan Ginajar S.Kom'),
+(12, 1, 'X 3', 0, '2023', 'Pa Herdi S.Kom'),
+(13, 1, 'X 4', 0, '2023', 'Pa Garuh S.Kom'),
+(14, 1, 'X 5', 0, '2023', 'Pa Haikal S.Kom'),
+(15, 1, 'XI 1', 0, '2022', 'Pa Kevin S.Kom'),
+(16, 1, 'XI 2', 0, '2022', 'Agan Ginajar S.Kom'),
+(17, 1, 'XI 3', 0, '2022', 'Pa Herdi S.Kom'),
+(18, 1, 'XI 4', 0, '2022', 'Pa Garuh S.Kom'),
+(19, 1, 'XI 5', 0, '2022', 'Pa Haikal S.Kom'),
+(20, 1, 'XII 1', 0, '2021', 'Pa Kevin S.Kom'),
+(21, 1, 'XII 2', 0, '2021', 'Agan Ginajar S.Kom'),
+(22, 1, 'XII 3', 0, '2021', 'Pa Herdi S.Kom'),
+(23, 1, 'XII 4', 0, '2021', 'Pa Garuh S.Kom'),
+(24, 1, 'XII 5', 0, '2021', 'Pa Haikal S.Kom');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_keuangan`
+--
+
+CREATE TABLE `t_keuangan` (
+  `id` int NOT NULL,
+  `nip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nama` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jenis_kelamin` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tempat_lahir` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tanggal_lahir` date NOT NULL,
+  `id_sekolah` int NOT NULL,
+  `password` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `foto` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jk` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_keuangan`
+--
+
+INSERT INTO `t_keuangan` (`id`, `nip`, `nama`, `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `id_sekolah`, `password`, `foto`, `jk`) VALUES
+(1, '1', 'nana', 'L', '1', '2023-07-04', 1, 'c4ca4238a0b923820dcc509a6f75849b', '1.jpg', 'L');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_keuangan_daftar`
+--
+
+CREATE TABLE `t_keuangan_daftar` (
+  `id_tagihan` int NOT NULL,
+  `nama_tagihan` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `total_tagihan` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_keuangan_daftar`
+--
+
+INSERT INTO `t_keuangan_daftar` (`id_tagihan`, `nama_tagihan`, `total_tagihan`) VALUES
+(1001, 'SPP', 'Rp. 1.000.000'),
+(1002, 'Study Tour', 'Rp. 2.000.000'),
+(1003, 'UTS', 'Rp. 400.000'),
+(1004, 'UAS', 'Rp. 600.000'),
+(1005, 'Seragam', 'Rp. 3.000.000'),
+(1006, 'LKS', 'Rp. 600.000');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_keuangan_pembayaran`
+--
+
+CREATE TABLE `t_keuangan_pembayaran` (
+  `id` int NOT NULL,
+  `nis` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `nama` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kelas` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `alamat` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jml_bayar` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jenis_tagihan` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `metode` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `tanggal_bayar` datetime DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_keuangan_pembayaran`
+--
+
+INSERT INTO `t_keuangan_pembayaran` (`id`, `nis`, `nama`, `kelas`, `alamat`, `jml_bayar`, `jenis_tagihan`, `metode`, `tanggal_bayar`) VALUES
+(21, '2130511001', 'Abi Hambali', '9C', '', 'Rp. 1.600.000', 'Study Tour', NULL, '2025-07-12 11:38:20'),
+(22, '2130511002', 'Aliyaa', '9B', '', 'Rp. 2.700.000', 'Seragam', NULL, '2025-07-12 11:38:20'),
+(23, '2130511003', 'Andika', '9G', '', 'Rp. 400.000', 'SPP', NULL, '2025-07-12 11:38:20'),
+(24, '2130511004', 'Faizal', '9A', '', 'Rp. 400.000', 'UAS', NULL, '2025-07-12 11:38:20'),
+(25, '2130511005', 'Haikal Lukman', '9E', '', 'Rp. 2.100.000', 'Seragam', NULL, '2025-07-12 11:38:20'),
+(26, '2130511006', 'Juliandi', '9F', '', 'Rp. 550.000', 'UAS', NULL, '2025-07-12 11:38:20'),
+(27, '2130511007', 'Kayla Sandi Putri', '9C', '', 'Rp. 400.000', 'LKS', NULL, '2025-07-12 11:38:20'),
+(28, '2130511008', 'Riza Nursyah', '9E', '', 'Rp. 350.000', 'UTS', NULL, '2025-07-12 11:38:20'),
+(29, '2130511009', 'Salsa Aulia', '9B', '', 'Lunas', 'Study Tour', NULL, '2025-07-12 11:38:20'),
+(30, '2130511010', 'Salma Latifah', '9C', '', 'Lunas', 'UAS', NULL, '2025-07-12 11:38:20'),
+(31, '2130511011', 'Sarah Anindi', '9D', '', 'Lunas', 'SPP', NULL, '2025-07-12 11:38:20'),
+(32, '2130511012', 'Sauqi Alvi', '9D', '', 'Lunas', 'Seragam', NULL, '2025-07-12 11:38:20'),
+(33, '2130511013', 'Sendi Dendi', '9G', '', 'Lunas', 'UTS', NULL, '2025-07-12 11:38:20'),
+(35, '2130511014', 'Susila Anggraeni', '9A', '', 'Lunas', 'LKS', NULL, '2025-07-12 11:38:20'),
+(36, '2330511036', 'Nazwa Akmalia Padla', '20', 'Jl. Pajajaran 1 KM.4', '250000', 'SPP Bulan Juli 2025', 'Transfer Bank', '2025-07-12 11:38:20'),
+(37, '2330511036', 'Nazwa Akmalia Padla', '20', 'Jl. Pajajaran 1 KM.4', '1000000', 'SPP Bulan Juli 2025', 'Tunai', '2025-07-12 05:09:08');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_keuangan_tagihan`
+--
+
+CREATE TABLE `t_keuangan_tagihan` (
+  `id` int NOT NULL,
+  `nis` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `nama` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kelas` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `alamat` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jml_tagihan` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jenis_tagihan` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_keuangan_tagihan`
+--
+
+INSERT INTO `t_keuangan_tagihan` (`id`, `nis`, `nama`, `kelas`, `alamat`, `jml_tagihan`, `jenis_tagihan`) VALUES
+(3, '2130511007', 'Kayla Sandi Putri', '9C', 'Cisaat, Kabupaten Sukabumi', 'Rp. 200.000', 'LKS'),
+(5, '2130511005', 'Haikal Lukman', '9E', 'Sukalarang, Kabupaten Sukabumi', 'Rp. 900.000', 'Seragam'),
+(7, '2130511003', 'Andika', '9G', 'Cugenang', 'Rp. 600.000', 'SPP'),
+(9, '2130511004', 'Faizal', '9A', 'Baros', 'Rp. 200.000', 'UAS'),
+(10, '2130511006', 'Juliandi', '9F', 'Tipar', 'Rp. 50.000', 'UAS'),
+(11, '2130511002', 'Aliyaa', '9B', 'Jalan Raya Bogor', 'Rp. 300.000', 'Seragam'),
+(19, '2130511001', 'Abi Hambali', '9C', '', 'Rp. 400.000', 'Study Tour'),
+(21, '2130511008', 'Riza Nursyah', '9E', '', 'Rp. 50.000', 'UTS'),
+(22, '2', 'Reyhan', 'xiii ', '', '100000', 'Study Tour'),
+(31, '2330511036', 'Nazwa Akmalia Padla', '20', 'Jl. Pajajaran 1 KM.4', '500000', 'SPP Bulan Juli 2025');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_mahasiswa`
+--
+
+CREATE TABLE `t_mahasiswa` (
+  `id` int NOT NULL,
+  `nim` varchar(5) NOT NULL,
+  `nama` varchar(40) NOT NULL,
+  `ipk` double NOT NULL,
+  `jurusan` varchar(40) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `t_mahasiswa`
+--
+
+INSERT INTO `t_mahasiswa` (`id`, `nim`, `nama`, `ipk`, `jurusan`) VALUES
+(1, 'M0002', 'Hakko Bio Richard', 3, 'Manajemen Informatika'),
+(2, 'M0003', 'Dede Rizki Ramadhan', 2.8, 'Manajemen Informatika'),
+(3, 'M0004', 'Anton Sugianto', 3.2, 'Teknik Informatika'),
+(4, 'M0005', 'Ujang Walim', 3.1, 'Sistem Informasi'),
+(5, 'M0016', 'Dony', 3, 'Teknik Industri'),
+(6, 'M0100', 'Dimas', 3.1, 'Psikologi'),
+(7, 'M0016', 'Dion', 3, 'Teknik Industri'),
+(8, 'M0016', 'Mayang', 3, 'Teknik Industri'),
+(9, 'M0016', 'Susi', 3, 'Teknik Industri'),
+(10, 'M0016', 'Niqo', 3, 'Teknik Industri'),
+(11, 'M0016', 'Esbeye', 3, 'Teknik Industri'),
+(12, 'M0016', 'Joko', 3, 'Teknik Industri'),
+(13, 'M0016', 'Jaka', 3, 'Teknik Industri'),
+(14, 'M0016', 'Wira', 3, 'Sistem Informasi'),
+(15, 'M0016', 'Maradona', 3, 'Sistem Informasi'),
+(16, 'M0016', 'Ujang', 3, 'Sistem Informasi'),
+(17, 'M0016', 'Sugiarto', 3, 'Sistem Informasi'),
+(18, 'M0016', 'Karman', 3, 'Teknik Informatika'),
+(19, 'M0016', 'Anto', 3, 'Teknik Informatika'),
+(20, 'M0016', 'Rosada', 3, 'Teknik Informatika'),
+(21, 'M0016', 'Bima', 3, 'Manajemen Informatika'),
+(22, 'M0016', 'Lusi', 3, 'Manajemen Informatika'),
+(23, 'M0016', 'Ipul', 3, 'Manajemen Informatika'),
+(24, 'M0016', 'Erik', 3, 'Administrasi Bisnis'),
+(25, 'M0016', 'Siffa', 3, 'PGSD'),
+(26, 'M0016', 'Sebastian', 3, 'Teknik Industri'),
+(27, 'M0016', 'George', 3, 'Teknik Industri'),
+(28, 'M0016', 'Richard', 3, 'Teknik Industri'),
+(29, 'M0016', 'Dony', 3, 'Teknik Industri');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_mapel`
+--
+
+CREATE TABLE `t_mapel` (
+  `id` int NOT NULL,
+  `id_guru` int NOT NULL,
+  `nama_mapel` varchar(30) DEFAULT NULL,
+  `nama_guru` varchar(30) DEFAULT NULL,
+  `kode` varchar(20) DEFAULT NULL,
+  `id_sekolah` int NOT NULL,
+  `id_kelas` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+--
+-- Dumping data for table `t_mapel`
+--
+
+INSERT INTO `t_mapel` (`id`, `id_guru`, `nama_mapel`, `nama_guru`, `kode`, `id_sekolah`, `id_kelas`) VALUES
+(1, 1, 'FISIKA', 'UJANG, S.P.d', '2344', 1, 10),
+(2, 124, 'B. INDONESIA', 'ASEP, S.Pd', '2311', 1, 10),
+(3, 1, 'MATEMATIKA', 'IDA, M.Pd', '2541', 1, 0),
+(4, 2333, 'B. INGGRIS', 'UJANG, S.Si', '122', 1, 11),
+(5, 2344, 'B. JEPANG', 'USEP, M.Pd', '2341', 1, 12),
+(6, 2544, 'KIMIA', 'ABI, S.Pd', '231', 1, 13),
+(7, 2545, 'BIOLOGI', 'SITA, S.Pd', '212', 1, 14),
+(8, 2546, 'SEJARAH', 'WAHYU, S.Pd', '3001', 1, 15),
+(9, 124, 'B. INGGRIS LANJUTAN', 'ASEP, S.Pd', '2312', 1, 16),
+(10, 124, 'B. SUNDA', 'ASEP, S.Pd', '2313', 1, 17),
+(11, 3333, 'TIK', 'RINA, S.Kom', 'TIKX1', 1, 18),
+(12, 3334, 'PPKN', 'NINA, S.Pd', 'PPKN1', 1, 19),
+(13, 3335, 'EKONOMI', 'RONY, S.E', 'EKO1', 1, 20),
+(14, 3336, 'SOSIOLOGI', 'YANTI, M.Sos', 'SOS1', 1, 21),
+(15, 3337, 'GEOGRAFI', 'ANDI, M.Si', 'GEO1', 1, 22),
+(16, 3338, 'SBK', 'HERU, S.Pd', 'SBK1', 1, 23),
+(17, 3339, 'PRAKARYA', 'INA, S.Pd', 'PKY1', 1, 24);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_materi`
+--
+
+CREATE TABLE `t_materi` (
+  `id` int NOT NULL,
+  `mapel_id` int NOT NULL,
+  `judul` varchar(255) NOT NULL,
+  `deskripsi` text,
+  `file` varchar(255) DEFAULT NULL,
+  `tanggal_upload` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `t_materi`
+--
+
+INSERT INTO `t_materi` (`id`, `mapel_id`, `judul`, `deskripsi`, `file`, `tanggal_upload`) VALUES
+(1, 1, 'Hukum Newton', 'Pembahasan lengkap mengenai hukum Newton 1, 2, dan 3 serta penerapannya dalam kehidupan sehari-hari.', 'fisika_hukum_newton.pdf', '2025-07-12');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_menu`
+--
+
+CREATE TABLE `t_menu` (
+  `id` int NOT NULL,
+  `nama_menu` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `keterangan` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `aktif` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `role` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_menu`
+--
+
+INSERT INTO `t_menu` (`id`, `nama_menu`, `keterangan`, `aktif`, `role`) VALUES
+(1, 'matapelajaran', 'Mata Pelajaran', '1', '1'),
+(2, 'grafik_pinjaman', 'Grafik Pinjaman', '1', '4'),
+(3, 'profil', 'Profil Guru', '1', '2'),
+(4, 'penilaian', 'Penilaian Siswa', '1', '2'),
+(5, 'grafik_tagihan', 'Grafik Tagihan', '4', '3'),
+(6, 'pembelajaran', 'Pembelajaran', '1', '2'),
+(8, 'ujian_essay', 'Ujian Essay', '1', '1'),
+(10, 'data_buku', 'Data Buku', '1', '4'),
+(11, 'mapel', 'Mata Pelajaran', '1', '2'),
+(12, 'grafik_pembayaran_tagihan', 'Grafik Pembayaran Tagihan', '1', '3'),
+(14, 'pembayaran', 'Pembayaran', '1', '3'),
+(15, 'profil', 'Profil', '1', '3'),
+(16, 'grafik_nilaisiswa', 'Grafik Penilaian', '1', '1'),
+(18, 'kelas', 'Kelas', '1', '1'),
+(19, 'daftar_kelas', 'Rekap Nilai', '1', '2'),
+(20, 'mata_pelajaran', 'Mata Pelajaran', '1', '0'),
+(21, 'absensi', 'Absensi', '1', '2'),
+(22, 'adminkelas', 'Kelas', '1', '0'),
+(23, 'tabel_guru', 'Data Guru', '1', '0'),
+(24, 'data_peminjam_buku', 'Peminjaman', '1', '4'),
+(25, 'dashboard_pembayaran', 'Pembayaran', '1', '3'),
+(26, 'walikelas', 'Walikelas', '1', '0'),
+(27, 'grafik_kehadiran', 'Grafik Kehadiran Siswa', '1', '2'),
+(28, 'ekskul', 'Ekstrakurikuler', '1', '1'),
+(29, 'dashboard_agenda', 'Agenda Mengajar', '1', '2'),
+(30, 'datasiswa', 'Data Siswa', '1', '0'),
+(31, 'profil_keuangan', 'Profil Keuangan', '1', '0'),
+(32, 'pengajaran', 'Data Pembelajaran', '1', '0'),
+(33, 'mata_pelajaran', 'Pembelajaran Mata Pelajaran ', '1', '1');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_nilai`
+--
+
+CREATE TABLE `t_nilai` (
+  `id` int NOT NULL,
+  `nama_mapel` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai` int NOT NULL,
+  `semester` int NOT NULL,
+  `id_sekolah` int NOT NULL,
+  `id_siswa` int NOT NULL,
+  `kelas` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_nilai`
+--
+
+INSERT INTO `t_nilai` (`id`, `nama_mapel`, `nilai`, `semester`, `id_sekolah`, `id_siswa`, `kelas`) VALUES
+(1, 'Matematika', 90, 1, 1, 1, 'XII ipa 1'),
+(2, 'Fisika', 80, 1, 0, 1, 'XI ipa 1'),
+(3, 'Kimia', 88, 1, 0, 1, 'X'),
+(4, 'Biologi', 75, 1, 0, 10, '1'),
+(5, 'Fisika', 85, 1, 1, 11, 'XII 1');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_nilai_candra`
+--
+
+CREATE TABLE `t_nilai_candra` (
+  `id` int NOT NULL,
+  `mata_pelajaran` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kkm` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai_mapel` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `predikat_mapel` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai_tugas` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `predikat_tugas` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai_uts` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `predikat_uts` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nilai_uas` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `predikat_uas` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_nilai_candra`
+--
+
+INSERT INTO `t_nilai_candra` (`id`, `mata_pelajaran`, `kkm`, `nilai_mapel`, `predikat_mapel`, `nilai_tugas`, `predikat_tugas`, `nilai_uts`, `predikat_uts`, `nilai_uas`, `predikat_uas`) VALUES
+(1, 'Matematika', '70', '85', '', '85', '', '75', '', '80', ''),
+(2, 'Sejarah', '80', '90', 'A', '87', 'A', '88', 'A', '86', 'A'),
+(3, 'Akidah Ahklak', '85', '90', 'A', '90', 'A', '90', 'A', '90', 'A'),
+(4, 'Fisika', '70', '65', 'C', '55', 'C', '65', 'C', '65', 'C'),
+(5, 'Kimia', '65', '90', '', '90', '', '90', '', '90', ''),
+(20, 'Bahasa Indonesia', '75', '70', 'C', '80', 'B', '85', 'A', '75', 'B'),
+(21, 'Bahasa Inggris', '70', '85', 'A', '75', 'B', '80', 'B', '90', 'A'),
+(22, 'Biologi', '70', '80', 'B', '86', 'B', '75', 'B', '80', 'B'),
+(23, 'Geografi', '60', '75', 'B', '80', 'B', '85', 'B', '90', 'A'),
+(24, 'Ekonomi', '65', '70', 'B', '75', 'B', '80', 'B', '85', 'A'),
+(25, 'Sosiologi', '65', '80', 'B', '85', 'B', '75', 'B', '80', 'B'),
+(26, 'Seni Rupa', '70', '75', 'B', '80', 'B', '85', 'B', '90', 'A'),
+(27, 'Pendidikan Jasmani', '75', '90', 'A', '85', 'A', '87', 'A', '86', 'A'),
+(28, 'Komputer', '65', '90', 'A', '90', 'A', '90', 'A', '90', 'A'),
+(29, 'Teknik Gambar', '70', '90', 'A', '90', 'A', '90', 'A', '90', 'A'),
+(0, 'Olahraga', '40', '90', '', '80', '', '77', '', '66', '');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_penilaian`
+--
+
+CREATE TABLE `t_penilaian` (
+  `id` int NOT NULL,
+  `id_mapel` int NOT NULL,
+  `id_siswa` int NOT NULL,
+  `id_guru` int NOT NULL,
+  `kehadiran` int NOT NULL,
+  `tugas` int NOT NULL,
+  `uts` int NOT NULL,
+  `uas` int NOT NULL,
+  `sikap` int NOT NULL,
+  `kedisiplinan` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_penilaian`
+--
+
+INSERT INTO `t_penilaian` (`id`, `id_mapel`, `id_siswa`, `id_guru`, `kehadiran`, `tugas`, `uts`, `uas`, `sikap`, `kedisiplinan`) VALUES
+(1, 1, 11, 2113322, 90, 85, 80, 87, 4, 4);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_pustakawan`
+--
+
+CREATE TABLE `t_pustakawan` (
+  `id` int NOT NULL,
+  `nip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nama` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jenis_kelamin` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tempat_lahir` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tanggal_lahir` date NOT NULL,
+  `kelas` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id_sekolah` int NOT NULL,
+  `password` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `foto` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jk` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_pustakawan`
+--
+
+INSERT INTO `t_pustakawan` (`id`, `nip`, `nama`, `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `kelas`, `id_sekolah`, `password`, `foto`, `jk`) VALUES
+(4, '4', '4', '', '4', '2023-06-01', '4', 1, '202cb962ac59075b964b07152d234b70', '', 'L');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_role`
+--
+
+CREATE TABLE `t_role` (
+  `id` int NOT NULL,
+  `role` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_role`
+--
+
+INSERT INTO `t_role` (`id`, `role`) VALUES
+(0, 'administra'),
+(1, 'siswa'),
+(2, 'guru'),
+(3, 'keuangan'),
+(4, 'pustakawan');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_siswa`
+--
+
+CREATE TABLE `t_siswa` (
+  `id` int NOT NULL,
+  `nis` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nama` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jenis_kelamin` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tempat_lahir` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tanggal_lahir` date NOT NULL,
+  `kelas` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id_sekolah` int NOT NULL,
+  `password` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `foto` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_siswa`
+--
+
+INSERT INTO `t_siswa` (`id`, `nis`, `nama`, `jenis_kelamin`, `tempat_lahir`, `tanggal_lahir`, `kelas`, `id_sekolah`, `password`, `foto`) VALUES
+(1, '1', 'Andri Rini', 'L', '2022-1-1', '2022-01-01', '5', 1, 'c4ca4238a0b923820dcc509a6f75849b', '64b8cd36b8d6b.jpg'),
+(2, '3', 'Muhamad Zildan TM', 'P', '2022-1-1', '2022-01-01', '1', 1, 'c4ca4238a0b923820dcc509a6f75849b', '1.jpg'),
+(3, '4', 'Muhammad Rafi', 'P', '2022-1-1', '2022-01-01', '1', 1, 'c4ca4238a0b923820dcc509a6f75849b', '1.jpg'),
+(4, '5', 'M. Herdi Al-Fachri', 'P', '2022-1-1', '2022-01-01', '1', 1, 'c4ca4238a0b923820dcc509a6f75849b', '1.jpg'),
+(5, '6', 'M. Ripal Perdiansyah', 'P', '2022-1-1', '2022-01-01', '1', 1, 'c4ca4238a0b923820dcc509a6f75849b', '1.jpg'),
+(6, '7', 'Zulhaydar Fathurrahman Sidiq', 'P', '2022-1-1', '2022-01-01', '1', 1, 'c4ca4238a0b923820dcc509a6f75849b', '1.jpg'),
+(8, '930949049390430', 'Ghina', '1', 'Palembang', '2222-01-01', '1 smp', 3333, 'abc', '1.jpg'),
+(11, '2330511036', 'NAZWA AKMALIA PADLA', 'P', 'Sukabumi', '2004-01-10', '20', 1, '5f4dcc3b5aa765d61d8327deb882cf99', 'foto_6870e97da14e15.38705769.jpg');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_siswa_absensi`
+--
+
+CREATE TABLE `t_siswa_absensi` (
+  `id` int NOT NULL,
+  `id_siswa` int NOT NULL,
+  `waktu_kehadiran` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  `kehadiran` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_siswa_absensi`
+--
+
+INSERT INTO `t_siswa_absensi` (`id`, `id_siswa`, `waktu_kehadiran`, `kehadiran`) VALUES
+(1, 1, '2023-06-26 04:23:42.660789', 's'),
+(2, 2, '2023-06-26 04:23:46.323762', 'H'),
+(3, 11, '2025-07-11 17:26:08.000000', 'H'),
+(4, 11, '2025-07-11 17:29:34.000000', 'H'),
+(5, 11, '2025-07-11 11:40:04.000000', 'H'),
+(6, 11, '2025-07-11 23:02:16.000000', 'H');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_walikelas`
+--
+
+CREATE TABLE `t_walikelas` (
+  `id_walikelas` int NOT NULL,
+  `nama` varchar(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `walikelas` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `jumlah_siswa` int NOT NULL,
+  `id_sekolah` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `t_walikelas`
+--
+
+INSERT INTO `t_walikelas` (`id_walikelas`, `nama`, `walikelas`, `jumlah_siswa`, `id_sekolah`) VALUES
+(1, 'Agan Ginajar S.Kom', 'VII B', 40, 1),
+(2, 'Pa Herdi S.Kom', 'VIII B', 35, 0),
+(3, 'Pa Kevin S.Kom', 'X A', 29, 0),
+(4, 'Pa Garuh S.Kom', 'XI B', 38, 0),
+(5, 'Pa Haikal S.Kom', 'VIII C', 40, 0);
 
 -- --------------------------------------------------------
 
@@ -633,58 +1350,35 @@ INSERT INTO `tugas` (`id`, `mapel_id`, `judul`, `deskripsi`, `deadline`, `create
 
 CREATE TABLE `users` (
   `id` int NOT NULL,
-  `username` varchar(50) DEFAULT NULL,
-  `fullname` varchar(100) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  `password` varchar(255) DEFAULT NULL,
-  `id_role` int NOT NULL,
-  `picture` varchar(100) DEFAULT NULL,
-  `status` tinyint(1) DEFAULT '1',
-  `last_login` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `fullname` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '-',
+  `status` tinyint(1) NOT NULL DEFAULT '1',
+  `picture` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `type` enum('admin','siswa','guru','ortu','perpus','kepsek') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'siswa',
+  `last_login` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `fullname`, `email`, `password`, `id_role`, `picture`, `status`, `last_login`, `created_at`) VALUES
-(1001, NULL, 'Lina Kartikasari, M.Pd.', 'lina@sma.sch.id', NULL, 3, 'lina.jpg', 1, '2025-07-07 04:32:29', '2025-07-07 04:32:29'),
-(1002, NULL, 'Yoga Pratama Putra, S.Pd.', 'yoga@sma.sch.id', NULL, 3, 'yoga.jpg', 1, '2025-07-07 04:32:29', '2025-07-07 04:32:29'),
-(1003, NULL, 'Sinta Marlina, S.Pd.', 'sinta@sma.sch.id', NULL, 3, 'sinta.jpg', 1, '2025-07-07 04:32:29', '2025-07-07 04:32:29'),
-(1004, NULL, 'Andi Saputra, S.Kom.', 'andi@sma.sch.id', NULL, 3, 'andi.jpg', 1, '2025-07-07 04:32:29', '2025-07-07 04:32:29'),
-(1005, NULL, 'Rani Nurhayati, S.Pd.', 'rani@sma.sch.id', NULL, 3, 'rani.jpg', 1, '2025-07-07 04:32:29', '2025-07-07 04:32:29'),
-(1006, NULL, 'Drs. Dedi Firmansyah, M.Pd.', 'dedi@sma.sch.id', NULL, 3, 'dedi.jpg', 1, '2025-07-07 04:32:29', '2025-07-07 04:32:29'),
-(20231001, NULL, 'NAZWA AKMALIA PADLA', 'nazwaakmalia036@ummi.ac.id', NULL, 2, 'https://lh3.googleusercontent.com/a/ACg8ocJ_q04pxF4nNbYoZZrwe5j22qR8PHJI4cvlqIbBphsrUYsSxw=s96-c', 1, '2025-07-07 00:26:32', '2025-07-06 17:26:32'),
-(20231003, NULL, 'Nazwa Akmalia padla', 'nazwaakmalia569@gmail.com', NULL, 1, 'https://lh3.googleusercontent.com/a/ACg8ocIG1g7XlpyosQlq9gwdT0FGsA6M4AsUsvJlI1mLgoEDFjFIxDlD=s96-c', 1, '2025-07-10 08:08:28', '2025-07-10 01:08:28');
+INSERT INTO `users` (`id`, `fullname`, `email`, `password`, `status`, `picture`, `type`, `last_login`, `created_at`) VALUES
+(1, 'Adi Sunarto Asril', 'odong1983@gmail.com', '-', 1, 'https://lh3.googleusercontent.com/a/ACg8ocKGG6dt1vwONqa3rm0hICNgBexmiki34ePGyv88Rmrckll9Qz4Z=s96-c', 'admin', '2025-06-01 09:22:30', '2025-06-01 02:22:30'),
+(2, 'Sunarto Asril Adi', 'asriladi@ummi.ac.id', '-', 1, 'https://lh3.googleusercontent.com/a/ACg8ocL-489oiObyR269ezHYR7_bzmQckdjIMOYnP28IOhIM9QSFuRw=s96-c', 'admin', '2025-06-13 02:12:27', '2025-06-12 19:12:27'),
+(3, 'AKMALIA PADLA NAZWA', 'nazwaakmalia036@ummi.ac.id', '-', 1, 'https://lh3.googleusercontent.com/a/ACg8ocJ_q04pxF4nNbYoZZrwe5j22qR8PHJI4cvlqIbBphsrUYsSxw=s96-c', 'siswa', '2025-07-11 21:51:23', '2025-06-14 02:18:16'),
+(5, 'Akmalia padla Nazwa', 'nazwaakmalia569@gmail.com', '-', 1, 'https://lh3.googleusercontent.com/a/ACg8ocIG1g7XlpyosQlq9gwdT0FGsA6M4AsUsvJlI1mLgoEDFjFIxDlD=s96-c', NULL, '2025-06-20 21:13:37', '2025-06-20 14:13:37');
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `absensi`
---
-ALTER TABLE `absensi`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `mapel_id` (`mapel_id`),
-  ADD KEY `fk_absensi_siswa` (`siswa_id`);
-
---
--- Indexes for table `administrator`
---
-ALTER TABLE `administrator`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_admin_user` (`user_id`);
-
---
 -- Indexes for table `agenda_guru`
 --
 ALTER TABLE `agenda_guru`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `guru_id` (`guru_id`),
-  ADD KEY `mapel_id` (`mapel_id`),
-  ADD KEY `fk_agenda_kelas` (`kelas_id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `agenda_kegiatan`
@@ -693,127 +1387,32 @@ ALTER TABLE `agenda_kegiatan`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `anggota_ekskul`
---
-ALTER TABLE `anggota_ekskul`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `ekskul_id` (`ekskul_id`),
-  ADD KEY `fk_anggota_ekskul_siswa` (`siswa_id`);
-
---
 -- Indexes for table `anggota_mapel`
 --
 ALTER TABLE `anggota_mapel`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `siswa_id` (`siswa_id`,`mapel_id`),
+  ADD KEY `siswa_id` (`siswa_id`),
   ADD KEY `mapel_id` (`mapel_id`);
 
 --
--- Indexes for table `anggota_perpus`
+-- Indexes for table `books`
 --
-ALTER TABLE `anggota_perpus`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `no_anggota` (`no_anggota`),
-  ADD KEY `user_id` (`user_id`);
-
---
--- Indexes for table `buku`
---
-ALTER TABLE `buku`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `kode_buku` (`kode_buku`);
-
---
--- Indexes for table `ekstrakurikuler`
---
-ALTER TABLE `ekstrakurikuler`
+ALTER TABLE `books`
   ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `guru`
---
-ALTER TABLE `guru`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `nip` (`nip`);
 
 --
 -- Indexes for table `jadwal`
 --
 ALTER TABLE `jadwal`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `mapel_id` (`mapel_id`),
-  ADD KEY `fk_jadwal_kelas` (`kelas_id`);
-
---
--- Indexes for table `kelas`
---
-ALTER TABLE `kelas`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `kepsek`
---
-ALTER TABLE `kepsek`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `mapel`
---
-ALTER TABLE `mapel`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `guru_id` (`guru_id`),
-  ADD KEY `fk_mapel_kelas` (`kelas_id`);
-
---
--- Indexes for table `materi`
---
-ALTER TABLE `materi`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `mapel_id` (`mapel_id`);
-
---
--- Indexes for table `menu`
---
-ALTER TABLE `menu`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `nilai`
---
-ALTER TABLE `nilai`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `mapel_id` (`mapel_id`),
-  ADD KEY `fk_nilai_siswa` (`siswa_id`);
+  ADD KEY `id_mapel` (`id_mapel`),
+  ADD KEY `id_kelas` (`id_kelas`);
 
 --
 -- Indexes for table `notifikasi`
 --
 ALTER TABLE `notifikasi`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `siswa_id` (`siswa_id`);
-
---
--- Indexes for table `ortu`
---
-ALTER TABLE `ortu`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_ortu_siswa` (`anak_id`);
-
---
--- Indexes for table `pembayaran`
---
-ALTER TABLE `pembayaran`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `tagihan_id` (`tagihan_id`),
-  ADD KEY `fk_pembayaran_siswa` (`siswa_id`);
-
---
--- Indexes for table `peminjaman`
---
-ALTER TABLE `peminjaman`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `anggota_id` (`anggota_id`),
-  ADD KEY `buku_id` (`buku_id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `pengumpulan_tugas`
@@ -824,139 +1423,177 @@ ALTER TABLE `pengumpulan_tugas`
   ADD KEY `siswa_id` (`siswa_id`);
 
 --
--- Indexes for table `penilaian`
---
-ALTER TABLE `penilaian`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_guru` (`id_guru`),
-  ADD KEY `id_mapel` (`id_mapel`),
-  ADD KEY `fk_penilaian_siswa` (`id_siswa`);
-
---
--- Indexes for table `role`
---
-ALTER TABLE `role`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `nama_role` (`nama_role`);
-
---
 -- Indexes for table `siswa`
 --
 ALTER TABLE `siswa`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `nisn` (`nisn`),
-  ADD KEY `fk_siswa_kelas` (`kelas_id`);
-
---
--- Indexes for table `tagihan`
---
-ALTER TABLE `tagihan`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_tagihan_kelas` (`kelas_id`),
-  ADD KEY `fk_tagihan_siswa` (`siswa_id`);
+  ADD PRIMARY KEY (`nisn`);
 
 --
 -- Indexes for table `tugas`
 --
 ALTER TABLE `tugas`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_absensi`
+--
+ALTER TABLE `t_absensi`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_administrator`
+--
+ALTER TABLE `t_administrator`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_ekstrakurikuler`
+--
+ALTER TABLE `t_ekstrakurikuler`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_grafiknilai`
+--
+ALTER TABLE `t_grafiknilai`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_guru`
+--
+ALTER TABLE `t_guru`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_guru_penilaian`
+--
+ALTER TABLE `t_guru_penilaian`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_kelas`
+--
+ALTER TABLE `t_kelas`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_keuangan`
+--
+ALTER TABLE `t_keuangan`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_keuangan_pembayaran`
+--
+ALTER TABLE `t_keuangan_pembayaran`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_keuangan_tagihan`
+--
+ALTER TABLE `t_keuangan_tagihan`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_mapel`
+--
+ALTER TABLE `t_mapel`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_materi`
+--
+ALTER TABLE `t_materi`
   ADD PRIMARY KEY (`id`),
   ADD KEY `mapel_id` (`mapel_id`);
+
+--
+-- Indexes for table `t_menu`
+--
+ALTER TABLE `t_menu`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_nilai`
+--
+ALTER TABLE `t_nilai`
+  ADD PRIMARY KEY (`id`) USING BTREE;
+
+--
+-- Indexes for table `t_penilaian`
+--
+ALTER TABLE `t_penilaian`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_pustakawan`
+--
+ALTER TABLE `t_pustakawan`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_role`
+--
+ALTER TABLE `t_role`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_siswa`
+--
+ALTER TABLE `t_siswa`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_siswa_absensi`
+--
+ALTER TABLE `t_siswa_absensi`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `t_walikelas`
+--
+ALTER TABLE `t_walikelas`
+  ADD PRIMARY KEY (`id_walikelas`);
 
 --
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`),
-  ADD KEY `fk_users_role` (`id_role`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT for table `absensi`
---
-ALTER TABLE `absensi`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
 -- AUTO_INCREMENT for table `agenda_guru`
 --
 ALTER TABLE `agenda_guru`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `agenda_kegiatan`
 --
 ALTER TABLE `agenda_kegiatan`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `anggota_ekskul`
---
-ALTER TABLE `anggota_ekskul`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `anggota_mapel`
 --
 ALTER TABLE `anggota_mapel`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `anggota_perpus`
+-- AUTO_INCREMENT for table `books`
 --
-ALTER TABLE `anggota_perpus`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `buku`
---
-ALTER TABLE `buku`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `ekstrakurikuler`
---
-ALTER TABLE `ekstrakurikuler`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+ALTER TABLE `books`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `jadwal`
 --
 ALTER TABLE `jadwal`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `kelas`
---
-ALTER TABLE `kelas`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `mapel`
---
-ALTER TABLE `mapel`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
-
---
--- AUTO_INCREMENT for table `materi`
---
-ALTER TABLE `materi`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT for table `menu`
---
-ALTER TABLE `menu`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT for table `nilai`
---
-ALTER TABLE `nilai`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `notifikasi`
@@ -965,205 +1602,173 @@ ALTER TABLE `notifikasi`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `pembayaran`
---
-ALTER TABLE `pembayaran`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT for table `peminjaman`
---
-ALTER TABLE `peminjaman`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `pengumpulan_tugas`
 --
 ALTER TABLE `pengumpulan_tugas`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT for table `penilaian`
---
-ALTER TABLE `penilaian`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-
---
--- AUTO_INCREMENT for table `role`
---
-ALTER TABLE `role`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT for table `tagihan`
---
-ALTER TABLE `tagihan`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `tugas`
 --
 ALTER TABLE `tugas`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `t_absensi`
+--
+ALTER TABLE `t_absensi`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=161;
+
+--
+-- AUTO_INCREMENT for table `t_administrator`
+--
+ALTER TABLE `t_administrator`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `t_ekstrakurikuler`
+--
+ALTER TABLE `t_ekstrakurikuler`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
+
+--
+-- AUTO_INCREMENT for table `t_grafiknilai`
+--
+ALTER TABLE `t_grafiknilai`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT for table `t_guru`
+--
+ALTER TABLE `t_guru`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3113214;
+
+--
+-- AUTO_INCREMENT for table `t_guru_penilaian`
+--
+ALTER TABLE `t_guru_penilaian`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
+-- AUTO_INCREMENT for table `t_kelas`
+--
+ALTER TABLE `t_kelas`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+
+--
+-- AUTO_INCREMENT for table `t_keuangan`
+--
+ALTER TABLE `t_keuangan`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `t_keuangan_pembayaran`
+--
+ALTER TABLE `t_keuangan_pembayaran`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+
+--
+-- AUTO_INCREMENT for table `t_keuangan_tagihan`
+--
+ALTER TABLE `t_keuangan_tagihan`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+
+--
+-- AUTO_INCREMENT for table `t_mapel`
+--
+ALTER TABLE `t_mapel`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT for table `t_materi`
+--
+ALTER TABLE `t_materi`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `t_menu`
+--
+ALTER TABLE `t_menu`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+
+--
+-- AUTO_INCREMENT for table `t_nilai`
+--
+ALTER TABLE `t_nilai`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `t_penilaian`
+--
+ALTER TABLE `t_penilaian`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `t_pustakawan`
+--
+ALTER TABLE `t_pustakawan`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `t_role`
+--
+ALTER TABLE `t_role`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `t_siswa`
+--
+ALTER TABLE `t_siswa`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT for table `t_siswa_absensi`
+--
+ALTER TABLE `t_siswa_absensi`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `t_walikelas`
+--
+ALTER TABLE `t_walikelas`
+  MODIFY `id_walikelas` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20231004;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
 --
 
 --
--- Constraints for table `absensi`
---
-ALTER TABLE `absensi`
-  ADD CONSTRAINT `absensi_ibfk_2` FOREIGN KEY (`mapel_id`) REFERENCES `mapel` (`id`),
-  ADD CONSTRAINT `fk_absensi_siswa` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `administrator`
---
-ALTER TABLE `administrator`
-  ADD CONSTRAINT `administrator_ibfk_1` FOREIGN KEY (`id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `fk_admin_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `agenda_guru`
---
-ALTER TABLE `agenda_guru`
-  ADD CONSTRAINT `agenda_guru_ibfk_1` FOREIGN KEY (`guru_id`) REFERENCES `guru` (`id`),
-  ADD CONSTRAINT `agenda_guru_ibfk_3` FOREIGN KEY (`mapel_id`) REFERENCES `mapel` (`id`),
-  ADD CONSTRAINT `fk_agenda_kelas` FOREIGN KEY (`kelas_id`) REFERENCES `kelas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
---
--- Constraints for table `anggota_ekskul`
---
-ALTER TABLE `anggota_ekskul`
-  ADD CONSTRAINT `anggota_ekskul_ibfk_2` FOREIGN KEY (`ekskul_id`) REFERENCES `ekstrakurikuler` (`id`),
-  ADD CONSTRAINT `fk_anggota_ekskul_siswa` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
 -- Constraints for table `anggota_mapel`
 --
 ALTER TABLE `anggota_mapel`
-  ADD CONSTRAINT `anggota_mapel_ibfk_1` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `anggota_mapel_ibfk_2` FOREIGN KEY (`mapel_id`) REFERENCES `mapel` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `anggota_perpus`
---
-ALTER TABLE `anggota_perpus`
-  ADD CONSTRAINT `anggota_perpus_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `guru`
---
-ALTER TABLE `guru`
-  ADD CONSTRAINT `guru_ibfk_1` FOREIGN KEY (`id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `anggota_mapel_ibfk_1` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`nisn`) ON DELETE CASCADE,
+  ADD CONSTRAINT `anggota_mapel_ibfk_2` FOREIGN KEY (`mapel_id`) REFERENCES `t_mapel` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `jadwal`
 --
 ALTER TABLE `jadwal`
-  ADD CONSTRAINT `fk_jadwal_kelas` FOREIGN KEY (`kelas_id`) REFERENCES `kelas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `jadwal_ibfk_2` FOREIGN KEY (`mapel_id`) REFERENCES `mapel` (`id`);
-
---
--- Constraints for table `kepsek`
---
-ALTER TABLE `kepsek`
-  ADD CONSTRAINT `kepsek_ibfk_1` FOREIGN KEY (`id`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `mapel`
---
-ALTER TABLE `mapel`
-  ADD CONSTRAINT `fk_mapel_kelas` FOREIGN KEY (`kelas_id`) REFERENCES `kelas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `mapel_ibfk_1` FOREIGN KEY (`guru_id`) REFERENCES `guru` (`id`);
-
---
--- Constraints for table `materi`
---
-ALTER TABLE `materi`
-  ADD CONSTRAINT `materi_ibfk_1` FOREIGN KEY (`mapel_id`) REFERENCES `mapel` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `nilai`
---
-ALTER TABLE `nilai`
-  ADD CONSTRAINT `fk_nilai_siswa` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `nilai_ibfk_2` FOREIGN KEY (`mapel_id`) REFERENCES `mapel` (`id`);
-
---
--- Constraints for table `notifikasi`
---
-ALTER TABLE `notifikasi`
-  ADD CONSTRAINT `notifikasi_ibfk_1` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `ortu`
---
-ALTER TABLE `ortu`
-  ADD CONSTRAINT `fk_ortu_siswa` FOREIGN KEY (`anak_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `ortu_ibfk_1` FOREIGN KEY (`id`) REFERENCES `users` (`id`);
-
---
--- Constraints for table `pembayaran`
---
-ALTER TABLE `pembayaran`
-  ADD CONSTRAINT `fk_pembayaran_siswa` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `pembayaran_ibfk_2` FOREIGN KEY (`tagihan_id`) REFERENCES `tagihan` (`id`);
-
---
--- Constraints for table `peminjaman`
---
-ALTER TABLE `peminjaman`
-  ADD CONSTRAINT `peminjaman_ibfk_1` FOREIGN KEY (`anggota_id`) REFERENCES `anggota_perpus` (`id`),
-  ADD CONSTRAINT `peminjaman_ibfk_2` FOREIGN KEY (`buku_id`) REFERENCES `buku` (`id`);
+  ADD CONSTRAINT `jadwal_ibfk_1` FOREIGN KEY (`id_mapel`) REFERENCES `t_mapel` (`id`),
+  ADD CONSTRAINT `jadwal_ibfk_2` FOREIGN KEY (`id_kelas`) REFERENCES `t_kelas` (`id`);
 
 --
 -- Constraints for table `pengumpulan_tugas`
 --
 ALTER TABLE `pengumpulan_tugas`
   ADD CONSTRAINT `pengumpulan_tugas_ibfk_1` FOREIGN KEY (`tugas_id`) REFERENCES `tugas` (`id`),
-  ADD CONSTRAINT `pengumpulan_tugas_ibfk_2` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`);
+  ADD CONSTRAINT `pengumpulan_tugas_ibfk_2` FOREIGN KEY (`siswa_id`) REFERENCES `t_siswa` (`id`);
 
 --
--- Constraints for table `penilaian`
+-- Constraints for table `t_materi`
 --
-ALTER TABLE `penilaian`
-  ADD CONSTRAINT `fk_penilaian_siswa` FOREIGN KEY (`id_siswa`) REFERENCES `siswa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `penilaian_ibfk_1` FOREIGN KEY (`id_guru`) REFERENCES `guru` (`id`),
-  ADD CONSTRAINT `penilaian_ibfk_2` FOREIGN KEY (`id_mapel`) REFERENCES `mapel` (`id`);
-
---
--- Constraints for table `siswa`
---
-ALTER TABLE `siswa`
-  ADD CONSTRAINT `fk_siswa_kelas` FOREIGN KEY (`kelas_id`) REFERENCES `kelas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_siswa_user` FOREIGN KEY (`id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `tagihan`
---
-ALTER TABLE `tagihan`
-  ADD CONSTRAINT `fk_tagihan_kelas` FOREIGN KEY (`kelas_id`) REFERENCES `kelas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_tagihan_siswa` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `tugas`
---
-ALTER TABLE `tugas`
-  ADD CONSTRAINT `tugas_ibfk_1` FOREIGN KEY (`mapel_id`) REFERENCES `mapel` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `users`
---
-ALTER TABLE `users`
-  ADD CONSTRAINT `fk_users_role` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`);
+ALTER TABLE `t_materi`
+  ADD CONSTRAINT `t_materi_ibfk_1` FOREIGN KEY (`mapel_id`) REFERENCES `t_mapel` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

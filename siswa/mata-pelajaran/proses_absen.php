@@ -3,54 +3,82 @@ session_start();
 include('../../koneksi.php');
 
 // Validasi login siswa
-if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'siswa') {
-  echo "<script>alert('Akses ditolak!'); window.location='../../logout.php';</script>";
-  exit;
+if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'siswa') {
+    header("Location: ../logout.php");
+    exit;
 }
 
-$email = $_SESSION['email'] ?? '';
-$siswaQuery = mysqli_query($conn, "SELECT id FROM siswa WHERE email = '$email'");
-$siswa = mysqli_fetch_assoc($siswaQuery);
-
-if (!$siswa) {
-  echo "<script>alert('Data siswa tidak ditemukan.'); window.location='../../logout.php';</script>";
-  exit;
-}
-
-$siswa_id = $siswa['id'];
-$mapel_id = $_POST['mapel_id'] ?? null;
+$email = $_SESSION['email'];
+$mapel_id  = $_POST['mapel_id'] ?? null;
 $materi_id = $_POST['materi_id'] ?? null;
+$kode_mapel = $_GET['kode'] ?? '';
 
-if (!$mapel_id || !$materi_id) {
-  echo "<script>alert('❌ Data tidak lengkap.'); window.history.back();</script>";
-  exit;
+// Validasi input
+if (!$mapel_id || !$materi_id || !$kode_mapel) {
+    die("❌ Data tidak lengkap.");
 }
 
-// Ambil tanggal hari ini
-$tanggal = date('Y-m-d');
-
-// Cek apakah siswa sudah absen hari ini untuk mapel dan materi tersebut
-$cek = mysqli_query($conn, "
-  SELECT * FROM absensi 
-  WHERE siswa_id = $siswa_id 
-    AND mapel_id = $mapel_id 
-    AND tanggal = '$tanggal'
+// Ambil data siswa
+$querySiswa = mysqli_query($conn, "
+    SELECT s.nisn, s.nama, ts.id AS id_ts, ts.kelas
+    FROM siswa s
+    JOIN t_siswa ts ON s.nisn = ts.nis
+    WHERE s.email = '$email'
 ");
-
-if (mysqli_num_rows($cek) > 0) {
-  echo "<script>alert('⚠️ Kamu sudah absen hari ini.'); window.history.back();</script>";
-  exit;
+$siswa = mysqli_fetch_assoc($querySiswa);
+if (!$siswa) {
+    die("❌ Data siswa tidak ditemukan.");
 }
 
-// Masukkan absensi
-$insert = mysqli_query($conn, "
-  INSERT INTO absensi (siswa_id, mapel_id, tanggal, status)
-  VALUES ($siswa_id, $mapel_id, '$tanggal', 'Hadir')
+$siswa_id = $siswa['id_ts'];
+$nama     = $siswa['nama'];
+$kelas    = $siswa['kelas'];
+
+// Ambil data mapel untuk mendapatkan id_kelas dan id_sekolah
+$queryMapel = mysqli_query($conn, "SELECT id_kelas, id_sekolah FROM t_mapel WHERE id = '$mapel_id'");
+$mapel = mysqli_fetch_assoc($queryMapel);
+if (!$mapel) {
+    die("❌ Data mapel tidak ditemukan.");
+}
+
+$id_kelas   = $mapel['id_kelas'];
+$id_sekolah = $mapel['id_sekolah'];
+
+// Cek apakah sudah absen hari ini
+$cekAbsen = mysqli_query($conn, "
+    SELECT id FROM t_absensi 
+    WHERE id_siswa = '$siswa_id' 
+      AND id_mapel = '$mapel_id' 
+      AND materi_id = '$materi_id'
+      AND DATE(waktu_kehadiran) = CURDATE()
+");
+if (mysqli_num_rows($cekAbsen) > 0) {
+    header("Location: materi.php?kode=" . urlencode($kode_mapel));
+    exit;
+}
+
+
+// Simpan ke t_absensi
+$insert1 = mysqli_query($conn, "
+    INSERT INTO t_absensi 
+        (nama, kelas, waktu_kehadiran, id_siswa, id_mapel, materi_id, id_kelas, id_sekolah)
+    VALUES 
+        ('$nama', '$kelas', NOW(), '$siswa_id', '$mapel_id', '$materi_id', '$id_kelas', '$id_sekolah')
 ");
 
-if ($insert) {
-  echo "<script>alert('✅ Absensi berhasil dicatat.'); window.history.back();</script>";
+// Simpan ke t_siswa_absensi
+$insert2 = mysqli_query($conn, "
+    INSERT INTO t_siswa_absensi 
+        (id_siswa, waktu_kehadiran, kehadiran)
+    VALUES 
+        ('$siswa_id', NOW(), 'H')
+");
+
+
+if ($insert && $insert2) {
+    header("Location: materi.php?kode=" . urlencode($kode_mapel));
+    exit;
 } else {
-  echo "<script>alert('❌ Gagal menyimpan absensi.'); window.history.back();</script>";
+    echo "❌ Gagal menyimpan absensi. Periksa koneksi atau struktur tabel.";
 }
 ?>

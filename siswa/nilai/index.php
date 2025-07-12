@@ -2,46 +2,70 @@
 session_start();
 include '../../koneksi.php';
 
-// Cek login siswa
-if (!isset($_SESSION['email']) || $_SESSION['role'] != 2) {
-    header("location:../index.php");
+// ✅ Cek login siswa
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'siswa') {
+    header("Location: ../logout.php");
     exit;
 }
 
-// Ambil data siswa
 $email = $_SESSION['email'];
-$siswa_query = mysqli_query($conn, "SELECT * FROM siswa WHERE email = '$email'");
-$siswa = mysqli_fetch_assoc($siswa_query);
+
+// ✅ Ambil siswa dari tabel `siswa` berdasarkan email
+$query_siswa = mysqli_query($conn, "SELECT * FROM siswa WHERE email = '$email'");
+$siswa = mysqli_fetch_assoc($query_siswa);
 
 if (!$siswa) {
-  echo "<script>alert('Siswa tidak ditemukan.'); window.location='../../logout.php';</script>";
-  exit;
+    echo "<script>alert('Data siswa tidak ditemukan'); window.location='../../logout.php';</script>";
+    exit;
 }
 
-$siswa_id = $siswa['id'];
+$nisn = $siswa['nisn'];
 
-// Ambil notifikasi
+// ✅ Ambil ID dari `t_siswa` berdasarkan NISN
+$query_t_siswa = mysqli_query($conn, "SELECT * FROM t_siswa WHERE nis = '$nisn'");
+$t_siswa = mysqli_fetch_assoc($query_t_siswa);
+
+if (!$t_siswa) {
+    echo "<script>alert('Data t_siswa tidak ditemukan'); window.location='../../logout.php';</script>";
+    exit;
+}
+
+$id_siswa = $t_siswa['id']; // ini yang dipakai untuk t_nilai dan t_penilaian
+
+// ✅ Ambil notifikasi
 $jumlah_notif = 0;
 $daftar_notif = [];
-$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi WHERE siswa_id = '$siswa_id' ORDER BY waktu DESC LIMIT 5");
+$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi WHERE siswa_id = '$nisn' ORDER BY waktu DESC LIMIT 5");
 $jumlah_notif = mysqli_num_rows($notif_query);
 while ($row = mysqli_fetch_assoc($notif_query)) {
-  $daftar_notif[] = $row;
+    $daftar_notif[] = $row;
 }
 
-// Ambil nilai dari tabel penilaian + mapel
+// ✅ Ambil nilai gabungan
 $nilai_query = mysqli_query($conn, "
-  SELECT p.*, m.nama_mapel
-  FROM penilaian p
-  LEFT JOIN mapel m ON p.id_mapel = m.id
-  WHERE p.id_siswa = '$siswa_id'
-  ORDER BY p.semester ASC
+  SELECT 
+    n.nama_mapel,
+    n.semester,
+    IFNULL(p.kedisiplinan, '-') AS kedisiplinan,
+    IFNULL(p.kehadiran, '-') AS kehadiran,
+    IFNULL(p.sikap, '-') AS sikap,
+    IFNULL(p.tugas, '-') AS tugas,
+    IFNULL(p.uts, '-') AS uts,
+    IFNULL(p.uas, '-') AS uas,
+    n.nilai AS evaluasi
+  FROM t_nilai n
+  LEFT JOIN t_penilaian p ON n.nama_mapel = (
+      SELECT m.nama_mapel FROM t_mapel m WHERE m.id = p.id_mapel LIMIT 1
+  ) AND n.id_siswa = p.id_siswa
+  WHERE n.id_siswa = '$id_siswa'
 ");
+
 $daftar_nilai = [];
 while ($n = mysqli_fetch_assoc($nilai_query)) {
-  $daftar_nilai[] = $n;
+    $daftar_nilai[] = $n;
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -214,46 +238,47 @@ while ($n = mysqli_fetch_assoc($nilai_query)) {
 
         <!-- Tabel Nilai -->
         <div class="card p-4">
-          <h5 class="mb-3">📊 Daftar Nilai</h5>
-          <?php if (count($daftar_nilai) > 0): ?>
-            <div class="table-responsive">
-              <table class="table table-bordered">
-                <thead class="thead-light">
-                  <tr>
-                    <th>No</th>
-                    <th>Mata Pelajaran</th>
-                    <th>Semester</th>
-                    <th>Disiplin</th>
-                    <th>Kehadiran</th>
-                    <th>Sikap</th>
-                    <th>Tugas</th>
-                    <th>UTS</th>
-                    <th>UAS</th>
-                    <th>Evaluasi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php $no = 1; foreach ($daftar_nilai as $n): ?>
-                    <tr>
-                      <td><?= $no++ ?></td>
-                      <td><?= htmlspecialchars($n['nama_mapel']) ?></td>
-                      <td><?= htmlspecialchars($n['semester']) ?></td>
-                      <td><?= $n['kedisiplinan'] ?></td>
-                      <td><?= $n['kehadiran'] ?></td>
-                      <td><?= $n['sikap'] ?></td>
-                      <td><?= $n['tugas'] ?></td>
-                      <td><?= $n['uts'] ?></td>
-                      <td><?= $n['uas'] ?></td>
-                      <td><?= $n['evaluasi'] ?></td>
-                    </tr>
-                  <?php endforeach; ?>
-                </tbody>
-              </table>
-            </div>
-          <?php else: ?>
-            <div class="alert alert-info">Belum ada nilai yang tersedia.</div>
-          <?php endif; ?>
-        </div>
+  <h5 class="mb-3">📊 Daftar Nilai</h5>
+  <?php if (count($daftar_nilai) > 0): ?>
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead class="thead-light">
+          <tr>
+            <th>No</th>
+            <th>Mata Pelajaran</th>
+            <th>Semester</th>
+            <th>Disiplin</th>
+            <th>Kehadiran</th>
+            <th>Sikap</th>
+            <th>Tugas</th>
+            <th>UTS</th>
+            <th>UAS</th>
+            <th>Evaluasi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php $no = 1; foreach ($daftar_nilai as $n): ?>
+            <tr>
+              <td><?= $no++ ?></td>
+              <td><?= htmlspecialchars($n['nama_mapel']) ?></td>
+              <td><?= htmlspecialchars($n['semester']) ?></td>
+              <td><?= $n['kedisiplinan'] ?></td>
+              <td><?= $n['kehadiran'] ?></td>
+              <td><?= $n['sikap'] ?></td>
+              <td><?= $n['tugas'] ?></td>
+              <td><?= $n['uts'] ?></td>
+              <td><?= $n['uas'] ?></td>
+              <td><?= $n['evaluasi'] ?></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  <?php else: ?>
+    <div class="alert alert-info">Belum ada nilai yang tersedia.</div>
+  <?php endif; ?>
+</div>
+
 
         <!-- Footer -->
         <footer class="footer mt-4">

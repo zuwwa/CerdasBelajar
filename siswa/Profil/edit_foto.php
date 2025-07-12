@@ -3,9 +3,9 @@ session_start();
 include('../../koneksi.php');
 
 // Pastikan sudah login
-if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'siswa') {
-  echo "<script>alert('Akses ditolak.'); window.location='../../logout.php';</script>";
-  exit();
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'siswa') {
+    header("Location: ../logout.php");
+    exit;
 }
 ?>
 

@@ -3,8 +3,8 @@ session_start();
 include '../../koneksi.php';
 
 // Cek login siswa
-if (!isset($_SESSION['email']) || $_SESSION['role'] != 2) {
-    header("location:../index.php");
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'siswa') {
+    header("Location: ../../logout.php");
     exit;
 }
 
@@ -13,26 +13,27 @@ $email = $_SESSION['email'];
 // Ambil data siswa
 $cek_siswa = mysqli_query($conn, "SELECT * FROM siswa WHERE email = '$email'");
 $siswa = mysqli_fetch_assoc($cek_siswa);
+
 if (!$siswa) {
     echo "<script>alert('❌ Data siswa tidak ditemukan.'); window.location='../../logout.php';</script>";
     exit();
 }
 
-$id_siswa = $siswa['id'];
+$id_siswa = $siswa['nisn'];
 
 // Proses gabung mapel
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_gabung'])) {
     $kode = mysqli_real_escape_string($conn, $_POST['kode_gabung']);
-    $cek = mysqli_query($conn, "SELECT * FROM mapel WHERE kode_mapel = '$kode'");
+    $cek = mysqli_query($conn, "SELECT * FROM t_mapel WHERE kode = '$kode'");
 
     if (mysqli_num_rows($cek) > 0) {
         $mapel = mysqli_fetch_assoc($cek);
         $id_mapel = $mapel['id'];
 
         // Cek apakah sudah tergabung
-        $cekGabung = mysqli_query($conn, "SELECT * FROM anggota_mapel WHERE siswa_id = $id_siswa AND mapel_id = $id_mapel");
+        $cekGabung = mysqli_query($conn, "SELECT * FROM anggota_mapel WHERE siswa_id = '$id_siswa' AND mapel_id = $id_mapel");
         if (mysqli_num_rows($cekGabung) < 1) {
-            mysqli_query($conn, "INSERT INTO anggota_mapel (siswa_id, mapel_id) VALUES ($id_siswa, $id_mapel)");
+            mysqli_query($conn, "INSERT INTO anggota_mapel (siswa_id, mapel_id) VALUES ('$id_siswa', $id_mapel)");
             echo "<script>alert('✅ Berhasil gabung mapel!'); window.location='index.php';</script>";
         } else {
             echo "<script>alert('⚠️ Kamu sudah tergabung pada mapel ini.');</script>";
@@ -42,16 +43,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['kode_gabung'])) {
     }
 }
 
-// Ambil daftar mapel yang sudah digabung siswa
+// Ambil daftar mapel yang diikuti siswa
 $result = mysqli_query($conn, "
-  SELECT mapel.*, kelas.kelas AS nama_kelas, guru.nama AS nama_guru
-  FROM anggota_mapel
-  JOIN mapel ON anggota_mapel.mapel_id = mapel.id
-  LEFT JOIN kelas ON mapel.kelas_id = kelas.id
-  LEFT JOIN guru ON mapel.guru_id = guru.id
-  WHERE anggota_mapel.siswa_id = $id_siswa
+    SELECT t_mapel.*, t_kelas.kelas AS nama_kelas
+    FROM anggota_mapel
+    JOIN t_mapel ON anggota_mapel.mapel_id = t_mapel.id
+    LEFT JOIN t_kelas ON t_mapel.id_kelas = t_kelas.id
+    WHERE anggota_mapel.siswa_id = '$id_siswa'
 ");
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -120,17 +122,19 @@ $result = mysqli_query($conn, "
             </tr>
           </thead>
           <tbody>
-            <?php $no = 1; while ($row = mysqli_fetch_assoc($result)) : ?>
-              <tr>
-                <td><?= $no++; ?></td>
-                <td class="text-primary font-weight-bold"><?= htmlspecialchars($row['nama_mapel']); ?></td>
-                <td><?= htmlspecialchars($row['kode_mapel']); ?></td>
-                <td><?= htmlspecialchars($row['nama_guru']); ?></td>
-                <td><?= htmlspecialchars($row['nama_kelas']); ?></td>
-                <td><a href="mapel.php?kode=<?= $row['kode_mapel']; ?>" class="btn btn-primary btn-sm">Masuk</a></td>
-              </tr>
-            <?php endwhile; ?>
-          </tbody>
+          <?php $no = 1; while ($row = mysqli_fetch_assoc($result)) : ?>
+            <tr>
+              <td><?= $no++; ?></td>
+              <td class="text-primary font-weight-bold"><?= htmlspecialchars($row['nama_mapel'] ?? '-') ?></td>
+              <td><?= htmlspecialchars($row['kode'] ?? '-') ?></td>
+              <td><?= htmlspecialchars($row['nama_guru'] ?? '-') ?></td>
+              <td><?= htmlspecialchars($row['nama_kelas'] ?? '-') ?></td>
+              <td>
+                <a href="mapel.php?kode=<?= urlencode($row['kode'] ?? '') ?>" class="btn btn-primary btn-sm">Masuk</a>
+              </td>
+            </tr>
+          <?php endwhile; ?>
+        </tbody>
         </table>
       </div>
     </div>

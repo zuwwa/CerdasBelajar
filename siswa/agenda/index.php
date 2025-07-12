@@ -3,36 +3,50 @@ session_start();
 include '../../koneksi.php';
 
 // Cek login siswa
-if (!isset($_SESSION['email']) || $_SESSION['role'] != 2) {
-    header("location:../index.php");
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'siswa') {
+    header("Location: ../logout.php");
     exit;
 }
 
-// Ambil data siswa
+// Ambil data siswa dari tabel `siswa`
 $email = $_SESSION['email'];
-$siswa = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM siswa WHERE email = '$email'"));
+$siswa_query = mysqli_query($conn, "SELECT * FROM siswa WHERE email = '$email'");
+$siswa = mysqli_fetch_assoc($siswa_query);
+
 if (!$siswa) {
-  echo "<script>alert('\u274c Siswa tidak ditemukan.'); window.location='../../logout.php';</script>";
-  exit;
+    echo "<script>alert('❌ Siswa tidak ditemukan.'); window.location='../../logout.php';</script>";
+    exit;
 }
-$siswa_id = $siswa['id'];
+
+$nisn = $siswa['nisn'];
+
+// Ambil data dari tabel t_siswa
+$t_siswa_query = mysqli_query($conn, "SELECT * FROM t_siswa WHERE nis = '$nisn'");
+$t_siswa = mysqli_fetch_assoc($t_siswa_query);
+if (!$t_siswa) {
+    echo "<script>alert('❌ Data t_siswa tidak ditemukan.'); window.location='../../logout.php';</script>";
+    exit;
+}
+
+$siswa_id = $t_siswa['id'];
 
 // Ambil notifikasi
 $jumlah_notif = 0;
 $daftar_notif = [];
-$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi WHERE siswa_id = '$siswa_id' ORDER BY waktu DESC LIMIT 5");
+$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi WHERE siswa_id = '$nisn' ORDER BY waktu DESC LIMIT 5");
 $jumlah_notif = mysqli_num_rows($notif_query);
 while ($row = mysqli_fetch_assoc($notif_query)) {
   $daftar_notif[] = $row;
 }
 
-// Ambil agenda kegiatan umum
+// Ambil daftar agenda
 $agenda_query = mysqli_query($conn, "SELECT * FROM agenda_kegiatan ORDER BY tanggal_mulai ASC");
 $daftar_agenda = [];
 while ($row = mysqli_fetch_assoc($agenda_query)) {
   $daftar_agenda[] = $row;
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -176,37 +190,39 @@ while ($row = mysqli_fetch_assoc($agenda_query)) {
           </div>
         </div>
 
-        <div class="card p-4">
-          <h5 class="mb-3">📅 Daftar Agenda Kegiatan</h5>
-          <?php if ($daftar_agenda): ?>
-            <div class="table-responsive">
-              <table class="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Tanggal</th>
-                    <th>Judul</th>
-                    <th>Deskripsi</th>
-                    <th>Tempat</th>
-                    <th>Penanggung Jawab</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php foreach ($daftar_agenda as $a): ?>
-                    <tr>
-                      <td><?= date('d M Y', strtotime($a['tanggal_mulai'])) ?><?= $a['tanggal_selesai'] ? ' - ' . date('d M Y', strtotime($a['tanggal_selesai'])) : '' ?></td>
-                      <td><?= htmlspecialchars($a['judul']) ?></td>
-                      <td><?= nl2br(htmlspecialchars($a['deskripsi'])) ?></td>
-                      <td><?= htmlspecialchars($a['tempat']) ?></td>
-                      <td><?= htmlspecialchars($a['penanggung_jawab']) ?></td>
-                    </tr>
-                  <?php endforeach; ?>
-                </tbody>
-              </table>
-            </div>
-          <?php else: ?>
-            <div class="alert alert-info">Belum ada agenda kegiatan saat ini.</div>
-          <?php endif; ?>
-        </div>
+        <!-- Konten Agenda -->
+<div class="card p-4">
+  <h5 class="mb-3">📅 Daftar Agenda Kegiatan</h5>
+  <?php if ($daftar_agenda): ?>
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Judul</th>
+            <th>Deskripsi</th>
+            <th>Tempat</th>
+            <th>Penanggung Jawab</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($daftar_agenda as $a): ?>
+            <tr>
+              <td><?= date('d M Y', strtotime($a['tanggal_mulai'])) ?><?= $a['tanggal_selesai'] ? ' - ' . date('d M Y', strtotime($a['tanggal_selesai'])) : '' ?></td>
+              <td><?= htmlspecialchars($a['judul']) ?></td>
+              <td><?= nl2br(htmlspecialchars($a['deskripsi'])) ?></td>
+              <td><?= htmlspecialchars($a['tempat']) ?></td>
+              <td><?= htmlspecialchars($a['penanggung_jawab']) ?></td>
+            </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+  <?php else: ?>
+    <div class="alert alert-info">Belum ada agenda kegiatan saat ini.</div>
+  <?php endif; ?>
+</div>
+
 
         <footer class="footer mt-4">
           <div class="text-center">© SMAN 1 Kota Sukabumi 2025</div>

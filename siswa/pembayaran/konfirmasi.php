@@ -3,9 +3,9 @@ session_start();
 include('../../koneksi.php');
 
 // Cek login & role siswa
-if (!isset($_SESSION['email']) || $_SESSION['type'] !== 'siswa') {
-  echo "<script>alert('⛔ Akses ditolak'); window.location='../../logout.php';</script>";
-  exit;
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'siswa') {
+    header("Location: ../logout.php");
+    exit;
 }
 
 // Ambil data siswa
@@ -15,26 +15,49 @@ if (!$siswa) {
   echo "<script>alert('❌ Siswa tidak ditemukan.'); window.location='../../logout.php';</script>";
   exit;
 }
-$siswa_id = $siswa['id'];
+$nis = $siswa['nisn'];
+$nama = $siswa['nama'];
+$kelas = $siswa['kelas_id'];
+$alamat = $siswa['alamat'] ?? '-';
 
-// Proses form submit
+// Ambil tagihan aktif
+$tagihan_query = mysqli_query($conn, "
+  SELECT 
+    kt.id, kt.jenis_tagihan, kt.jml_tagihan,
+    CAST(REPLACE(REPLACE(kt.jml_tagihan, 'Rp. ', ''), '.', '') AS UNSIGNED) AS total_tagihan,
+    IFNULL(SUM(CAST(REPLACE(REPLACE(kp.jml_bayar, 'Rp. ', ''), '.', '') AS UNSIGNED)), 0) AS total_bayar
+  FROM t_keuangan_tagihan kt
+  LEFT JOIN t_keuangan_pembayaran kp ON kt.nis = kp.nis AND kt.jenis_tagihan = kp.jenis_tagihan
+  WHERE kt.nis = '$nis'
+  GROUP BY kt.id, kt.jenis_tagihan, kt.jml_tagihan
+  HAVING total_bayar < total_tagihan
+");
+
+$tagihan_aktif = [];
+while ($row = mysqli_fetch_assoc($tagihan_query)) {
+  $tagihan_aktif[] = $row;
+}
+
+// Proses submit form
 if (isset($_POST['submit'])) {
-  $tagihan_id = $_POST['tagihan_id'];
+  $jenis_tagihan = $_POST['jenis_tagihan'];
   $jumlah_bayar = $_POST['jumlah_bayar'];
   $metode = $_POST['metode'];
-  $tanggal = date('Y-m-d');
+  $tanggal_bayar = date('Y-m-d H:i:s');
 
-  // Upload bukti pembayaran
   $bukti = $_FILES['bukti']['name'];
   $tmp = $_FILES['bukti']['tmp_name'];
   $folder = '../../uploads/bukti_pembayaran/';
   $filename = uniqid() . '_' . $bukti;
 
+  if (!file_exists($folder)) {
+    mkdir($folder, 0777, true);
+  }
+
   if (move_uploaded_file($tmp, $folder . $filename)) {
-    // Simpan ke database
     $query = mysqli_query($conn, "
-      INSERT INTO pembayaran (siswa_id, tagihan_id, jumlah_bayar, tanggal, status, metode, keterangan)
-      VALUES ('$siswa_id', '$tagihan_id', '$jumlah_bayar', '$tanggal', 'menunggu', '$metode', '$filename')
+      INSERT INTO t_keuangan_pembayaran (nis, nama, kelas, alamat, jml_bayar, jenis_tagihan, metode, tanggal_bayar)
+      VALUES ('$nis', '$nama', '$kelas', '$alamat', '$jumlah_bayar', '$jenis_tagihan', '$metode', '$tanggal_bayar')
     ");
     if ($query) {
       echo "<script>alert('✅ Bukti pembayaran berhasil dikirim. Tunggu verifikasi.'); window.location='index.php';</script>";
@@ -45,15 +68,8 @@ if (isset($_POST['submit'])) {
     echo "<script>alert('❌ Gagal upload bukti pembayaran.');</script>";
   }
 }
-
-// Ambil daftar tagihan aktif siswa
-$tagihan_query = mysqli_query($conn, "
-  SELECT * FROM tagihan
-  WHERE siswa_id = '$siswa_id' AND id NOT IN (
-    SELECT tagihan_id FROM pembayaran WHERE siswa_id = '$siswa_id' AND status = 'lunas'
-  )
-");
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -87,7 +103,7 @@ $tagihan_query = mysqli_query($conn, "
           <div class="col-md-12">
             <div class="bg-gradient-primary text-white p-4 rounded shadow">
               <h4>Konfirmasi Pembayaran</h4>
-              <h2 class="mb-0"><?= $siswa['nama'] ?></h2>
+              <h2 class="mb-0"><?= htmlspecialchars($siswa['nama']) ?></h2>
             </div>
           </div>
         </div>
@@ -96,12 +112,14 @@ $tagihan_query = mysqli_query($conn, "
         <div class="card p-4">
           <form action="" method="post" enctype="multipart/form-data">
             <div class="form-group">
-              <label for="tagihan_id">Pilih Tagihan</label>
-              <select name="tagihan_id" class="form-control" required>
+              <label for="jenis_tagihan">Pilih Tagihan</label>
+              <select name="jenis_tagihan" class="form-control" required>
                 <option value="">-- Pilih Tagihan --</option>
-                <?php while ($tagihan = mysqli_fetch_assoc($tagihan_query)): ?>
-                  <option value="<?= $tagihan['id'] ?>"><?= $tagihan['nama_tagihan'] ?> - Rp<?= number_format($tagihan['total'], 0, ',', '.') ?></option>
-                <?php endwhile; ?>
+                <?php foreach ($tagihan_aktif as $tagihan): ?>
+                  <option value="<?= htmlspecialchars($tagihan['jenis_tagihan']) ?>">
+                    <?= htmlspecialchars($tagihan['jenis_tagihan']) ?> - Rp<?= number_format($tagihan['total_tagihan'], 0, ',', '.') ?>
+                  </option>
+                <?php endforeach; ?>
               </select>
             </div>
 

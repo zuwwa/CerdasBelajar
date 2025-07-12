@@ -3,12 +3,12 @@ session_start();
 include '../../koneksi.php';
 
 // Cek login siswa
-if (!isset($_SESSION['email']) || $_SESSION['role'] != 2) {
-    header("location:../index.php");
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'siswa') {
+    header("Location: ../logout.php");
     exit;
 }
 
-// Ambil data siswa
+// Ambil data dari tabel siswa (pakai email)
 $email = $_SESSION['email'];
 $query = mysqli_query($conn, "SELECT * FROM siswa WHERE email = '$email'");
 $siswa = mysqli_fetch_assoc($query);
@@ -18,13 +18,23 @@ if (!$siswa) {
   exit;
 }
 
-$siswa_id = $siswa['id'];
-$kelas_id = $siswa['kelas_id'];
+// Ambil ID dan kelas dari t_siswa (pakai nisn)
+$nisn = $siswa['nisn'];
+$query_t_siswa = mysqli_query($conn, "SELECT * FROM t_siswa WHERE nis = '$nisn'");
+$t_siswa = mysqli_fetch_assoc($query_t_siswa);
+
+if (!$t_siswa) {
+  echo "<script>alert('❌ Data t_siswa tidak ditemukan.'); window.location='../../logout.php';</script>";
+  exit;
+}
+
+$siswa_id = $t_siswa['id'];
+$kelas_id = $t_siswa['kelas'];
 
 // Ambil notifikasi
 $jumlah_notif = 0;
 $daftar_notif = [];
-$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi WHERE siswa_id = '$siswa_id' ORDER BY waktu DESC LIMIT 5");
+$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi WHERE siswa_id = '$nisn' ORDER BY waktu DESC LIMIT 5");
 $jumlah_notif = mysqli_num_rows($notif_query);
 while ($row = mysqli_fetch_assoc($notif_query)) {
   $daftar_notif[] = $row;
@@ -32,19 +42,21 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
 
 // Ambil jadwal pelajaran berdasarkan kelas
 $jadwal_query = mysqli_query($conn, "
-  SELECT j.*, m.nama_mapel, g.nama AS nama_guru
+  SELECT j.*, m.nama_mapel, m.nama_guru
   FROM jadwal j
-  LEFT JOIN mapel m ON j.mapel_id = m.id
-  LEFT JOIN guru g ON m.guru_id = g.id
-  WHERE j.kelas_id = '$kelas_id'
-  ORDER BY FIELD(j.hari, 'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'), j.jam_mulai
+  LEFT JOIN t_mapel m ON j.id_mapel = m.id
+  WHERE j.id_kelas = '$kelas_id'
+  ORDER BY FIELD(j.hari, 'Senin','Selasa','Rabu','Kamis','Jumat'), j.jam_mulai
 ");
+
+
 
 $jadwal_list = [];
 while ($row = mysqli_fetch_assoc($jadwal_query)) {
   $jadwal_list[] = $row;
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">

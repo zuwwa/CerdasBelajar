@@ -3,14 +3,24 @@ session_start();
 include('../../koneksi.php');
 
 // Cek sesi dan role
-if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'siswa') {
-  echo "<script>alert('Akses ditolak.'); window.location='../../logout.php';</script>";
-  exit();
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'siswa') {
+    header("Location: ../logout.php");
+    exit;
 }
 
 $email = $_SESSION['email'];
 $folder = '../uploads/';
 $maxSize = 2 * 1024 * 1024; // 2MB
+
+$ambilSiswa = mysqli_query($conn, "SELECT nisn FROM siswa WHERE email = '$email'");
+$siswa = mysqli_fetch_assoc($ambilSiswa);
+$nisn = $siswa['nisn'] ?? null;
+
+if (!$nisn) {
+  echo "<script>alert('❌ Data siswa tidak ditemukan'); history.back();</script>";
+  exit();
+}
+
 
 // Debug: apakah file dikirim?
 if (!isset($_FILES['foto'])) {
@@ -49,7 +59,7 @@ if (!move_uploaded_file($tmp, $pathBaru)) {
 }
 
 // Update DB
-$update = mysqli_query($conn, "UPDATE siswa SET foto = '$namaBaru' WHERE email = '$email'");
+$update = mysqli_query($conn, "UPDATE t_siswa SET foto = '$namaBaru' WHERE nis = '$nisn'");
 
 if ($update) {
   echo "<script>alert('✅ Foto berhasil diperbarui'); window.location='index.php';</script>";

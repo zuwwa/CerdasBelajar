@@ -2,7 +2,7 @@
 session_start();
 include('../../koneksi.php');
 
-// Pastikan user adalah siswa dan login
+// Cek login siswa
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'siswa') {
     echo "<script>alert('⛔ Akses ditolak.'); window.location='../../logout.php';</script>";
     exit();
@@ -10,26 +10,32 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'siswa') {
 
 $email = strtolower(trim($_SESSION['email']));
 
-// Ambil data siswa
-$query = mysqli_query($conn, "SELECT foto FROM siswa WHERE email = '$email'");
-$data = mysqli_fetch_assoc($query);
+// Ambil NISN siswa dari tabel siswa (yang berelasi dengan email)
+$getNISN = mysqli_query($conn, "SELECT nisn FROM siswa WHERE email = '$email'");
+$dataSiswa = mysqli_fetch_assoc($getNISN);
 
-if (!$data) {
+if (!$dataSiswa) {
     echo "<script>alert('❌ Data siswa tidak ditemukan.'); window.location='index.php';</script>";
     exit();
 }
 
-// Cek dan hapus file jika ada
-$foto = $data['foto'];
+$nisn = $dataSiswa['nisn'];
+
+// Ambil foto dari tabel t_siswa
+$getFoto = mysqli_query($conn, "SELECT foto FROM t_siswa WHERE nis = '$nisn'");
+$dataFoto = mysqli_fetch_assoc($getFoto);
+$foto = $dataFoto['foto'] ?? null;
+
+// Hapus file jika ada
 $folder = '../uploads/';
 $path = $folder . $foto;
 
 if (!empty($foto) && file_exists($path)) {
-    unlink($path); // Hapus file
+    unlink($path);
 }
 
-// Update database: kosongkan kolom foto
-$update = mysqli_query($conn, "UPDATE siswa SET foto = NULL WHERE email = '$email'");
+// Kosongkan kolom foto di t_siswa
+$update = mysqli_query($conn, "UPDATE t_siswa SET foto = 'default.png' WHERE nis = '$nisn'");
 
 if ($update) {
     echo "<script>alert('✅ Foto berhasil dihapus.'); window.location='index.php';</script>";

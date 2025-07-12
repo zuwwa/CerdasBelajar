@@ -3,37 +3,17 @@ session_start();
 include("configGoogle.php");
 include("koneksi.php");
 
-// Ambil role dari URL kalau ada
 $role_dipilih = isset($_GET['role']) ? $_GET['role'] : null;
-
 if ($role_dipilih) {
     $_SESSION['dipilih'] = $role_dipilih;
 }
 
-
-// Jika sudah login dan punya session email, arahkan ke folder sesuai role
+// Jika sudah login dan punya session email
 if (isset($_SESSION['access_token']) && isset($_SESSION['email'])) {
-    $email = $_SESSION['email'];
-    $query = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email'");
-    $data = mysqli_fetch_assoc($query);
-
-    if ($data && isset($data['id_role'])) {
-    switch ($data['id_role']) {
-        case 1: header("Location: administrator/index.php"); exit;
-        case 2: header("Location: siswa/index.php"); exit;
-        case 3: header("Location: guru/index.php"); exit;
-        case 4: header("Location: ortu/index.php"); exit;
-        case 5: header("Location: kepsek/index.php"); exit;
-        case 6: header("Location: perpus/index.php"); exit;
-        default:
-            echo "<script>alert('⚠️ Role tidak dikenali!'); window.location='logout.php';</script>"; exit;
-    }
-    } else {
-        echo "<script>alert('⚠️ Akun Anda belum memiliki role. Silakan hubungi admin.'); window.location='logout.php';</script>"; exit;
-    }
+    header("Location: login.php");
+    exit;
 }
 
-// Jika kembali dari Google OAuth
 if (isset($_GET["code"])) {
     $token = $google_client->fetchAccessTokenWithAuthCode($_GET["code"]);
     if (!isset($token['error'])) {
@@ -47,55 +27,45 @@ if (isset($_GET["code"])) {
         $fullname  = $data['name'];
         $picture   = $data['picture'];
         $created   = date("Y-m-d H:i:s");
+        $lastLogin = $created;
+        $status    = 1;
+        $password  = '-';
 
-        // Cek apakah user sudah ada
         $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
 
+        // Jika user belum ada
         if ($result->num_rows < 1) {
-            // Tambahkan user baru tanpa role (type NULL)
             $role_from_url = $_SESSION['dipilih'] ?? null;
-            $stmt_insert = $conn->prepare("INSERT INTO users (fullname, email, picture, created_at, id_role) VALUES (?, ?, ?, ?, ?)");
-            $stmt_insert->bind_param("sssss", $fullname, $email, $picture, $created, $role_from_url);
+
+            $stmt_insert = $conn->prepare("INSERT INTO users (fullname, email, password, status, picture, type, last_login, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt_insert->bind_param("ssssssss", $fullname, $email, $password, $status, $picture, $role_from_url, $lastLogin, $created);
             $stmt_insert->execute();
 
             echo "<script>alert('✅ Akun berhasil dibuat. Silakan hubungi admin untuk menetapkan role.'); window.location='logout.php';</script>";
             exit;
-        }
-
-        // Simpan session
-        $_SESSION['email']   = $email;
-        $_SESSION['picture'] = $picture;
-        $_SESSION['username'] = $fullname;
-
-        // Ambil data user dari DB
-        $user_data = $result->fetch_assoc();
-
-        if ($user_data && isset($user_data['id_role'])) {
-            $_SESSION['role'] = $user_data['id_role'];
-
-            switch ($user_data['id_role']) {
-        case 1: header("Location: administrator/index.php"); exit;
-        case 2: header("Location: siswa/index.php"); exit;
-        case 3: header("Location: guru/index.php"); exit;
-        case 4: header("Location: ortu/index.php"); exit;
-        case 5: header("Location: kepsek/index.php"); exit;
-        case 6: header("Location: perpus/index.php"); exit;
-        default:
-            echo "<script>alert('⚠️ Role pengguna tidak dikenali!'); window.location='logout.php';</script>"; exit;
-    }
-
         } else {
-            echo "<script>alert('⚠️ Akun Anda belum memiliki role. Silakan hubungi admin.'); window.location='logout.php';</script>"; exit;
+            // Jika sudah ada, update last_login
+            $stmt_update = $conn->prepare("UPDATE users SET last_login = ? WHERE email = ?");
+            $stmt_update->bind_param("ss", $lastLogin, $email);
+            $stmt_update->execute();
         }
+
+        $_SESSION['email']     = $email;
+        $_SESSION['username']  = $fullname;
+        $_SESSION['picture']   = $picture;
+
+        header("Location: login.php");
+        exit;
     }
 }
 
-// URL Login Google
 $login_url = $google_client->createAuthUrl();
 ?>
+
+
 
 
 
@@ -233,11 +203,11 @@ $login_url = $google_client->createAuthUrl();
       </div>
     </div>
     <div class="login-buttons">
-      <a href="?role=2"><button class="btn siswa">Siswa</button></a>
-      <a href="?role=3"><button class="btn guru">Guru</button></a>
-      <a href="?role=4"><button class="btn ortu">Orang Tua</button></a>
-      <a href="?role=5"><button class="btn kepsek">Kepala Sekolah</button></a>
-      <a href="?role=1"><button class="btn admin">Admin</button></a>
+      <a href="?role=Siswa"><button class="btn siswa">Siswa</button></a>
+      <a href="?role=Guru"><button class="btn guru">Guru</button></a>
+      <a href="?role=Orang Tua"><button class="btn ortu">Orang Tua</button></a>
+      <a href="?role=Kepala Sekolah"><button class="btn kepsek">Kepala Sekolah</button></a>
+      <a href="?role=Admin"><button class="btn admin">Admin</button></a>
     </div>
   </div>
 

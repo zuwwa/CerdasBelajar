@@ -3,8 +3,8 @@ session_start();
 include '../../koneksi.php';
 
 // Cek login siswa
-if (!isset($_SESSION['email']) || $_SESSION['role'] != 2) {
-    header("location:../index.php");
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'siswa') {
+    header("Location: ../logout.php");
     exit;
 }
 
@@ -16,6 +16,12 @@ if (!$data) {
   echo "<script>alert('❌ Data siswa tidak ditemukan.'); window.location='../../logout.php';</script>";
   exit();
 }
+
+$nisn = $data['nisn'];
+$query_foto = mysqli_query($conn, "SELECT foto FROM t_siswa WHERE nis = '$nisn' LIMIT 1");
+$data_foto = mysqli_fetch_assoc($query_foto);
+$foto = $data_foto['foto'] ?? '';
+
 
 // ✅ Ambil notifikasi terbaru
 $siswa_id = $_SESSION['id_user'] ?? null;
@@ -52,6 +58,14 @@ if ($siswa_id) {
       padding-bottom: 30px;
     }
 
+    .foto-siswa {
+    width: auto;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
 
     .content-wrapper { padding: 2rem; }
 
@@ -264,9 +278,9 @@ if ($siswa_id) {
           <!-- 📷 FOTO PROFIL -->
           <div class="col-md-4 mb-4">
             <div class="bg-white p-4 rounded shadow-sm text-center">
-              <img src="../uploads/<?= $data['foto'] ?: 'default.png'; ?>?v=<?= time(); ?>" alt="Foto Siswa" style="width: 100%; max-width: 200px; border-radius: 10px; margin-bottom: 15px;">
+              <img src="../uploads/<?= $foto ?: 'default.png'; ?>?v=<?= time(); ?>" alt="Foto Siswa" class="foto-siswa">
               <div>
-                <?php if (empty($data['foto'])): ?>
+                <?php if (empty($foto) || $foto === 'default.png'): ?>
                   <a href="edit_foto.php" class="btn btn-sm btn-primary mb-2" style="width: 80%;">Tambah Foto</a><br>
                 <?php endif; ?>
                 <a href="edit_foto.php" class="btn btn-sm btn-warning mb-2" style="width: 80%;">Edit Foto</a><br>

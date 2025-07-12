@@ -3,13 +3,12 @@ session_start();
 include '../koneksi.php';
 
 // Cek login siswa
-if (!isset($_SESSION['email']) || $_SESSION['role'] != 2) {
-    header("location:../index.php");
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'siswa') {
+    header("Location: ../logout.php");
     exit;
 }
 
-
-// Ambil data siswa
+// Ambil data siswa dari tabel `siswa`
 $email = $_SESSION['email'];
 $query = mysqli_query($conn, "SELECT * FROM siswa WHERE email = '$email'");
 $data = mysqli_fetch_assoc($query);
@@ -19,44 +18,84 @@ if (!$data) {
     exit;
 }
 
-$siswa_id = $data['id'];
-$kelas_id = $data['kelas_id'];
+$nisn = $data['nisn']; // Gunakan nisn sebagai ID siswa
 
-// Notifikasi
+// Ambil data lengkap dari `t_siswa` + nama kelas langsung dari `t_kelas`
+$t_siswa_query = mysqli_query($conn, "
+    SELECT t_siswa.*, t_kelas.kelas AS nama_kelas, t_kelas.id AS kelas_id
+    FROM t_siswa
+    LEFT JOIN t_kelas ON t_siswa.kelas = t_kelas.id
+    WHERE t_siswa.nis = '$nisn'
+");
+$t_siswa = mysqli_fetch_assoc($t_siswa_query);
+
+if (!$t_siswa || !$t_siswa['kelas_id']) {
+    echo "<script>alert('Data siswa atau kelas tidak valid.'); window.location='../logout.php';</script>";
+    exit;
+}
+
+$kelas_id = $t_siswa['kelas_id']; // id kelas untuk mapel
+$nama_kelas = $t_siswa['nama_kelas']; // nama kelas untuk ditampilkan
+
+// Ambil notifikasi siswa berdasarkan nisn
 $jumlah_notif = 0;
 $daftar_notif = [];
-$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi WHERE siswa_id = '$siswa_id' ORDER BY waktu DESC LIMIT 5");
+$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi WHERE siswa_id = '$nisn' ORDER BY waktu DESC LIMIT 5");
 $jumlah_notif = mysqli_num_rows($notif_query);
 while ($row = mysqli_fetch_assoc($notif_query)) {
     $daftar_notif[] = $row;
 }
 
-// Daftar mapel berdasarkan kelas
-$mapel_result = mysqli_query($conn, "SELECT * FROM mapel WHERE kelas_id = '$kelas_id'");
+// Ambil daftar mapel berdasarkan kelas_id
 $daftar_mapel = [];
+$mapel_result = mysqli_query($conn, "
+    SELECT t_mapel.*
+    FROM anggota_mapel
+    JOIN t_mapel ON anggota_mapel.mapel_id = t_mapel.id
+    WHERE anggota_mapel.siswa_id = '$nisn'
+");
 while ($m = mysqli_fetch_assoc($mapel_result)) {
     $daftar_mapel[] = $m;
 }
 
-// Tugas terbaru
-$tugas_result = mysqli_query($conn, "
-  SELECT tugas.*, mapel.nama_mapel, mapel.kode_mapel 
-  FROM tugas 
-  JOIN mapel ON tugas.mapel_id = mapel.id 
-  WHERE mapel.kelas_id = '$kelas_id' 
-    AND tugas.deadline >= NOW()
-  ORDER BY tugas.deadline ASC 
-  LIMIT 5
-");
 
-
-
-$daftar_tugas = [];
-while ($t = mysqli_fetch_assoc($tugas_result)) {
-    $daftar_tugas[] = $t;
+// Tambahkan mapel dari session gabung jika ada
+if (isset($_SESSION['mapel_gabung']) && is_array($_SESSION['mapel_gabung'])) {
+    foreach ($_SESSION['mapel_gabung'] as $kode_mapel) {
+        $cek = mysqli_query($conn, "SELECT * FROM t_mapel WHERE kode = '$kode_mapel' LIMIT 1");
+        if ($row = mysqli_fetch_assoc($cek)) {
+            $sudah_ada = false;
+            foreach ($daftar_mapel as $mapel) {
+                if ($mapel['id'] == $row['id']) {
+                    $sudah_ada = true;
+                    break;
+                }
+            }
+            if (!$sudah_ada) {
+                $daftar_mapel[] = $row;
+            }
+        }
+    }
 }
 
+// Ambil tugas terbaru berdasarkan kelas
+$tugas_result = mysqli_query($conn, "
+    SELECT tugas.*, t_mapel.nama_mapel, t_mapel.kode AS kode_mapel
+    FROM tugas
+    INNER JOIN t_mapel ON tugas.mapel_id = t_mapel.id
+    INNER JOIN anggota_mapel ON t_mapel.id = anggota_mapel.mapel_id
+    WHERE anggota_mapel.siswa_id = '$nisn'
+      AND tugas.deadline >= NOW()
+    ORDER BY tugas.deadline ASC
+    LIMIT 5
+");
+
+$daftar_tugas = [];
+while ($row = mysqli_fetch_assoc($tugas_result)) {
+    $daftar_tugas[] = $row;
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -80,6 +119,11 @@ while ($t = mysqli_fetch_assoc($tugas_result)) {
       display: flex;
       flex-direction: column;
     }
+    .card {
+    pointer-events: auto; /* <-- jangan none */
+    cursor: pointer;
+  }
+
 
     .page-body-wrapper {
       height: 100%;
@@ -272,12 +316,13 @@ while ($t = mysqli_fetch_assoc($tugas_result)) {
       <!-- MAIN PANEL -->
       <div class="main-panel">
         <div class="content-wrapper">
+          
           <!-- HEADER HALAMAN -->
           <div class="row mb-4">
             <div class="col-md-12">
               <div class="text-white p-4 rounded shadow" style="background: linear-gradient(90deg, rgb(2, 40, 122), rgb(27, 127, 219));">
                 <h4>Selamat Datang 👋</h4>
-                <h2 class="mb-0"><?= isset($_SESSION['username']) ? $_SESSION['username'] : 'Pengguna'; ?></h2>
+                <h2 class="mb-0"><?= htmlspecialchars($data['nama']) ?></h2>
               </div>
             </div>
           </div>
@@ -285,13 +330,14 @@ while ($t = mysqli_fetch_assoc($tugas_result)) {
           <div class="row">
             <!-- MATA PELAJARAN -->
             <div class="col-md-3 mb-4">
-              <a href="mata-pelajaran/index.php" class="text-decoration-none text-dark">
-                <div class="card text-center p-3 shadow-sm">
+              <a href="/CerdasBelajar/siswa/mata-pelajaran/index.php" class="text-decoration-none text-dark" style="display:block;">
+                <div class="card text-center p-3 shadow-sm" style="cursor:pointer;">
                   <i class="typcn typcn-book display-4 text-primary"></i>
                   <h6>Mata Pelajaran</h6>
                 </div>
               </a>
             </div>
+
             <!-- GABUNG MAPEL -->
             <div class="col-md-3 mb-4">
               <a href="#" class="text-decoration-none text-dark" data-toggle="modal" data-target="#modalGabungMapel">
@@ -303,50 +349,44 @@ while ($t = mysqli_fetch_assoc($tugas_result)) {
             </div>
           </div>
 
-         <div class="row mt-2">
-  <div class="col-md-12">
-    <h5 class="mb-3">📌 Tugas Terbaru</h5>
-    <?php if (count($daftar_tugas) > 0): ?>
-      <?php foreach ($daftar_tugas as $tugas): ?>
-        <a href="mata-pelajaran/tugas.php?kode=<?= urlencode($tugas['kode_mapel']) ?>">
-          <div class="card mb-2 p-3">
-            <strong><?= htmlspecialchars($tugas['judul']) ?></strong>
-            <div class="small text-muted">
-              Mapel: <?= htmlspecialchars($tugas['nama_mapel']) ?> |
-              Deadline: <?= date('d-m-Y H:i', strtotime($tugas['deadline'])) ?>
+        <?php if (!empty($daftar_tugas)): ?>
+        <?php foreach ($daftar_tugas as $tugas): ?>
+          <a href="mata-pelajaran/tugas.php?kode=<?= urlencode($tugas['kode_mapel']) ?>">
+            <div class="card mb-2 p-3">
+              <strong><?= htmlspecialchars($tugas['judul']) ?></strong>
+              <div class="small text-muted">
+                Mapel: <?= htmlspecialchars($tugas['nama_mapel']) ?> |
+                Deadline: <?= date('d-m-Y H:i', strtotime($tugas['deadline'])) ?>
+              </div>
             </div>
-          </div>
-        </a>
-      <?php endforeach; ?>
-    <?php else: ?>
-      <div class="text-muted">Tidak ada tugas aktif saat ini.</div>
-    <?php endif; ?>
-  </div>
-</div>
-
-
+          </a>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <div class="text-muted">Tidak ada tugas aktif saat ini.</div>
+      <?php endif; ?>
 
 
           <!-- MATA PELAJARAN KELAS -->
           <?php if (!empty($kelas_id)): ?>
-            <div class="row mt-4">
-              <div class="col-md-12">
-                <h5 class="mb-3">📚 Mata Pelajaran Kelasmu</h5>
-                <div class="row">
-                  <?php foreach ($daftar_mapel as $mapel): ?>
-                    <div class="col-md-3 mb-3">
-                      <a href="mata-pelajaran/mapel.php?kode=<?= urlencode($mapel['kode_mapel']) ?>" class="text-decoration-none text-dark">
-                        <div class="card p-3 shadow-sm h-100">
-                          <h6 class="mb-1"><?= htmlspecialchars($mapel['nama_mapel']) ?></h6>
-                          <div class="text-muted small">Kode: <?= $mapel['kode_mapel'] ?></div>
-                        </div>
-                      </a>
-                    </div>
-                  <?php endforeach; ?>
-                </div>
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <h5 class="mb-3">📚 Mata Pelajaran Kelasmu</h5>
+              <div class="row">
+                <?php foreach ($daftar_mapel as $mapel): ?>
+                  <div class="col-md-3 mb-3">
+                    <a href="mata-pelajaran/mapel.php?kode=<?= urlencode($mapel['kode']) ?>" class="text-decoration-none text-dark">
+                      <div class="card p-3 shadow-sm h-100">
+                        <h6 class="mb-1"><?= htmlspecialchars($mapel['nama_mapel']) ?></h6>
+                        <div class="text-muted small">Kode: <?= $mapel['kode'] ?></div>
+                      </div>
+                    </a>
+                  </div>
+                <?php endforeach; ?>
               </div>
             </div>
-          <?php endif; ?>
+          </div>
+        <?php endif; ?>
+
 
           <!-- FOOTER -->
           <footer class="footer mt-5">
