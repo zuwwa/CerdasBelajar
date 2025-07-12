@@ -117,6 +117,7 @@ if (!$mapel) {
 
   <!-- TOMBOL FITUR MAPEL -->
   <div class="text-center mt-4">
+    <a href="../index.php" class="btn btn-dark btn-action">🏠 Beranda</a> <!-- ✅ Tambahan tombol beranda -->
     <a href="absensi.php?kode=<?= urlencode($mapel['kode']); ?>" class="btn btn-info btn-action">📅 Absensi</a>
     <a href="tugas.php?kode=<?= urlencode($mapel['kode']); ?>" class="btn btn-primary btn-action">📘 Tugas</a>
     <a href="materi.php?kode=<?= urlencode($mapel['kode']); ?>" class="btn btn-success btn-action">📚 Materi</a>

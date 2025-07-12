@@ -3,8 +3,8 @@ session_start();
 include '../koneksi.php';
 
 // Cek login kepala sekolah
-if (!isset($_SESSION['email']) || $_SESSION['role'] != 4) {
-    header("location:../index.php");
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'kepsek') {
+    echo "<script>alert('⛔ Akses ditolak! Halaman ini hanya untuk admin.'); window.location='../logout.php';</script>";
     exit;
 }
 

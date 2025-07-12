@@ -47,7 +47,7 @@ if (isset($_POST['submit'])) {
 
   $bukti = $_FILES['bukti']['name'];
   $tmp = $_FILES['bukti']['tmp_name'];
-  $folder = '../../uploads/bukti_pembayaran/';
+  $folder = '../../../uploads/bukti_pembayaran/';
   $filename = uniqid() . '_' . $bukti;
 
   if (!file_exists($folder)) {

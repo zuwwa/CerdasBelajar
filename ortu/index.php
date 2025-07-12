@@ -3,8 +3,8 @@ session_start();
 include '../koneksi.php';
 
 // Cek login orang tua
-if (!isset($_SESSION['email']) || $_SESSION['role'] != 5) {
-    header("location:../index.php");
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'ortu') {
+    echo "<script>alert('⛔ Akses ditolak! Halaman ini hanya untuk orang tua siswa.'); window.location='../logout.php';</script>";
     exit;
 }
 

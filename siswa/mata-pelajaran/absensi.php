@@ -15,6 +15,8 @@ $siswaQuery = mysqli_query($conn, "
     JOIN t_siswa ts ON s.nisn = ts.nis
     WHERE s.email = '$email'
 ");
+
+
 $siswa = mysqli_fetch_assoc($siswaQuery);
 $siswa_id = $siswa['id_ts'] ?? null;
 
@@ -50,6 +52,7 @@ $absensiQuery = mysqli_query($conn, "
     WHERE a.id_siswa = '$siswa_id' AND a.id_mapel = '{$mapel['id']}'
     ORDER BY tm.tanggal_upload DESC
 ");
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -74,7 +77,10 @@ $absensiQuery = mysqli_query($conn, "
 <body>
 <div class="container mt-5 mb-5">
   <div class="card shadow">
-    <h3 class="text-primary mb-3">📅 Riwayat Absensi: <?= htmlspecialchars($mapel['nama_mapel']) ?></h3>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="text-primary m-0">📅 Riwayat Absensi: <?= htmlspecialchars($mapel['nama_mapel']) ?></h3>
+  <a href="../index.php" class="btn btn-dark btn-sm">🏠 Beranda</a>
+</div>
     <p><strong>Guru Pengampu:</strong> <?= htmlspecialchars($mapel['nama_guru']) ?></p>
     <p><strong>Kelas:</strong> <?= htmlspecialchars($mapel['nama_kelas']) ?></p>
     <p><strong>Tanggal Hari Ini:</strong> <?= date('d M Y') ?></p>

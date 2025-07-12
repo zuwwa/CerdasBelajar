@@ -3,7 +3,7 @@ session_start();
 include '../koneksi.php';
 
 // Cek login admin
-if (!isset($_SESSION['email']) || $_SESSION['role'] != 1) {
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'admin') {
     echo "<script>alert('⛔ Akses ditolak! Halaman ini hanya untuk admin.'); window.location='../logout.php';</script>";
     exit;
 }
@@ -11,7 +11,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] != 1) {
 
 // Ambil data admin
 $email = $_SESSION['email'];
-$query = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email' AND id_role = 1");
+$query = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email' AND type = 'admin'");
 $data = mysqli_fetch_assoc($query);
 
 if (!$data) {

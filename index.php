@@ -3,41 +3,21 @@ session_start();
 include("configGoogle.php");
 include("koneksi.php");
 
-$role_dipilih = isset($_GET['role']) ? $_GET['role'] : null;
+// Tangkap role dari URL (misal ?role=siswa)
+$role_dipilih = $_GET['role'] ?? null;
 if ($role_dipilih) {
     $_SESSION['dipilih'] = $role_dipilih;
-}
-
-
-// Jika sudah login dan punya session email, arahkan ke folder sesuai role
-if (isset($_SESSION['access_token']) && isset($_SESSION['email'])) {
-    $email = $_SESSION['email'];
-    $query = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email'");
-    $data = mysqli_fetch_assoc($query);
-
-    if ($data && isset($data['id_role'])) {
-    switch ($data['id_role']) {
-        case 1: header("Location: administrator/index.php"); exit;
-        case 2: header("Location: siswa/index.php"); exit;
-        case 3: header("Location: guru/index.php"); exit;
-        case 4: header("Location: ortu/index.php"); exit;
-        case 5: header("Location: kepsek/index.php"); exit;
-        case 6: header("Location: perpus/index.php"); exit;
-        default:
-            echo "<script>alert('⚠️ Role tidak dikenali!'); window.location='logout.php';</script>"; exit;
-    }
-    } else {
-        echo "<script>alert('⚠️ Akun Anda belum memiliki role. Silakan hubungi admin.'); window.location='logout.php';</script>"; exit;
-    }
 }
 
 // Jika kembali dari Google OAuth
 if (isset($_GET["code"])) {
     $token = $google_client->fetchAccessTokenWithAuthCode($_GET["code"]);
+
     if (!isset($token['error'])) {
         $google_client->setAccessToken($token['access_token']);
         $_SESSION['access_token'] = $token['access_token'];
 
+        // Ambil info user dari Google
         $google_service = new Google_Service_Oauth2($google_client);
         $data = $google_service->userinfo->get();
 
@@ -49,11 +29,13 @@ if (isset($_GET["code"])) {
         $status    = 1;
         $password  = '-';
 
+        // Cek apakah email sudah terdaftar
         $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
 
+        // Jika email belum terdaftar, buat akun baru
         if ($result->num_rows < 1) {
             $role_from_url = $_SESSION['dipilih'] ?? null;
 
@@ -61,41 +43,37 @@ if (isset($_GET["code"])) {
             $stmt_insert->bind_param("ssssssss", $fullname, $email, $password, $status, $picture, $role_from_url, $lastLogin, $created);
             $stmt_insert->execute();
 
-            echo "<script>alert('✅ Akun berhasil dibuat. Silakan hubungi admin untuk menetapkan role.'); window.location='logout.php';</script>";
+            echo "<script>alert('✅ Akun berhasil dibuat. Silakan hubungi admin untuk mengaktifkan akses.'); window.location='logout.php';</script>";
             exit;
         }
 
-        // Simpan session
-        $_SESSION['email']   = $email;
-        $_SESSION['picture'] = $picture;
-        $_SESSION['username'] = $fullname;
-
-        // Ambil data user dari DB
+        // Ambil data user dari database
         $user_data = $result->fetch_assoc();
 
-        if ($user_data && isset($user_data['id_role'])) {
-            $_SESSION['role'] = $user_data['id_role'];
+        // Simpan session
+        $_SESSION['email']    = $email;
+        $_SESSION['username'] = $fullname;
+        $_SESSION['picture']  = $picture;
+        $_SESSION['role']     = $user_data['type'];
+        $_SESSION['id_user']  = $user_data['id'];  // ✅ Inilah yang dipakai di halaman lain
 
-            switch ($user_data['id_role']) {
-        case 1: header("Location: administrator/index.php"); exit;
-        case 2: header("Location: siswa/index.php"); exit;
-        case 3: header("Location: guru/index.php"); exit;
-        case 4: header("Location: ortu/index.php"); exit;
-        case 5: header("Location: kepsek/index.php"); exit;
-        case 6: header("Location: perpus/index.php"); exit;
-        default:
-            echo "<script>alert('⚠️ Role pengguna tidak dikenali!'); window.location='logout.php';</script>"; exit;
-    }
-
-        } else {
-            echo "<script>alert('⚠️ Akun Anda belum memiliki role. Silakan hubungi admin.'); window.location='logout.php';</script>"; exit;
+        // Arahkan sesuai role
+        switch ($user_data['type']) {
+            case 'admin':   header("Location: administrator/index.php"); exit;
+            case 'siswa':   header("Location: siswa/index.php"); exit;
+            case 'guru':    header("Location: guru/index.php"); exit;
+            case 'ortu':    header("Location: ortu/index.php"); exit;
+            case 'kepsek':  header("Location: kepsek/index.php"); exit;
+            case 'perpus':  header("Location: perpus/index.php"); exit;
+            default:
+                echo "<script>alert('⚠️ Role pengguna tidak dikenali!'); window.location='logout.php';</script>"; exit;
         }
     }
 }
 
+// URL login Google
 $login_url = $google_client->createAuthUrl();
 ?>
-
 
 
 <!DOCTYPE html>

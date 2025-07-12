@@ -29,7 +29,6 @@ if (!$mapel) {
     echo "<script>alert('Mapel tidak ditemukan.'); window.location='index.php';</script>";
     exit;
 }
-
 // Ambil daftar tugas dari mapel ini
 $tugasQuery = mysqli_query($conn, "
   SELECT * FROM tugas
@@ -58,7 +57,10 @@ $tugasQuery = mysqli_query($conn, "
 <body>
 <div class="container mt-5 mb-5">
   <div class="card shadow p-4">
-    <h3 class="mb-3 text-primary">📘 Tugas: <?= htmlspecialchars($mapel['nama_mapel']) ?></h3>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3 class="text-primary m-0">📘 Tugas: <?= htmlspecialchars($mapel['nama_mapel']) ?></h3>
+      <a href="../index.php" class="btn btn-dark btn-sm">🏠 Beranda</a>
+    </div>
     <p><strong>Guru Pengampu:</strong> <?= htmlspecialchars($mapel['nama_guru']) ?></p>
     <p><strong>Kelas:</strong> <?= htmlspecialchars($mapel['nama_kelas']) ?></p>
     <hr>

@@ -15,7 +15,7 @@
         include($_SERVER['DOCUMENT_ROOT'] . '/CerdasBelajar/koneksi.php');
 
         // Ambil nama admin dari tabel users
-        $query = mysqli_query($conn, "SELECT username, email FROM users WHERE email = '$email' AND id_role = 1");
+        $query = mysqli_query($conn, "SELECT fullname, email FROM users WHERE email = '$email' AND type = 'admin'");
         $admin = mysqli_fetch_assoc($query);
         ?>
 

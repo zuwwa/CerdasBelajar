@@ -3,8 +3,8 @@ session_start();
 include '../koneksi.php';
 
 // Cek login guru
-if (!isset($_SESSION['email']) || $_SESSION['role'] != 3) {
-    header("location:../index.php");
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'guru') {
+    echo "<script>alert('⛔ Akses ditolak! Halaman ini hanya untuk guru.'); window.location='../logout.php';</script>";
     exit;
 }
 
