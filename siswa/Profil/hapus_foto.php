@@ -27,7 +27,7 @@ $dataFoto = mysqli_fetch_assoc($getFoto);
 $foto = $dataFoto['foto'] ?? null;
 
 // Hapus file jika ada
-$folder = '../uploads/';
+$folder = '../../uploads/';
 $path = $folder . $foto;
 
 if (!empty($foto) && file_exists($path)) {

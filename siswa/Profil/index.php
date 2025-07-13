@@ -278,7 +278,7 @@ if ($siswa_id) {
           <!-- 📷 FOTO PROFIL -->
           <div class="col-md-4 mb-4">
             <div class="bg-white p-4 rounded shadow-sm text-center">
-              <img src="../uploads/<?= $foto ?: 'default.png'; ?>?v=<?= time(); ?>" alt="Foto Siswa" class="foto-siswa">
+              <img src="../../uploads/<?= $foto ?: 'default.png'; ?>?v=<?= time(); ?>" alt="Foto Siswa" class="foto-siswa">
               <div>
                 <?php if (empty($foto) || $foto === 'default.png'): ?>
                   <a href="edit_foto.php" class="btn btn-sm btn-primary mb-2" style="width: 80%;">Tambah Foto</a><br>

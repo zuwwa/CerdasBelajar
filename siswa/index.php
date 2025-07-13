@@ -272,7 +272,7 @@ while ($row = mysqli_fetch_assoc($tugas_result)) {
           <!-- NOTIFIKASI -->
           <li class="notification-wrapper">
             <div class="notification-icon" onclick="toggleDropdown()">
-              <img src="images/bell-icon.png" alt="Notifikasi">
+              <img src="../images/bell-icon.png" alt="Notifikasi">
               <?php if ($jumlah_notif > 0): ?>
                 <div class="notification-badge"><?= $jumlah_notif ?></div>
               <?php endif; ?>
@@ -295,14 +295,14 @@ while ($row = mysqli_fetch_assoc($tugas_result)) {
           <!-- PROFIL -->
           <li class="nav-item nav-profile-icon">
             <a class="nav-link" href="profil/index.php">
-              <img src="images/profile.png?v=2" alt="Profil">
+              <img src="../images/profile.png?v=2" alt="Profil">
             </a>
           </li>
 
           <!-- LOGOUT -->
           <li class="nav-item nav-profile-icon">
             <a class="nav-link" href="logout.php" onclick="return confirm('Yakin ingin logout?')">
-              <img src="images/logout.png" alt="Logout">
+              <img src="../images/logout.png" alt="Logout">
             </a>
           </li>
         </ul>

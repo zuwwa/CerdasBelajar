@@ -35,10 +35,10 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dashboard Admin - SMAN 1 Sukabumi</title>
-  <link rel="stylesheet" href="vendors/typicons.font/font/typicons.css" />
-  <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css" />
-  <link rel="stylesheet" href="css/vertical-layout-light/style.css" />
-  <link rel="shortcut icon" href="images/sma.png" />
+  <link rel="stylesheet" href="../vendors/typicons.font/font/typicons.css" />
+  <link rel="stylesheet" href="../vendors/css/vendor.bundle.base.css" />
+  <link rel="stylesheet" href="../css/vertical-layout-light/style.css" />
+  <link rel="shortcut icon" href="../images/sma.png" />
   <style>
     .navbar-menu-wrapper { background-color: #004080 !important; }
     .notification-badge {
@@ -88,7 +88,7 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
   <ul class="navbar-nav d-flex flex-row align-items-center m-0">
     <!-- Notifikasi -->
     <li class="nav-item position-relative mx-2" style="cursor: pointer;" onclick="toggleDropdown()">
-      <img src="images/bell-icon.png" alt="Notifikasi" style="width: 24px;">
+      <img src="../images/bell-icon.png" alt="Notifikasi" style="width: 24px;">
       <?php if ($jumlah_notif > 0): ?>
         <span class="notification-badge"><?= $jumlah_notif ?></span>
       <?php endif; ?>
@@ -108,14 +108,14 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
     <!-- Profil -->
     <li class="nav-item mx-2">
       <a class="nav-link p-0" href="profil/index.php" title="Profil">
-        <img src="images/profile.png?v=2" alt="Profil" style="width: 24px; height: 24px;">
+        <img src="../images/profile.png?v=2" alt="Profil" style="width: 24px; height: 24px;">
       </a>
     </li>
 
     <!-- Logout -->
     <li class="nav-item mx-2">
       <a class="nav-link p-0" href="logout.php" title="Logout" onclick="return confirm('Yakin ingin logout?')">
-        <img src="images/logout.png" alt="Logout" style="width: 24px; height: 24px;">
+        <img src="../images/logout.png" alt="Logout" style="width: 24px; height: 24px;">
       </a>
     </li>
   </ul>
@@ -179,9 +179,9 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
   </div>
 
   <!-- JS -->
-  <script src="vendors/js/vendor.bundle.base.js"></script>
-  <script src="js/off-canvas.js"></script>
-  <script src="js/template.js"></script>
+  <script src="../vendors/js/vendor.bundle.base.js"></script>
+  <script src="../js/off-canvas.js"></script>
+  <script src="../js/template.js"></script>
   <script>
     function toggleDropdown() {
       document.getElementById('notifDropdown').classList.toggle('active');

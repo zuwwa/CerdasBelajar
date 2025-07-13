@@ -220,7 +220,7 @@ $login_url = $google_client->createAuthUrl();
 
   <!-- Gambar Header SMA Full Lebar -->
   <div style="margin: 0; padding: 0;">
-    <img id="header-img" src="aset/gambar/header sma.webp" alt="Header SMA" style="width: 100%; height: 350px; object-fit: cover; display: block; margin: 0; padding: 0;">
+    <img id="header-img" src="images/header sma.png" alt="Header SMA" style="width: 100%; height: 350px; object-fit: cover; display: block; margin: 0; padding: 0;">
   </div>
 
   <?php if ($role_dipilih): ?>
@@ -254,15 +254,15 @@ $login_url = $google_client->createAuthUrl();
 
     <div class="features">
       <div class="feature">
-        <img src="aset/gambar/academic.png" alt="Academic">
+        <img src="images/academic.png" alt="Academic">
         <h3>Sistem Informasi Akademik</h3>
       </div>
       <div class="feature">
-        <img src="aset/gambar/sekolah.png" alt="Website">
+        <img src="images/sekolah.png" alt="Website">
         <h3>Website Resmi Sekolah</h3>
       </div>
       <div class="feature">
-        <img src="aset/gambar/perpus.png" alt="Library">
+        <img src="images/perpus.png" alt="Library">
         <h3>Sistem Informasi Perpustakaan</h3>
       </div>
     </div>

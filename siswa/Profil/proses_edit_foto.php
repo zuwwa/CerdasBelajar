@@ -9,7 +9,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] != 'siswa') {
 }
 
 $email = $_SESSION['email'];
-$folder = '../uploads/';
+$folder = '../../uploads/';
 $maxSize = 2 * 1024 * 1024; // 2MB
 
 $ambilSiswa = mysqli_query($conn, "SELECT nisn FROM siswa WHERE email = '$email'");
