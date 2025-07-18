@@ -146,7 +146,7 @@ while ($row = mysqli_fetch_assoc($agenda_query)) {
       <ul class="navbar-nav navbar-nav-right d-flex align-items-center">
         <li class="nav-item d-flex align-items-center position-relative">
           <div class="notification-icon" onclick="toggleDropdown()">
-            <img src="../images/bell-icon.png" alt="Notifikasi">
+            <img src="../../images/bell-icon.png" alt="Notifikasi">
             <?php if ($jumlah_notif > 0): ?>
               <div class="notification-badge"><?= $jumlah_notif ?></div>
             <?php endif; ?>
@@ -165,12 +165,12 @@ while ($row = mysqli_fetch_assoc($agenda_query)) {
         </li>
         <li class="nav-item d-flex align-items-center">
           <a class="nav-link nav-profile-icon" href="../profil/index.php">
-            <img src="../images/profile.png?v=2" alt="Profil">
+            <img src="../../images/profile.png?v=2" alt="Profil">
           </a>
         </li>
         <li class="nav-item d-flex align-items-center">
           <a class="nav-link nav-profile-icon" href="../../logout.php" onclick="return confirm('Yakin ingin logout?')">
-            <img src="../images/logout.png" alt="Logout">
+            <img src="../../images/logout.png" alt="Logout">
           </a>
         </li>
       </ul>
