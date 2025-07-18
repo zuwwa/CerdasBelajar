@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 12, 2025 at 05:14 AM
+-- Generation Time: Jul 18, 2025 at 08:41 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.1.10
 
@@ -84,7 +84,7 @@ INSERT INTO `agenda_kegiatan` (`id`, `judul`, `deskripsi`, `tempat`, `tanggal_mu
 
 CREATE TABLE `anggota_mapel` (
   `id` int NOT NULL,
-  `siswa_id` varchar(12) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+  `siswa_id` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `mapel_id` int NOT NULL,
   `tanggal_gabung` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -94,8 +94,8 @@ CREATE TABLE `anggota_mapel` (
 --
 
 INSERT INTO `anggota_mapel` (`id`, `siswa_id`, `mapel_id`, `tanggal_gabung`) VALUES
-(4, '2330511036', 1, '2025-07-12 00:08:22'),
-(5, '2330511036', 13, '2025-07-12 10:34:57');
+(5, '2330511036', 13, '2025-07-12 10:34:57'),
+(6, '2330511036', 1, '2025-07-13 11:35:35');
 
 -- --------------------------------------------------------
 
@@ -426,7 +426,7 @@ CREATE TABLE `pengumpulan_tugas` (
 --
 
 INSERT INTO `pengumpulan_tugas` (`id`, `tugas_id`, `siswa_id`, `file_jawaban`, `catatan`, `nilai`, `tanggal_upload`) VALUES
-(1, 1, 3, '1752279917_WhatsApp_Image_2024_07_04_at_20.11.31_6d3aa99c.jpg', NULL, NULL, '2025-07-12 00:25:17');
+(1, 1, 3, '1752380859_WhatsApp_Image_2024_07_04_at_20.11.31_6d3aa99c.jpg', NULL, NULL, '2025-07-13 04:27:39');
 
 -- --------------------------------------------------------
 
@@ -435,9 +435,9 @@ INSERT INTO `pengumpulan_tugas` (`id`, `tugas_id`, `siswa_id`, `file_jawaban`, `
 --
 
 CREATE TABLE `siswa` (
-  `nisn` varchar(12) NOT NULL,
+  `nisn` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `nama` varchar(30) NOT NULL,
-  `email` varchar(100) DEFAULT NULL,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `tempat_lahir` varchar(30) NOT NULL,
   `tanggal_lahir` date NOT NULL,
   `jenis_kelamin` enum('Laki-laki','Perempuan') NOT NULL,
@@ -458,7 +458,7 @@ INSERT INTO `siswa` (`nisn`, `nama`, `email`, `tempat_lahir`, `tanggal_lahir`, `
 ('1830511003', 'TAUFIQ HIDAYATULLAH', NULL, 'Sukabumi', '1999-12-19', 'Laki-laki', 'Islam', 'Jalan Radin Intan No. 77, Karang Tengah, Sukabumi', '089977955772'),
 ('1830511120', 'RHEZA FAHRY ABDILLAH', NULL, 'Jakarta', '1995-06-06', 'Perempuan', 'Islam', 'Jalan Ahmad Yani,Sukabumi', '081388955767'),
 ('1830521019', 'DITO ADITYA', NULL, 'Manado', '2001-01-20', 'Laki-laki', 'Islam', 'Jalan Pemuda Sukabumi', '081269962201'),
-('2330511036', 'Nazwa Akmalia Padla', 'nazwaakmalia036@ummi.ac.id', 'Sukabumi', '2004-01-10', 'Perempuan', 'Islam', 'Jl. Pajajaran 1 KM.4', '08123456789');
+('2330511036', 'Nazwa Akmalia Padla', 'nazwaakmalia036@ummi.ac.id', 'Sukabumi', '2004-01-10', 'Perempuan', 'Islam', 'Jl. Pajajaran 1 KM.4 Desa Cikujang', '08123456789');
 
 -- --------------------------------------------------------
 
@@ -1267,7 +1267,7 @@ INSERT INTO `t_role` (`id`, `role`) VALUES
 
 CREATE TABLE `t_siswa` (
   `id` int NOT NULL,
-  `nis` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `nis` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `nama` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `jenis_kelamin` varchar(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `tempat_lahir` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -1290,7 +1290,7 @@ INSERT INTO `t_siswa` (`id`, `nis`, `nama`, `jenis_kelamin`, `tempat_lahir`, `ta
 (5, '6', 'M. Ripal Perdiansyah', 'P', '2022-1-1', '2022-01-01', '1', 1, 'c4ca4238a0b923820dcc509a6f75849b', '1.jpg'),
 (6, '7', 'Zulhaydar Fathurrahman Sidiq', 'P', '2022-1-1', '2022-01-01', '1', 1, 'c4ca4238a0b923820dcc509a6f75849b', '1.jpg'),
 (8, '930949049390430', 'Ghina', '1', 'Palembang', '2222-01-01', '1 smp', 3333, 'abc', '1.jpg'),
-(11, '2330511036', 'NAZWA AKMALIA PADLA', 'P', 'Sukabumi', '2004-01-10', '20', 1, '5f4dcc3b5aa765d61d8327deb882cf99', 'foto_6870e97da14e15.38705769.jpg');
+(11, '2330511036', 'NAZWA AKMALIA PADLA', 'P', 'Sukabumi', '2004-01-10', '20', 1, '5f4dcc3b5aa765d61d8327deb882cf99', 'foto_6873358062bd46.14939144.jpg');
 
 -- --------------------------------------------------------
 
@@ -1351,7 +1351,7 @@ INSERT INTO `t_walikelas` (`id_walikelas`, `nama`, `walikelas`, `jumlah_siswa`, 
 CREATE TABLE `users` (
   `id` int NOT NULL,
   `fullname` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '-',
   `status` tinyint(1) NOT NULL DEFAULT '1',
   `picture` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
@@ -1368,7 +1368,7 @@ INSERT INTO `users` (`id`, `fullname`, `email`, `password`, `status`, `picture`,
 (1, 'Adi Sunarto Asril', 'odong1983@gmail.com', '-', 1, 'https://lh3.googleusercontent.com/a/ACg8ocKGG6dt1vwONqa3rm0hICNgBexmiki34ePGyv88Rmrckll9Qz4Z=s96-c', 'admin', '2025-06-01 09:22:30', '2025-06-01 02:22:30'),
 (2, 'Sunarto Asril Adi', 'asriladi@ummi.ac.id', '-', 1, 'https://lh3.googleusercontent.com/a/ACg8ocL-489oiObyR269ezHYR7_bzmQckdjIMOYnP28IOhIM9QSFuRw=s96-c', 'admin', '2025-06-13 02:12:27', '2025-06-12 19:12:27'),
 (3, 'AKMALIA PADLA NAZWA', 'nazwaakmalia036@ummi.ac.id', '-', 1, 'https://lh3.googleusercontent.com/a/ACg8ocJ_q04pxF4nNbYoZZrwe5j22qR8PHJI4cvlqIbBphsrUYsSxw=s96-c', 'siswa', '2025-07-11 21:51:23', '2025-06-14 02:18:16'),
-(5, 'Akmalia padla Nazwa', 'nazwaakmalia569@gmail.com', '-', 1, 'https://lh3.googleusercontent.com/a/ACg8ocIG1g7XlpyosQlq9gwdT0FGsA6M4AsUsvJlI1mLgoEDFjFIxDlD=s96-c', NULL, '2025-06-20 21:13:37', '2025-06-20 14:13:37');
+(5, 'Akmalia padla Nazwa', 'nazwaakmalia569@gmail.com', '-', 1, 'https://lh3.googleusercontent.com/a/ACg8ocIG1g7XlpyosQlq9gwdT0FGsA6M4AsUsvJlI1mLgoEDFjFIxDlD=s96-c', 'guru', '2025-06-20 21:13:37', '2025-06-20 14:13:37');
 
 --
 -- Indexes for dumped tables
@@ -1391,8 +1391,8 @@ ALTER TABLE `agenda_kegiatan`
 --
 ALTER TABLE `anggota_mapel`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `siswa_id` (`siswa_id`),
-  ADD KEY `mapel_id` (`mapel_id`);
+  ADD KEY `mapel_id` (`mapel_id`),
+  ADD KEY `anggota_mapel_ibfk_1` (`siswa_id`);
 
 --
 -- Indexes for table `books`
@@ -1581,7 +1581,7 @@ ALTER TABLE `agenda_kegiatan`
 -- AUTO_INCREMENT for table `anggota_mapel`
 --
 ALTER TABLE `anggota_mapel`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `books`
@@ -1747,8 +1747,7 @@ ALTER TABLE `users`
 -- Constraints for table `anggota_mapel`
 --
 ALTER TABLE `anggota_mapel`
-  ADD CONSTRAINT `anggota_mapel_ibfk_1` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`nisn`) ON DELETE CASCADE,
-  ADD CONSTRAINT `anggota_mapel_ibfk_2` FOREIGN KEY (`mapel_id`) REFERENCES `t_mapel` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `anggota_mapel_ibfk_1` FOREIGN KEY (`siswa_id`) REFERENCES `siswa` (`nisn`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `jadwal`
