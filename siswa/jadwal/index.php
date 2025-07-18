@@ -64,9 +64,9 @@ while ($row = mysqli_fetch_assoc($jadwal_query)) {
   <meta charset="UTF-8">
   <title>Jadwal Pelajaran - CerdasBelajar</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../vendors/typicons.font/font/typicons.css">
-  <link rel="stylesheet" href="../css/vertical-layout-light/style.css">
-  <link rel="shortcut icon" href="../images/sma.png">
+  <link rel="stylesheet" href="../../vendors/typicons.font/font/typicons.css">
+  <link rel="stylesheet" href="../../css/vertical-layout-light/style.css">
+  <link rel="shortcut icon" href="../../images/sma.png">
   <style>
     .bg-gradient-primary {
       background: linear-gradient(90deg, rgb(2, 40, 122), rgb(27, 127, 219));
@@ -253,9 +253,9 @@ while ($row = mysqli_fetch_assoc($jadwal_query)) {
   </div>
 </div>
 
-<script src="../vendors/js/vendor.bundle.base.js"></script>
-<script src="../js/off-canvas.js"></script>
-<script src="../js/template.js"></script>
+<script src="../../vendors/js/vendor.bundle.base.js"></script>
+<script src="../../js/off-canvas.js"></script>
+<script src="../../js/template.js"></script>
 <script>
 function toggleDropdown() {
   document.getElementById('notifDropdown').classList.toggle('d-block');

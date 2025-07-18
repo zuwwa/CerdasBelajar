@@ -2,25 +2,38 @@
 session_start();
 include '../koneksi.php';
 
-// Cek login guru
+// Cek login role guru
 if (!isset($_SESSION['email']) || $_SESSION['role'] != 'guru') {
     echo "<script>alert('⛔ Akses ditolak! Halaman ini hanya untuk guru.'); window.location='../logout.php';</script>";
     exit;
 }
 
-// Ambil data guru
+// Ambil data akun login dari tabel users
 $email = $_SESSION['email'];
-$query = mysqli_query($conn, "SELECT * FROM t_guru WHERE email = '$email'");
-$data = mysqli_fetch_assoc($query);
+$query_user = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email'");
+$user_data = mysqli_fetch_assoc($query_user);
 
-if (!$data) {
-    echo "<script>alert('Guru tidak ditemukan.'); window.location='../logout.php';</script>";
+if (!$user_data || $user_data['type'] != 'guru') {
+    echo "<script>alert('Akun guru tidak ditemukan.'); window.location='../logout.php';</script>";
     exit;
 }
 
-$guru_id = $data['id'];
+// Ambil nama guru dari users
+$guru_name = $user_data['fullname'];
+$_SESSION['username'] = $guru_name;  // Untuk ditampilkan di dashboard
 
-// Ambil notifikasi untuk guru
+// Ambil data guru dari tabel t_guru berdasarkan nama (sementara)
+$query_guru = mysqli_query($conn, "SELECT * FROM t_guru WHERE nama = '$guru_name'");
+$data_guru = mysqli_fetch_assoc($query_guru);
+
+if (!$data_guru) {
+    echo "<script>alert('Data guru tidak ditemukan di database.'); window.location='../logout.php';</script>";
+    exit;
+}
+
+$guru_id = $data_guru['id'];
+
+// Ambil notifikasi guru (jika ada)
 $jumlah_notif = 0;
 $daftar_notif = [];
 $notif_query = mysqli_query($conn, "SELECT * FROM notifikasi WHERE guru_id = '$guru_id' ORDER BY waktu DESC LIMIT 5");
@@ -29,6 +42,7 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
     $daftar_notif[] = $row;
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">

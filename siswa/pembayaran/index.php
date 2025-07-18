@@ -84,9 +84,9 @@ function generateVA($id) {
 <meta charset="UTF-8" />
 <title>Tagihan Siswa - CerdasBelajar</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="stylesheet" href="../vendors/typicons.font/font/typicons.css" />
-<link rel="stylesheet" href="../css/vertical-layout-light/style.css" />
-<link rel="shortcut icon" href="../images/sma.png" />
+<link rel="stylesheet" href="../../vendors/typicons.font/font/typicons.css" />
+<link rel="stylesheet" href="../../css/vertical-layout-light/style.css" />
+<link rel="shortcut icon" href="../../images/sma.png" />
 <style>
 /* CSS khusus notifikasi, sidebar, tabel, dll */
 .bg-gradient-primary {
@@ -311,9 +311,9 @@ function generateVA($id) {
   </div>
 </div>
 
-<script src="../vendors/js/vendor.bundle.base.js"></script>
-<script src="../js/off-canvas.js"></script>
-<script src="../js/template.js"></script>
+<script src="../../vendors/js/vendor.bundle.base.js"></script>
+<script src="../../js/off-canvas.js"></script>
+<script src="../../js/template.js"></script>
 <script>
 function toggleDropdown() {
   document.getElementById('notifDropdown').classList.toggle('d-block');

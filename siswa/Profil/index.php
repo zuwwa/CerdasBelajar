@@ -43,9 +43,9 @@ if ($siswa_id) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Profil Siswa - SMAN 1 Kota Sukabumi</title>
-  <link rel="stylesheet" href="../vendors/typicons.font/font/typicons.css" />
-  <link rel="stylesheet" href="../css/vertical-layout-light/style.css" />
-  <link rel="shortcut icon" href="../images/sma.png" />
+  <link rel="stylesheet" href="../../vendors/typicons.font/font/typicons.css" />
+  <link rel="stylesheet" href="../../css/vertical-layout-light/style.css" />
+  <link rel="shortcut icon" href="../../images/sma.png" />
   <style>
     html, body {
       height: 100%;
@@ -302,9 +302,9 @@ if ($siswa_id) {
 </div>
 
 <!-- JS -->
-<script src="../vendors/js/vendor.bundle.base.js"></script>
-<script src="../js/off-canvas.js"></script>
-<script src="../js/template.js"></script>
+<script src="../../vendors/js/vendor.bundle.base.js"></script>
+<script src="../../js/off-canvas.js"></script>
+<script src="../../js/template.js"></script>
 <script>
   function toggleDropdown() {
     const dropdown = document.getElementById('notifDropdown');

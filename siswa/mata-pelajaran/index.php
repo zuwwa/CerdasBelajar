@@ -62,7 +62,7 @@ $result = mysqli_query($conn, "
   <title>Mata Pelajaran - SMAN 1 Kota Sukabumi</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
-  <link rel="shortcut icon" href="../images/sma.png" />
+  <link rel="shortcut icon" href="../../images/sma.png" />
   <style>
     body { background-color: #f4f6f9; }
     .header-section {

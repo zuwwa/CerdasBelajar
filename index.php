@@ -203,7 +203,7 @@ $login_url = $google_client->createAuthUrl();
 
   <div class="topbar">
     <div class="topbar-left">
-      <img src="aset/gambar/sma.png" alt="Logo">
+      <img src="images/sma.png" alt="Logo">
       <div class="text">
         <h1>MANAGEMENT SYSTEM</h1>
         <p>SMA NEGERI 1 KOTA SUKABUMI</p>

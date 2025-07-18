@@ -14,7 +14,7 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] != 'siswa') {
 <head>
   <meta charset="UTF-8">
   <title>Edit Foto</title>
-  <link rel="stylesheet" href="../css/vertical-layout-light/style.css">
+  <link rel="stylesheet" href="../../css/vertical-layout-light/style.css">
 </head>
 <body>
 <div class="container-scroller">
