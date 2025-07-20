@@ -66,7 +66,7 @@ CREATE TABLE `agenda_kegiatan` (
   `tanggal_mulai` date DEFAULT NULL,
   `tanggal_selesai` date DEFAULT NULL,
   `penanggung_jawab` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `agenda_kegiatan`
@@ -87,7 +87,7 @@ CREATE TABLE `anggota_mapel` (
   `siswa_id` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `mapel_id` int NOT NULL,
   `tanggal_gabung` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `anggota_mapel`
@@ -176,7 +176,7 @@ CREATE TABLE `jadwal` (
   `jam_selesai` time NOT NULL,
   `ruang` varchar(50) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `jadwal`
@@ -364,7 +364,7 @@ CREATE TABLE `notifikasi` (
   `judul` varchar(100) DEFAULT NULL,
   `isi` text,
   `waktu` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
 
@@ -419,7 +419,7 @@ CREATE TABLE `pengumpulan_tugas` (
   `catatan` text,
   `nilai` int DEFAULT NULL,
   `tanggal_upload` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `pengumpulan_tugas`
@@ -558,7 +558,7 @@ CREATE TABLE `tugas` (
   `deskripsi` text,
   `deadline` datetime NOT NULL,
   `dibuat_pada` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `tugas`
@@ -1057,7 +1057,7 @@ CREATE TABLE `t_materi` (
   `deskripsi` text,
   `file` varchar(255) DEFAULT NULL,
   `tanggal_upload` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `t_materi`

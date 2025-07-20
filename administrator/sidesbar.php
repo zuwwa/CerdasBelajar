@@ -69,6 +69,12 @@
         <span class="menu-title">Mata Pelajaran</span>
       </a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link" href="/CerdasBelajar/administrator/agenda/">
+        <i class="typcn typcn-book menu-icon"></i>
+        <span class="menu-title">Kelola Agenda</span>
+      </a>
+    </li>
 
     <li class="nav-item">
       <a class="nav-link" href="/CerdasBelajar/administrator/t-keuangan/">

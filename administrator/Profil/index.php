@@ -2,16 +2,31 @@
 session_start();
 include('../../koneksi.php');
 
-// Cek login dan role admin
-if (!isset($_SESSION['username']) || $_SESSION['role'] !== 'admin') {
-  echo "<script>alert('⛔ Akses ditolak. Silakan login sebagai admin.'); window.location='../../logout.php';</script>";
-  exit();
+// Cek login admin
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'admin') {
+  echo "<script>alert('⛔ Akses ditolak! Halaman ini hanya untuk admin.'); window.location='../logout.php';</script>";
+  exit;
 }
 
-// Ambil data siswa berdasarkan email
-$email = strtolower(trim($_SESSION['email']));
-$query = mysqli_query($conn, "SELECT * FROM t_siswa WHERE LOWER(email) = '$email'");
+
+// Ambil data admin
+$email = $_SESSION['email'];
+$query = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email' AND type = 'admin'");
 $data = mysqli_fetch_assoc($query);
+
+if (!$data) {
+  echo "<script>alert('Administrator tidak ditemukan.'); window.location='../logout.php';</script>";
+  exit;
+}
+
+// Notifikasi
+$jumlah_notif = 0;
+$daftar_notif = [];
+$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi ORDER BY waktu DESC LIMIT 5");
+$jumlah_notif = mysqli_num_rows($notif_query);
+while ($row = mysqli_fetch_assoc($notif_query)) {
+  $daftar_notif[] = $row;
+}
 ?>
 
 <!DOCTYPE html>
@@ -19,7 +34,7 @@ $data = mysqli_fetch_assoc($query);
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profil Siswa - SMAN 1 Kota Sukabumi</title>
+  <title>Profil Admin - SMAN 1 Kota Sukabumi</title>
   <link rel="stylesheet" href="../vendors/typicons.font/font/typicons.css" />
   <link rel="stylesheet" href="../css/vertical-layout-light/style.css" />
   <link rel="shortcut icon" href="../images/sma.png" />
@@ -109,8 +124,8 @@ $data = mysqli_fetch_assoc($query);
         <div class="row mb-4">
           <div class="col-md-12">
             <div style="background: linear-gradient(90deg, rgb(2, 40, 122), rgb(27, 127, 219)); color: white; padding: 2rem; border-radius: 10px;">
-              <h4>Profil Siswa</h4>
-              <h2 class="font-weight-bold mb-0"><?= $_SESSION['first_name'] . ' ' . $_SESSION['last_name']; ?></h2>
+              <h4>Profil Admin</h4>
+              <h2 class="font-weight-bold mb-0"><?= $_SESSION['username']; ?></h2>
             </div>
           </div>
         </div>
@@ -121,8 +136,8 @@ $data = mysqli_fetch_assoc($query);
             <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.05);">
               <h4>Data Profil</h4>
               <table class="mt-3" style="width: 100%; border-collapse: collapse;">
-                <tr><th style="text-align: left; padding: 8px;">NISN</th><td><?= $data['nisn']; ?></td></tr>
-                <tr><th style="text-align: left; padding: 8px;">Nama</th><td><?= $data['nama']; ?></td></tr>
+                <tr><th style="text-align: left; padding: 8px;">NISN</th><td><?= $data['id']; ?></td></tr>
+                <tr><th style="text-align: left; padding: 8px;">Nama</th><td><?= $data['fullname']; ?></td></tr>
                 <tr><th style="text-align: left; padding: 8px;">Tempat Lahir</th><td><?= $data['tempat_lahir']; ?></td></tr>
                 <tr><th style="text-align: left; padding: 8px;">Tanggal Lahir</th><td><?= $data['tanggal_lahir']; ?></td></tr>
                 <tr><th style="text-align: left; padding: 8px;">Jenis Kelamin</th><td><?= $data['jenis_kelamin']; ?></td></tr>
