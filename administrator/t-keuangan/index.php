@@ -30,14 +30,17 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
 
 // Query untuk pembayaran yang menunggu konfirmasi
 $konfirmasi_query = mysqli_query($conn, "
-    SELECT p.id, p.nis, ts.nama AS nama_siswa, p.jml_bayar, p.metode, p.bukti_pembayaran, p.tanggal, 
-           t.jenis_tagihan, t.jml_tagihan
+    SELECT p.id, p.nis, ts.nama AS nama_siswa, 
+           d.nama_tagihan, d.total_tagihan AS jml_tagihan, 
+           p.jml_bayar, p.metode, p.bukti_pembayaran, p.tanggal_bayar, p.status
     FROM t_keuangan_pembayaran p
     JOIN t_siswa ts ON p.nis = ts.nis
-    JOIN t_keuangan_tagihan t ON p.nis = t.nis AND p.jenis_tagihan = t.jenis_tagihan
+    LEFT JOIN t_keuangan_daftar d ON p.jenis_tagihan = d.nama_tagihan
     WHERE p.status = 'menunggu'
-    ORDER BY p.tanggal DESC
+    ORDER BY p.tanggal_bayar DESC
 ");
+
+
 
 
 /**
@@ -59,10 +62,10 @@ function generateVA($tagihan_id)
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Keuangan - SMAN 1 Kota Sukabumi</title>
-    <link rel="stylesheet" href="../vendors/typicons.font/font/typicons.css" />
-    <link rel="stylesheet" href="../css/vertical-layout-light/style.css" />
-    <link rel="stylesheet" href="../css/bootstrap.min.css">
-    <link rel="shortcut icon" href="../images/sma.png" />
+    <link rel="stylesheet" href="../../vendors/typicons.font/font/typicons.css" />
+    <link rel="stylesheet" href="../../css/vertical-layout-light/style.css" />
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="shortcut icon" href="../../images/sma.png" />
     <style>
         :root {
             --primary-blue: #004080;
@@ -208,7 +211,7 @@ function generateVA($tagihan_id)
         </nav>
 
         <div class="container-fluid page-body-wrapper">
-            <?php include 'sidebar.php'; ?>
+            <?php include '../sidesbar.php'; ?>
             <div class="main-panel">
                 <div class="content-wrapper">
                     <div class="row mb-4">
@@ -245,28 +248,28 @@ function generateVA($tagihan_id)
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php while ($row = mysqli_fetch_assoc($konfirmasi_query)): ?>
-                                            <tr>
-                                                <td><?= date('d/m/Y', strtotime($row['tanggal'])) ?></td>
-                                                <td><?= htmlspecialchars($row['nama_siswa']) ?></td>
-                                                <td><?= htmlspecialchars($row['nama_tagihan']) ?></td>
-                                                <td>Rp<?= number_format(str_replace(['Rp. ', '.'], '', $row['jml_tagihan']), 0, ',', '.') ?></td>
-                                                <td>Rp<?= number_format(str_replace(['Rp. ', '.'], '', $row['jml_bayar']), 0, ',', '.') ?></td>
-                                                <td><?= htmlspecialchars($row['metode']) ?></td>
-                                                <td>
-                                                    <?php if (!empty($row['bukti_pembayaran'])): ?>
-                                                        <a href="../../uploads/bukti_pembayaran/<?= htmlspecialchars($row['bukti_pembayaran']) ?>" target="_blank" class="btn btn-sm btn-info">Lihat</a>
-                                                    <?php else: ?>
-                                                        <span class="text-muted">-</span>
-                                                    <?php endif; ?>
-                                                </td>
+                                    <?php while ($row = mysqli_fetch_assoc($konfirmasi_query)): ?>
+<tr>
+    <td><?= date('d/m/Y', strtotime($row['tanggal_bayar'])) ?></td>
+    <td><?= htmlspecialchars($row['nama_siswa']) ?></td>
+    <td><?= htmlspecialchars($row['nama_tagihan']) ?></td>
+    <td>Rp<?= number_format((int) filter_var($row['jml_tagihan'], FILTER_SANITIZE_NUMBER_INT), 0, ',', '.') ?></td>
+    <td>Rp<?= number_format((int) filter_var($row['jml_bayar'], FILTER_SANITIZE_NUMBER_INT), 0, ',', '.') ?></td>
+    <td><?= htmlspecialchars($row['metode']) ?></td>
+    <td>
+        <?php if (!empty($row['bukti_pembayaran'])): ?>
+            <a href="../../uploads/bukti_pembayaran/<?= htmlspecialchars($row['bukti_pembayaran']) ?>" target="_blank" class="btn btn-sm btn-info">Lihat</a>
+        <?php else: ?>
+            <span class="text-muted">-</span>
+        <?php endif; ?>
+    </td>
+    <td>
+        <a href="verifikasi.php?id=<?= $row['id'] ?>&aksi=terima" class="btn btn-success btn-sm" onclick="return confirm('Terima pembayaran ini?')">Terima</a>
+        <a href="verifikasi.php?id=<?= $row['id'] ?>&aksi=tolak" class="btn btn-danger btn-sm" onclick="return confirm('Tolak pembayaran ini?')">Tolak</a>
+    </td>
+</tr>
+<?php endwhile; ?>
 
-                                                <td>
-                                                    <a href="verifikasi.php?id=<?= $row['id'] ?>&aksi=terima" class="btn btn-success btn-sm" onclick="return confirm('Terima pembayaran ini?')">Terima</a>
-                                                    <a href="verifikasi.php?id=<?= $row['id'] ?>&aksi=tolak" class="btn btn-danger btn-sm" onclick="return confirm('Tolak pembayaran ini?')">Tolak</a>
-                                                </td>
-                                            </tr>
-                                        <?php endwhile; ?>
                                     </tbody>
                                 </table>
                             </div>

@@ -18,17 +18,31 @@ if (!$siswa) {
 $nisn = $siswa['nisn'];
 
 // Fungsi untuk mendapatkan sisa pembayaran berdasarkan nis
-function getSisaBayar($conn, $nis, $tagihan_id, $total_tagihan)
-{
+function getSisaBayar($conn, $nis, $jenis_tagihan) {
+  // Ambil total tagihan dari t_keuangan_daftar
+  $tagihan = mysqli_fetch_assoc(mysqli_query(
+      $conn, 
+      "SELECT total_tagihan FROM t_keuangan_daftar WHERE nama_tagihan = '$jenis_tagihan'"
+  ));
+
+  $total_tagihan = 0;
+  if ($tagihan) {
+      $total_tagihan = (int) preg_replace('/[^0-9]/', '', $tagihan['total_tagihan']); // Hilangkan Rp. dan titik
+  }
+
+  // Ambil total bayar dari t_keuangan_pembayaran
   $query = mysqli_query($conn, "
-        SELECT SUM(jml_bayar) AS total_bayar
-        FROM t_keuangan_pembayaran
-        WHERE nis = '$nis' AND tagihan_id = '$tagihan_id' AND status = 'Lunas'
-    ");
+      SELECT SUM(CAST(REPLACE(REPLACE(jml_bayar, 'Rp. ', ''), '.', '') AS UNSIGNED)) AS total_bayar
+      FROM t_keuangan_pembayaran
+      WHERE nis = '$nis' AND jenis_tagihan = '$jenis_tagihan' AND status = 'lunas'
+  ");
   $row = mysqli_fetch_assoc($query);
   $total_dibayar = $row['total_bayar'] ?? 0;
+
   return max(0, $total_tagihan - $total_dibayar);
 }
+
+
 
 // Ambil notifikasi siswa berdasarkan nisn
 $jumlah_notif = 0;
@@ -42,14 +56,15 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
 // Ambil tagihan siswa
 $tagihan_query = mysqli_query($conn, "
   SELECT 
-    kt.id, kt.nis, kt.nama, kt.kelas, kt.alamat, kt.jml_tagihan, kt.jenis_tagihan,
-    CAST(REPLACE(REPLACE(kt.jml_tagihan, 'Rp. ', ''), '.', '') AS UNSIGNED) AS total_tagihan,
-    IFNULL(SUM(CAST(REPLACE(REPLACE(kp.jml_bayar, 'Rp. ', ''), '.', '') AS UNSIGNED)), 0) AS total_bayar
-  FROM t_keuangan_tagihan kt
-  LEFT JOIN t_keuangan_pembayaran kp ON kt.nis = kp.nis AND kt.jenis_tagihan = kp.jenis_tagihan
-  WHERE kt.nis = '$nisn'
-  GROUP BY kt.id, kt.nis, kt.nama, kt.kelas, kt.alamat, kt.jml_tagihan, kt.jenis_tagihan
-  ORDER BY kt.id DESC
+    d.id_tagihan,
+    d.nama_tagihan,
+    REPLACE(REPLACE(d.total_tagihan, 'Rp. ', ''), '.', '') AS total_tagihan,
+    IFNULL(SUM(CAST(REPLACE(REPLACE(p.jml_bayar, 'Rp. ', ''), '.', '') AS UNSIGNED)), 0) AS total_bayar
+  FROM t_keuangan_daftar d
+  LEFT JOIN t_keuangan_pembayaran p 
+    ON p.nis = '$nisn' AND p.jenis_tagihan = d.nama_tagihan AND p.status = 'lunas'
+  GROUP BY d.id_tagihan, d.nama_tagihan, d.total_tagihan
+  ORDER BY d.id_tagihan ASC
 ");
 
 if (!$tagihan_query) {
@@ -63,22 +78,24 @@ while ($row = mysqli_fetch_assoc($tagihan_query)) {
 
 // Ambil riwayat pembayaran siswa
 $pembayaran_query = mysqli_query($conn, "
-    SELECT kp.*, kd.nama_tagihan, kd.total_tagihan
+    SELECT kp.*, kp.jenis_tagihan,
+           (SELECT total_tagihan FROM t_keuangan_daftar WHERE nama_tagihan = kp.jenis_tagihan) AS total_tagihan
     FROM t_keuangan_pembayaran kp
-    LEFT JOIN t_keuangan_daftar kd ON kp.jenis_tagihan = kd.nama_tagihan
     WHERE kp.nis = '$nisn'
     ORDER BY kp.id DESC
 ");
+
 $riwayat = [];
 while ($row = mysqli_fetch_assoc($pembayaran_query)) {
   $riwayat[] = $row;
 }
 
 // Fungsi generate Virtual Account Number (VA)
-function generateVA($id)
+function generateVA($id_tagihan)
 {
-  return "888201" . str_pad($id, 8, "0", STR_PAD_LEFT);
+    return "888201" . str_pad((string)$id_tagihan, 8, "0", STR_PAD_LEFT);
 }
+
 ?>
 
 
@@ -194,7 +211,7 @@ function generateVA($id)
         <ul class="navbar-nav navbar-nav-right d-flex align-items-center">
           <li class="nav-item d-flex align-items-center position-relative">
             <div class="notification-icon" onclick="toggleDropdown()">
-              <img src="../images/bell-icon.png" alt="Notifikasi">
+              <img src="../../images/bell-icon.png" alt="Notifikasi">
               <?php if ($jumlah_notif > 0): ?>
                 <div class="notification-badge"><?= $jumlah_notif ?></div>
               <?php endif; ?>
@@ -208,17 +225,17 @@ function generateVA($id)
               <?php else: ?>
                 <div class="notif-item text-muted">Belum ada notifikasi</div>
               <?php endif; ?>
-              <a href="../notifikasi.php" class="notif-footer">Lihat Semua</a>
+              <a href="../../notifikasi.php" class="notif-footer">Lihat Semua</a>
             </div>
           </li>
           <li class="nav-item d-flex align-items-center">
-            <a class="nav-link nav-profile-icon" href="../profil/index.php">
-              <img src="../images/profile.png?v=2" alt="Profil">
+            <a class="nav-link nav-profile-icon" href="../../profil/index.php">
+              <img src="../../images/profile.png?v=2" alt="Profil">
             </a>
           </li>
           <li class="nav-item d-flex align-items-center">
             <a class="nav-link nav-profile-icon" href="../../logout.php" onclick="return confirm('Yakin ingin logout?')">
-              <img src="../images/logout.png" alt="Logout">
+              <img src="../../images/logout.png" alt="Logout">
             </a>
           </li>
         </ul>
@@ -244,7 +261,8 @@ function generateVA($id)
       <?php
       $tagihan_aktif_siswa = [];
       foreach ($daftar_tagihan as $tagihan) {
-        $sisa = getSisaBayar($conn, $nisn, $tagihan['id'], $tagihan['total_tagihan']);
+        $sisa = getSisaBayar($conn, $nisn, $tagihan['nama_tagihan'], $tagihan['total_tagihan']);
+     
         if ($sisa > 0) {
           $tagihan['sisa_bayar'] = $sisa;
           $tagihan_aktif_siswa[] = $tagihan;
@@ -256,7 +274,6 @@ function generateVA($id)
           <table class="table table-bordered">
             <thead class="thead-light">
               <tr>
-                <th>Tanggal Tagihan</th>
                 <th>Nama Tagihan</th>
                 <th>Total Tagihan</th>
                 <th>Sisa Bayar</th>
@@ -267,12 +284,12 @@ function generateVA($id)
             <tbody>
               <?php foreach ($tagihan_aktif_siswa as $row): ?>
                 <tr>
-                  <td><?= date('d/m/Y', strtotime($row['tanggal_tagihan'])) ?></td>
-                  <td><?= htmlspecialchars($row['jenis_tagihan']) ?></td>
+                  <td><?= htmlspecialchars($row['nama_tagihan']) ?></td>
                   <td>Rp<?= number_format($row['total_tagihan'], 0, ',', '.') ?></td>
                   <td>Rp<?= number_format($row['sisa_bayar'], 0, ',', '.') ?></td>
-                  <td><?= generateVA($row['id']) ?></td>
-                  <td><a href="konfirmasi.php?id=<?= $row['id'] ?>" class="btn btn-primary btn-sm">Bayar Sekarang</a></td>
+                  <td><?= generateVA($row['id_tagihan']) ?></td>
+                  <td><a href="konfirmasi.php?id_tagihan=<?= $row['id_tagihan'] ?>" class="btn btn-primary btn-sm">Bayar Sekarang</a></td>
+
                 </tr>
               <?php endforeach; ?>
             </tbody>
@@ -286,14 +303,14 @@ function generateVA($id)
     <div class="card p-4 mb-4">
       <h5 class="mb-3">💰 Riwayat Pembayaran</h5>
       <?php
-      $pembayaran_query = mysqli_query($conn, "
-          SELECT kp.*, kt.jenis_tagihan AS nama_tagihan, 
-                 CAST(REPLACE(REPLACE(kt.jml_tagihan, 'Rp. ', ''), '.', '') AS UNSIGNED) AS total_tagihan
-          FROM t_keuangan_pembayaran kp
-          LEFT JOIN t_keuangan_tagihan kt ON kp.nis = kt.nis AND kp.jenis_tagihan = kt.jenis_tagihan
-          WHERE kp.nis = '$nisn'
-          ORDER BY kp.id DESC
-      ");
+$pembayaran_query = mysqli_query($conn, "
+SELECT p.*, d.total_tagihan
+FROM t_keuangan_pembayaran p
+LEFT JOIN t_keuangan_daftar d ON p.jenis_tagihan = d.nama_tagihan
+WHERE p.nis = '$nisn'
+ORDER BY p.id DESC
+");
+
       $riwayat = [];
       while ($row = mysqli_fetch_assoc($pembayaran_query)) {
         $riwayat[] = $row;
@@ -315,22 +332,23 @@ function generateVA($id)
               </tr>
             </thead>
             <tbody>
-              <?php foreach ($riwayat as $row):
-                $sisa_pembayaran_histori = getSisaBayar($conn, $nisn, $row['tagihan_id'], $row['total_tagihan']);
-                $status_badge_class = '';
-                $status_display_text = '';
+            <?php foreach ($riwayat as $row): 
+    $sisa_pembayaran_histori = getSisaBayar($conn, $nisn, $row['jenis_tagihan']);
+    $status_badge_class = '';
+    $status_display_text = '';
 
-                if (strtolower($row['status']) === 'lunas') {
-                  $status_badge_class = 'badge-success';
-                  $status_display_text = 'Terkonfirmasi';
-                } elseif (strtolower($row['status']) === 'menunggu') {
-                  $status_badge_class = 'badge-warning';
-                  $status_display_text = 'Menunggu Konfirmasi';
-                } else {
-                  $status_badge_class = 'badge-danger';
-                  $status_display_text = ucfirst($row['status']);
-                }
-              ?>
+    if (strtolower($row['status']) === 'lunas') {
+        $status_badge_class = 'badge-success';
+        $status_display_text = 'Terkonfirmasi';
+    } elseif (strtolower($row['status']) === 'menunggu') {
+        $status_badge_class = 'badge-warning';
+        $status_display_text = 'Menunggu Konfirmasi';
+    } else {
+        $status_badge_class = 'badge-danger';
+        $status_display_text = ucfirst($row['status']);
+    }
+?>
+
                 <tr>
                   <td><?= date('d/m/Y', strtotime($row['tanggal'])) ?></td>
                   <td><?= htmlspecialchars($row['nama_tagihan']) ?></td>

@@ -1,79 +1,116 @@
 <?php
 session_start();
 include('../../koneksi.php');
-function getSisaBayar($conn, $siswa_id, $tagihan_id, $total_tagihan)
-{
-    $query = mysqli_query($conn, "
-        SELECT SUM(jumlah_bayar) AS total_bayar
-        FROM pembayaran
-        WHERE siswa_id = '$siswa_id' AND tagihan_id = '$tagihan_id' AND status = 'Lunas'
-    ");
-
-    $row = mysqli_fetch_assoc($query);
-    $total_dibayar = $row['total_bayar'] ?? 0;
-
-    return max(0, $total_tagihan - $total_dibayar);
-}
-
 
 // Cek login admin
-if (!isset($_SESSION['email']) || $_SESSION['role'] != 1) {
-    echo "<script>alert('⛔ Akses ditolak! Halaman ini hanya untuk admin.');window.location.href='../login.php';</script>";
+if (!isset($_SESSION['email']) || $_SESSION['role'] != 'admin') {
+    echo "<script>alert('⛔ Akses ditolak! Halaman ini hanya untuk admin.'); window.location='../logout.php';</script>";
     exit;
 }
 
-// Ambil daftar kelas untuk filter
-$kelas_query = mysqli_query($conn, "SELECT * FROM kelas ORDER BY tingkat, kelas");
+// Ambil data admin
+$email = $_SESSION['email'];
+$query = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email' AND type = 'admin'");
+$data = mysqli_fetch_assoc($query);
+
+if (!$data) {
+    echo "<script>alert('Administrator tidak ditemukan.'); window.location='../logout.php';</script>";
+    exit;
+}
+
+// Ambil daftar kelas dari t_siswa
+$kelas_query = mysqli_query($conn, "
+    SELECT tk.id, tk.kelas, tk.angkatan
+    FROM t_kelas tk
+    ORDER BY tk.angkatan DESC, tk.kelas ASC
+");
+
+
 $kelas_terpilih = $_GET['kelas_id'] ?? '';
+$angkatan_terpilih = $_GET['angkatan'] ?? '';
 $siswa_list = [];
 
-// Jika kelas terpilih, ambil daftar siswa di kelas tersebut
 if ($kelas_terpilih) {
-    $siswa_query = mysqli_query($conn, "SELECT * FROM siswa WHERE kelas_id = '$kelas_terpilih' ORDER BY nama ASC");
+    $kelas_info = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM t_kelas WHERE id = '$kelas_terpilih'"));
+    $siswa_query = mysqli_query($conn, "
+        SELECT ts.*
+        FROM t_siswa ts
+        WHERE ts.kelas = '{$kelas_info['kelas']}'
+        ORDER BY ts.nama ASC
+    ");
+
+
     while ($row = mysqli_fetch_assoc($siswa_query)) {
         $siswa_list[] = $row;
     }
 }
 
-// Ambil siswa_id dari URL jika ada
-$siswa_id = $_GET['siswa_id'] ?? null;
+// Ambil NIS dari URL
+$nis = $_GET['nis'] ?? null;
 $siswa = null;
 $daftar_tagihan = [];
 
-if ($siswa_id) {
-    // Ambil data siswa
-    $result = mysqli_query($conn, "SELECT * FROM siswa WHERE id = '$siswa_id'");
+if ($nis) {
+    $result = mysqli_query($conn, "SELECT * FROM t_siswa WHERE nis = '$nis'");
     $siswa = mysqli_fetch_assoc($result);
 
     if ($siswa) {
-        // Ambil semua tagihan yang berlaku untuk siswa ini
-        $kelas_id = $siswa['kelas_id'];
-
+        // Ambil tagihan siswa ini
         $query_tagihan = mysqli_query($conn, "
-            SELECT * FROM tagihan
-            WHERE
-                ditujukan_kepada = 'semua'
-                OR (ditujukan_kepada = 'kelas' AND kelas_id = '$kelas_id')
-                OR (ditujukan_kepada = 'siswa' AND siswa_id = '$siswa_id')
-            ORDER BY tanggal_tagihan DESC
+            SELECT * FROM t_keuangan_tagihan
+            WHERE nis = '$nis'
+            ORDER BY id DESC
         ");
-
         while ($row = mysqli_fetch_assoc($query_tagihan)) {
             $daftar_tagihan[] = $row;
         }
     }
 }
 
+$tagihan_query = mysqli_query($conn, "
+    SELECT 
+        td.id_tagihan,
+        td.nama_tagihan,
+        td.total_tagihan,
+        IFNULL(SUM(tp.jml_bayar), 0) AS total_bayar
+    FROM t_keuangan_daftar td
+    LEFT JOIN t_keuangan_pembayaran tp
+      ON td.nama_tagihan = tp.jenis_tagihan
+    GROUP BY td.id_tagihan, td.nama_tagihan, td.total_tagihan
+    ORDER BY td.id_tagihan ASC
+");
+
+
+$tagihan_aktif = [];
+while ($row = mysqli_fetch_assoc($tagihan_query)) {
+    $total_tagihan = (int) str_replace(['Rp. ', '.'], '', $row['total_tagihan']);
+    $total_bayar = (int) $row['total_bayar'];
+
+    $sisa_bayar = max(0, $total_tagihan - $total_bayar);
+    $row['sisa_bayar'] = $sisa_bayar;
+    $row['status'] = ($sisa_bayar == 0) ? 'Lunas' : 'Belum Lunas';
+    $tagihan_aktif[] = $row;
+}
+
+$riwayat_query = mysqli_query($conn, "
+    SELECT p.id, p.nis, p.jml_bayar, p.metode, p.bukti_pembayaran, p.status, p.tanggal_bayar,
+           d.nama_tagihan, d.total_tagihan AS jml_tagihan
+    FROM t_keuangan_pembayaran p
+    LEFT JOIN t_keuangan_daftar d 
+        ON p.jenis_tagihan = d.nama_tagihan
+    ORDER BY p.tanggal_bayar DESC
+");
+
+
 /**
  * Fungsi untuk menghasilkan nomor Virtual Account (VA).
- * @param int $tagihan_id ID Tagihan
- * @return string Nomor VA
  */
-function generateVA($tagihan_id)
+function generateVA($jenis_tagihan)
 {
-    return 'VA' . str_pad($tagihan_id, 8, '0', STR_PAD_LEFT);
+    return 'VA' . str_pad($jenis_tagihan, 8, '0', STR_PAD_LEFT);
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -82,10 +119,10 @@ function generateVA($tagihan_id)
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Riwayat Pembayaran Siswa - SMAN 1 Kota Sukabumi</title>
-    <link rel="stylesheet" href="../vendors/typicons.font/font/typicons.css" />
-    <link rel="stylesheet" href="../css/vertical-layout-light/style.css" />
-    <link rel="stylesheet" href="../css/bootstrap.min.css">
-    <link rel="shortcut icon" href="../images/sma.png" />
+    <link rel="stylesheet" href="../../vendors/typicons.font/font/typicons.css" />
+    <link rel="stylesheet" href="../../css/vertical-layout-light/style.css" />
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="shortcut icon" href="../../images/sma.png" />
     <style>
         :root {
             --primary-blue: #004080;
@@ -249,7 +286,7 @@ function generateVA($tagihan_id)
         </nav>
 
         <div class="container-fluid page-body-wrapper">
-            <?php include 'sidebar.php'; ?>
+            <?php include '../sidesbar.php'; ?>
             <div class="main-panel">
                 <div class="content-wrapper">
                     <div class="row mb-4">
@@ -270,44 +307,51 @@ function generateVA($tagihan_id)
                     <div class="card p-4 mb-4">
                         <h5 class="mb-3">🎓 Pilih Kelas</h5>
                         <div class="filter-buttons-grid mb-3">
-                            <?php mysqli_data_seek($kelas_query, 0); // Reset pointer for second loop 
+                            <?php while ($kelas = mysqli_fetch_assoc($kelas_query)) :
+                                $kelas_label = $kelas['kelas'] . ' - ' . $kelas['angkatan'];
                             ?>
-                            <?php while ($kelas = mysqli_fetch_assoc($kelas_query)) : ?>
-                                <a href="?kelas_id=<?= $kelas['id'] ?>" class="btn btn-outline-primary <?= ($kelas_terpilih == $kelas['id']) ? 'active' : '' ?>">
-                                    <?= htmlspecialchars($kelas['tingkat'] . ' ' . $kelas['kelas']) ?>
+                                <a href="?kelas_id=<?= $kelas['id'] ?>"
+                                    class="btn btn-outline-primary <?= ($kelas_terpilih == $kelas['id']) ? 'active' : '' ?>">
+                                    <?= htmlspecialchars($kelas_label) ?>
                                 </a>
                             <?php endwhile; ?>
                         </div>
-                        <?php if ($kelas_terpilih || $siswa_id): ?>
+
+
+                        <?php if ($kelas_terpilih || $nis): ?>
                             <a href="riwayat.php" class="btn btn-outline-danger">
                                 <span class="typcn typcn-times mr-2"></span> Reset Filter
                             </a>
                         <?php endif; ?>
                     </div>
 
+
                     <?php if ($kelas_terpilih): ?>
                         <div class="card p-4 mb-4">
-                            <h5 class="mb-3">👥 Daftar Siswa di Kelas <?= htmlspecialchars(mysqli_fetch_assoc(mysqli_query($conn, "SELECT CONCAT(tingkat, ' ', kelas) as nama_kelas FROM kelas WHERE id = '$kelas_terpilih'"))['nama_kelas'] ?? '') ?></h5>
+                            <h5 class="mb-3">👥 Daftar Siswa di Kelas <?= htmlspecialchars($kelas_terpilih) ?></h5>
                             <div class="table-responsive">
                                 <table class="table table-bordered">
                                     <thead class="thead-light">
                                         <tr>
                                             <th>No</th>
-                                            <th>NISN</th>
+                                            <th>NIS</th>
                                             <th>Nama</th>
                                             <th>Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if ($siswa_list): $no = 1;
-                                            foreach ($siswa_list as $s): ?>
+                                        <?php
+                                        $siswa_query = mysqli_query($conn, "SELECT * FROM t_siswa WHERE kelas = '$kelas_terpilih' ORDER BY nama ASC");
+                                        if (mysqli_num_rows($siswa_query) > 0):
+                                            $no = 1;
+                                            while ($s = mysqli_fetch_assoc($siswa_query)): ?>
                                                 <tr>
                                                     <td><?= $no++ ?></td>
-                                                    <td><?= htmlspecialchars($s['nisn']) ?></td>
+                                                    <td><?= htmlspecialchars($s['nis']) ?></td>
                                                     <td><?= htmlspecialchars($s['nama']) ?></td>
-                                                    <td><a href="?siswa_id=<?= $s['id'] ?>&kelas_id=<?= $kelas_terpilih ?>" class="btn btn-sm btn-info">Lihat Pembayaran</a></td>
+                                                    <td><a href="?nis=<?= $s['nis'] ?>&kelas=<?= urlencode($kelas_terpilih) ?>" class="btn btn-sm btn-info">Lihat Pembayaran</a></td>
                                                 </tr>
-                                            <?php endforeach;
+                                            <?php endwhile;
                                         else: ?>
                                             <tr>
                                                 <td colspan="4" class="text-center">Tidak ada siswa di kelas ini.</td>
@@ -319,61 +363,53 @@ function generateVA($tagihan_id)
                         </div>
                     <?php endif; ?>
 
+
                     <?php if (isset($siswa)): ?>
                         <div class="row mb-4">
                             <div class="col-md-12">
                                 <div class="bg-gradient-primary-custom text-white p-4 rounded shadow">
                                     <h4>Tagihan & Riwayat Pembayaran</h4>
                                     <h2 class="mb-0"><?= htmlspecialchars($siswa['nama']) ?></h2>
-                                    <p class="mb-0">NISN: <?= htmlspecialchars($siswa['nisn']) ?></p>
+                                    <p class="mb-0">NISN: <?= htmlspecialchars($siswa['nis']) ?></p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="card p-4 mb-4">
-                            <h5 class="mb-3">📌 Tagihan Aktif</h5>
-                            <?php
-                            $tagihan_aktif = [];
-                            foreach ($daftar_tagihan as $tagihan) {
-                                $tagihan_id = $tagihan['id'];
-                                $cek_pembayaran_query = mysqli_query($conn, "SELECT SUM(jumlah_bayar) as total_bayar FROM pembayaran WHERE tagihan_id = '$tagihan_id' AND status = 'Lunas'");
-                                $cek = mysqli_fetch_assoc($cek_pembayaran_query);
-                                $total_dibayar = $cek['total_bayar'] ?? 0;
-
-                                if ($total_dibayar < $tagihan['total']) {
-                                    $tagihan_aktif[] = $tagihan;
-                                }
-                            }
-                            ?>
+                            <h5 class="mb-3">📌 Daftar Tagihan</h5>
                             <?php if ($tagihan_aktif): ?>
                                 <div class="table-responsive">
                                     <table class="table table-bordered">
                                         <thead class="thead-light">
                                             <tr>
-                                                <th>Tanggal Tagihan</th>
+                                                <th>ID Tagihan</th>
                                                 <th>Nama Tagihan</th>
                                                 <th>Total Tagihan</th>
+                                                <th>Dibayar</th>
                                                 <th>Sisa Bayar</th>
-                                                <th>VA Number</th>
+                                                <th>Status</th>
                                                 <th>Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php foreach ($tagihan_aktif as $row):
-                                                $tagihan_id = $row['id'];
-                                                $cek_pembayaran_query_detail = mysqli_query($conn, "SELECT SUM(jumlah_bayar) as total_bayar FROM pembayaran WHERE tagihan_id = '$tagihan_id' AND status = 'Lunas'");
-                                                $cek_detail = mysqli_fetch_assoc($cek_pembayaran_query_detail);
-                                                $total_dibayar_detail = $cek_detail['total_bayar'] ?? 0;
-                                                $sisa_bayar = $row['total'] - $total_dibayar_detail;
-                                            ?>
+                                            <?php foreach ($tagihan_aktif as $row): ?>
                                                 <tr>
-                                                    <td><?= date('d/m/Y', strtotime($row['tanggal_tagihan'])) ?></td>
-                                                    <td><?= htmlspecialchars($row['nama_tagihan']) ?></td>
-                                                    <td>Rp<?= number_format($row['total'], 0, ',', '.') ?></td>
-                                                    <td>Rp<?= number_format($sisa_bayar, 0, ',', '.') ?></td>
-                                                    <td><?= generateVA($row['id']) ?></td>
+                                                    <td><?= htmlspecialchars($row['id_tagihan']) ?></td>
+                                                    <td><?= htmlspecialchars($row['nama_tagihan'] ?? '') ?> </td>
+                                                    <td><?= htmlspecialchars($row['total_tagihan']) ?></td>
+                                                    <td>Rp<?= number_format($row['total_bayar'], 0, ',', '.') ?></td>
+                                                    <td>Rp<?= number_format($row['sisa_bayar'], 0, ',', '.') ?></td>
                                                     <td>
-                                                        <a href="tambah_pembayaran.php?siswa_id=<?= $siswa['id'] ?>&tagihan_id=<?= $row['id'] ?>&kelas_id=<?= $kelas_terpilih ?>" class="btn btn-primary btn-sm">Tambahkan Pembayaran</a>
+                                                        <span class="badge <?= ($row['status'] == 'Lunas') ? 'badge-success' : 'badge-warning' ?>">
+                                                            <?= $row['status'] ?>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <?php if ($row['sisa_bayar'] > 0): ?>
+                                                            <a href="tambah_pembayaran.php?tagihan=<?= urlencode($row['nama_tagihan']) ?>" class="btn btn-primary btn-sm">Bayar</a>
+                                                        <?php else: ?>
+                                                            <span class="text-muted">Lunas</span>
+                                                        <?php endif; ?>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
@@ -381,20 +417,23 @@ function generateVA($tagihan_id)
                                     </table>
                                 </div>
                             <?php else: ?>
-                                <div class="alert alert-success">🎉 Tidak ada tagihan aktif untuk siswa ini.</div>
+                                <div class="alert alert-success">🎉 Tidak ada tagihan aktif.</div>
                             <?php endif; ?>
                         </div>
+
+
+
 
                         <div class="card p-4 mb-4">
                             <h5 class="mb-3">💰 Riwayat Pembayaran</h5>
                             <?php
                             $pembayaran_query = mysqli_query($conn, "
-                                    SELECT p.*, t.nama_tagihan, t.total
-                                    FROM pembayaran p
-                                    LEFT JOIN tagihan t ON p.tagihan_id = t.id
-                                    WHERE p.siswa_id = '$siswa_id'
-                                    ORDER BY p.tanggal DESC
-                                ");
+    SELECT p.*, t.jenis_tagihan, t.jml_tagihan
+    FROM t_keuangan_pembayaran p
+    LEFT JOIN t_keuangan_tagihan t ON p.nis = t.nis AND p.jenis_tagihan = t.jenis_tagihan
+    WHERE p.nis = '$nis'
+    ORDER BY p.tanggal_bayar DESC
+");
                             $riwayat = [];
                             while ($row = mysqli_fetch_assoc($pembayaran_query)) {
                                 $riwayat[] = $row;
@@ -406,55 +445,32 @@ function generateVA($tagihan_id)
                                         <thead class="thead-light">
                                             <tr>
                                                 <th>Tanggal</th>
-                                                <th>Nama Siswa</th>
                                                 <th>Tagihan</th>
+                                                <th>Total Tagihan</th>
                                                 <th>Dibayar</th>
-                                                <th><span class="text-danger">Sisa</span></th>
                                                 <th>Status</th>
                                                 <th>Metode</th>
                                                 <th>Bukti</th>
-                                                <th>Aksi</th>
                                             </tr>
                                         </thead>
-
                                         <tbody>
                                             <?php foreach ($riwayat as $row): ?>
                                                 <tr>
-                                                    <td><?= date('d/m/Y', strtotime($row['tanggal'])) ?></td>
-                                                    <td><?= htmlspecialchars($row['nama_tagihan']) ?></td>
-                                                    <td>Rp<?= number_format($row['total'], 0, ',', '.') ?></td>
-                                                    <td>Rp<?= number_format($row['jumlah_bayar'], 0, ',', '.') ?></td>
-
+                                                    <td><?= !empty($row['tanggal_bayar']) ? date('d/m/Y', strtotime($row['tanggal_bayar'])) : '-' ?></td>
+                                                    <td><?= htmlspecialchars($row['nama_tagihan'] ?? '-') ?></td>
+                                                    <td>Rp<?= number_format((int) filter_var($row['jml_tagihan'] ?? 0, FILTER_SANITIZE_NUMBER_INT), 0, ',', '.') ?></td>
+                                                    <td>Rp<?= number_format((int) filter_var($row['jml_bayar'] ?? 0, FILTER_SANITIZE_NUMBER_INT), 0, ',', '.') ?></td>
                                                     <td>
-                                                        <?php
-                                                        $sisa = getSisaBayar($conn, $row['siswa_id'], $row['tagihan_id'], $row['total']);
-                                                        echo '<span class="badge badge-' . ($sisa == 0 ? 'success' : 'warning') . '">Rp' . number_format($sisa, 0, ',', '.') . '</span>';
-
-                                                        ?>
+                                                        <span class="badge <?= ($row['status'] ?? '') == 'lunas' ? 'badge-success' : (($row['status'] ?? '') == 'menunggu' ? 'badge-warning' : 'badge-danger') ?>">
+                                                            <?= ucfirst($row['status'] ?? '-') ?>
+                                                        </span>
                                                     </td>
-
+                                                    <td><?= htmlspecialchars($row['metode'] ?? '-') ?></td>
                                                     <td>
-                                                        <?php if (strtolower($row['status']) === 'lunas'): ?>
-                                                            <span class="badge badge-success">Terkonfirmasi</span>
-                                                        <?php elseif (strtolower($row['status']) === 'menunggu'): ?>
-                                                            <span class="badge badge-warning">Menunggu</span>
-                                                        <?php else: ?>
-                                                            <span class="badge badge-danger"><?= ucfirst($row['status']) ?></span>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td><?= htmlspecialchars($row['metode']) ?: '-' ?></td>
-                                                    <td>
-                                                        <?php if (!empty($row['keterangan'])): ?>
-                                                            <a href="../../uploads/bukti_pembayaran/<?= $row['keterangan'] ?>" target="_blank" class="btn btn-sm btn-info">Lihat</a>
+                                                        <?php if (!empty($row['bukti_pembayaran'])): ?>
+                                                            <a href="../../uploads/bukti_pembayaran/<?= htmlspecialchars($row['bukti_pembayaran']) ?>" target="_blank" class="btn btn-info btn-sm">Lihat</a>
                                                         <?php else: ?>
                                                             <span class="text-muted">-</span>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td>
-                                                        <?php if (strtolower($row['status']) !== 'lunas'): ?>
-                                                            <a href="batal_pembayaran.php?id=<?= $row['id'] ?>&siswa_id=<?= $siswa['id'] ?>&kelas_id=<?= $kelas_terpilih ?>" class="btn btn-danger btn-sm" onclick="return confirm('Batalkan pembayaran ini?')">Batalkan</a>
-                                                        <?php else: ?>
-                                                            <span class="text-muted">Tidak ada aksi</span>
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>
@@ -463,8 +479,9 @@ function generateVA($tagihan_id)
                                     </table>
                                 </div>
                             <?php else: ?>
-                                <div class="alert alert-info">Belum ada riwayat pembayaran untuk siswa ini.</div>
+                                <div class="alert alert-info">Belum ada riwayat pembayaran.</div>
                             <?php endif; ?>
+
                         </div>
                     <?php endif; ?>
                 </div>

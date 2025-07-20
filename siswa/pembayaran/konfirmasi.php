@@ -20,10 +20,10 @@ $nama = $siswa['nama'];
 $kelas = $siswa['kelas_id'];
 $alamat = $siswa['alamat'] ?? '-';
 
-// Ambil notifikasi (Diambil dari index.php untuk konsistensi)
+// Ambil notifikasi
 $jumlah_notif = 0;
 $daftar_notif = [];
-$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi WHERE siswa_id = '$siswa_id' ORDER BY waktu DESC LIMIT 5");
+$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi WHERE siswa_id = '$nis' ORDER BY waktu DESC LIMIT 5");
 $jumlah_notif = mysqli_num_rows($notif_query);
 while ($row = mysqli_fetch_assoc($notif_query)) {
     $daftar_notif[] = $row;
@@ -31,22 +31,26 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
 
 // Proses form submit
 if (isset($_POST['submit'])) {
-    $tagihan_id = $_POST['tagihan_id'];
+    $id_tagihan = $_POST['tagihan_id'];
     $jumlah_bayar = $_POST['jumlah_bayar'];
     $metode = $_POST['metode'];
     $tanggal = date('Y-m-d');
 
+    // Cari nama_tagihan dari t_keuangan_daftar
+    $tagihan_row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT nama_tagihan FROM t_keuangan_daftar WHERE id_tagihan = '$id_tagihan'"));
+    $jenis_tagihan = $tagihan_row['nama_tagihan'];
+
     // Upload bukti pembayaran
     $bukti = $_FILES['bukti']['name'];
     $tmp = $_FILES['bukti']['tmp_name'];
-    $folder = '../../uploads/bukti_pembayaran/'; // Path relatif dari konfirmasi.php ke folder uploads
+    $folder = '../../uploads/bukti_pembayaran/';
     $filename = uniqid() . '_' . $bukti;
 
     if (move_uploaded_file($tmp, $folder . $filename)) {
-        // Simpan ke database
+        // Simpan ke t_keuangan_pembayaran
         $query = mysqli_query($conn, "
-            INSERT INTO pembayaran (siswa_id, tagihan_id, jumlah_bayar, tanggal, status, metode, keterangan)
-            VALUES ('$siswa_id', '$tagihan_id', '$jumlah_bayar', '$tanggal', 'menunggu', '$metode', '$filename')
+            INSERT INTO t_keuangan_pembayaran (nis, nama, kelas, alamat, jml_bayar, jenis_tagihan, metode, bukti_pembayaran, status, tanggal_bayar)
+            VALUES ('$nis', '$nama', '$kelas', '$alamat', '$jumlah_bayar', '$jenis_tagihan', '$metode', '$filename', 'menunggu', '$tanggal')
         ");
         if ($query) {
             echo "<script>alert('✅ Bukti pembayaran berhasil dikirim. Tunggu verifikasi.'); window.location='index.php';</script>";
@@ -58,14 +62,10 @@ if (isset($_POST['submit'])) {
     }
 }
 
-// Ambil daftar tagihan aktif siswa (opsional, jika Anda ingin mengisi dropdown berdasarkan tagihan yang belum lunas)
-$tagihan_query = mysqli_query($conn, "
-    SELECT * FROM tagihan
-    WHERE siswa_id = '$siswa_id' AND id NOT IN (
-        SELECT tagihan_id FROM pembayaran WHERE siswa_id = '$siswa_id' AND status = 'lunas'
-    )
-");
+// Ambil daftar tagihan aktif
+$tagihan_query = mysqli_query($conn, "SELECT * FROM t_keuangan_daftar ORDER BY id_tagihan ASC");
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -73,9 +73,9 @@ $tagihan_query = mysqli_query($conn, "
     <meta charset="UTF-8">
     <title>Konfirmasi Pembayaran - CerdasBelajar</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../vendors/typicons.font/font/typicons.css">
-    <link rel="stylesheet" href="../css/vertical-layout-light/style.css">
-    <link rel="shortcut icon" href="../images/sma.png">
+    <link rel="stylesheet" href="../../vendors/typicons.font/font/typicons.css">
+    <link rel="stylesheet" href="../../css/vertical-layout-light/style.css">
+    <link rel="shortcut icon" href="../../images/sma.png">
     <style>
         .bg-gradient-primary {
             background: linear-gradient(90deg, rgb(2, 40, 122), rgb(27, 127, 219));
@@ -153,48 +153,48 @@ $tagihan_query = mysqli_query($conn, "
 </head>
 <body>
 <div class="container-scroller">
-    <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
-        <div class="navbar-brand-wrapper d-flex align-items-center justify-content-start pl-3" style="background-color: #004080;">
-            <a class="navbar-brand brand-logo d-flex align-items-center" href="#">
-                <span class="text-white font-weight-bold h5 mb-0">SMAN 1 Kota Sukabumi</span>
+<nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+      <div class="navbar-brand-wrapper d-flex align-items-center justify-content-start pl-3" style="background-color: #004080;">
+        <a class="navbar-brand brand-logo d-flex align-items-center" href="#">
+          <span class="text-white font-weight-bold h5 mb-0">SMAN 1 Kota Sukabumi</span>
+        </a>
+      </div>
+      <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
+        <ul class="navbar-nav navbar-nav-right d-flex align-items-center">
+          <li class="nav-item d-flex align-items-center position-relative">
+            <div class="notification-icon" onclick="toggleDropdown()">
+              <img src="../../images/bell-icon.png" alt="Notifikasi">
+              <?php if ($jumlah_notif > 0): ?>
+                <div class="notification-badge"><?= $jumlah_notif ?></div>
+              <?php endif; ?>
+            </div>
+            <div class="notification-dropdown" id="notifDropdown">
+              <h6>Notifikasi</h6>
+              <?php if ($daftar_notif): ?>
+                <?php foreach ($daftar_notif as $notif): ?>
+                  <div class="notif-item"><?= htmlspecialchars($notif['judul']) ?></div>
+                <?php endforeach; ?>
+              <?php else: ?>
+                <div class="notif-item text-muted">Belum ada notifikasi</div>
+              <?php endif; ?>
+              <a href="../../notifikasi.php" class="notif-footer">Lihat Semua</a>
+            </div>
+          </li>
+          <li class="nav-item d-flex align-items-center">
+            <a class="nav-link nav-profile-icon" href="../../profil/index.php">
+              <img src="../../images/profile.png?v=2" alt="Profil">
             </a>
-        </div>
-        <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
-            <ul class="navbar-nav navbar-nav-right d-flex align-items-center">
-                <li class="nav-item d-flex align-items-center position-relative">
-                    <div class="notification-icon" onclick="toggleDropdown()">
-                        <img src="../images/bell-icon.png" alt="Notifikasi">
-                        <?php if ($jumlah_notif > 0): ?>
-                            <div class="notification-badge"><?= $jumlah_notif ?></div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="notification-dropdown" id="notifDropdown">
-                        <h6>Notifikasi</h6>
-                        <?php if ($daftar_notif): ?>
-                            <?php foreach ($daftar_notif as $notif): ?>
-                                <div class="notif-item"><?= htmlspecialchars($notif['judul']) ?></div>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <div class="notif-item text-muted">Belum ada notifikasi</div>
-                        <?php endif; ?>
-                        <a href="../notifikasi.php" class="notif-footer">Lihat Semua</a>
-                    </div>
-                </li>
-                <li class="nav-item d-flex align-items-center">
-                    <a class="nav-link nav-profile-icon" href="../profil/index.php">
-                        <img src="../images/profile.png?v=2" alt="Profil">
-                    </a>
-                </li>
-                <li class="nav-item d-flex align-items-center">
-                    <a class="nav-link nav-profile-icon" href="../../logout.php" onclick="return confirm('Yakin ingin logout?')">
-                        <img src="../images/logout.png" alt="Logout">
-                    </a>
-                </li>
-            </ul>
-        </div>
+          </li>
+          <li class="nav-item d-flex align-items-center">
+            <a class="nav-link nav-profile-icon" href="../../logout.php" onclick="return confirm('Yakin ingin logout?')">
+              <img src="../../images/logout.png" alt="Logout">
+            </a>
+          </li>
+        </ul>
+      </div>
     </nav>
     <div class="container-fluid page-body-wrapper">
-        <?php include 'sidebar.php'; ?>
+        <?php include '../sidebar.php'; ?>
         <div class="main-panel">
             <div class="content-wrapper">
 
@@ -212,11 +212,14 @@ $tagihan_query = mysqli_query($conn, "
                         <div class="form-group">
                             <label for="tagihan_id">Pilih Tagihan</label>
                             <select name="tagihan_id" class="form-control" required>
-                                <option value="">-- Pilih Tagihan --</option>
-                                <?php while ($tagihan = mysqli_fetch_assoc($tagihan_query)): ?>
-                                    <option value="<?= $tagihan['id'] ?>"><?= $tagihan['nama_tagihan'] ?> - Rp<?= number_format($tagihan['total'], 0, ',', '.') ?></option>
-                                <?php endwhile; ?>
-                            </select>
+    <option value="">-- Pilih Tagihan --</option>
+    <?php while ($tagihan = mysqli_fetch_assoc($tagihan_query)): ?>
+        <option value="<?= $tagihan['id_tagihan'] ?>">
+            <?= $tagihan['nama_tagihan'] ?> - <?= $tagihan['total_tagihan'] ?>
+        </option>
+    <?php endwhile; ?>
+</select>
+
                         </div>
 
                         <div class="form-group">
