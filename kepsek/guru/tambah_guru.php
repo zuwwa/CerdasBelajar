@@ -21,53 +21,98 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'kepsek') {
     redirectWithError('⛔ Akses ditolak! Halaman ini hanya untuk Kepala Sekolah.');
 }
 
-// Inisialisasi variabel pencarian
-$search_query = "";
-if (isset($_GET['search']) && !empty($_GET['search'])) {
-    $search_query = $_GET['search'];
+// Ambil data kelas dari tabel t_kelas
+$data_kelas = [];
+$query_kelas = "SELECT kelas FROM t_kelas ORDER BY kelas ASC";
+$stmt_kelas = mysqli_prepare($conn, $query_kelas);
+if ($stmt_kelas === false) {
+    error_log("Error preparing kelas query: " . mysqli_error($conn));
+    redirectWithError('Terjadi kesalahan sistem saat mengambil data kelas. Silakan coba lagi nanti.');
 }
-
-// Ambil data guru dari tabel t_guru
-$data_guru = [];
-// Pilih kolom yang relevan dan aman untuk ditampilkan
-$query = "SELECT id, nip, nama, jenis_kelamin, tempat_lahir, tanggal_lahir, kelas FROM t_guru";
-
-// Tambahkan kondisi pencarian jika ada input search
-if (!empty($search_query)) {
-    $query .= " WHERE nama LIKE ?"; // Menggunakan LIKE untuk pencarian sebagian
-}
-
-$query .= " ORDER BY nama ASC";
-
-// Menggunakan prepared statement untuk keamanan
-$stmt = mysqli_prepare($conn, $query);
-if ($stmt === false) {
-    // Penanganan error jika prepare query gagal
-    error_log("Error preparing query: " . mysqli_error($conn));
-    redirectWithError('Terjadi kesalahan sistem saat mengambil data guru. Silakan coba lagi nanti.');
-}
-
-if (!empty($search_query)) {
-    $search_param = "%" . $search_query . "%"; // Tambahkan wildcard untuk LIKE
-    mysqli_stmt_bind_param($stmt, "s", $search_param);
-}
-
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
-
-if ($result) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        $data_guru[] = $row;
+mysqli_stmt_execute($stmt_kelas);
+$result_kelas = mysqli_stmt_get_result($stmt_kelas);
+if ($result_kelas) {
+    while ($row_kelas = mysqli_fetch_assoc($result_kelas)) {
+        $data_kelas[] = $row_kelas['kelas'];
     }
-} else {
-    // Penanganan error jika eksekusi query gagal
-    error_log("Error executing query: " . mysqli_error($conn));
-    redirectWithError('Gagal mengambil data guru dari database. Silakan coba lagi nanti.');
+}
+mysqli_stmt_close($stmt_kelas);
+
+
+// Proses form jika ada POST request
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nip = $_POST['nip'] ?? '';
+    $nama = $_POST['nama'] ?? '';
+    $jenis_kelamin = $_POST['jenis_kelamin'] ?? '';
+    $tempat_lahir = $_POST['tempat_lahir'] ?? '';
+    $tanggal_lahir = $_POST['tanggal_lahir'] ?? '';
+    $kelas = $_POST['kelas'] ?? ''; // Sekarang akan menjadi nilai dari dropdown
+    $password = $_POST['password'] ?? ''; // Password ini hanya untuk tabel users
+
+    // Validasi input
+    if (empty($nip) || empty($nama) || empty($jenis_kelamin) || empty($tempat_lahir) || empty($tanggal_lahir) || empty($kelas) || empty($password)) {
+        redirectWithError('Semua kolom wajib diisi!');
+    }
+
+    // Hash password
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    // Asumsi id_sekolah adalah 1
+    $id_sekolah = 1;
+    // Asumsi foto default
+    $foto_default = 'default.jpg';
+    // jk diambil dari jenis_kelamin
+    $jk = $jenis_kelamin;
+
+    // Mulai transaksi
+    mysqli_begin_transaction($conn);
+
+    try {
+        // 1. Insert ke tabel t_guru (kolom password disertakan dengan nilai default '-')
+        $default_guru_password = '-'; // Nilai default untuk t_guru.password
+        $query_guru = "INSERT INTO t_guru (nip, nama, jenis_kelamin, tempat_lahir, tanggal_lahir, kelas, id_sekolah, password, foto, jk) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt_guru = mysqli_prepare($conn, $query_guru);
+        if ($stmt_guru === false) {
+            throw new Exception("Gagal menyiapkan query guru: " . mysqli_error($conn));
+        }
+        // Perhatikan parameter binding: ssssssisss (10 parameter, termasuk password)
+        mysqli_stmt_bind_param($stmt_guru, "ssssssisss", $nip, $nama, $jenis_kelamin, $tempat_lahir, $tanggal_lahir, $kelas, $id_sekolah, $default_guru_password, $foto_default, $jk);
+        if (!mysqli_stmt_execute($stmt_guru)) {
+            throw new Exception("Gagal menambahkan data guru: " . mysqli_stmt_error($stmt_guru));
+        }
+        mysqli_stmt_close($stmt_guru);
+
+        // 2. Insert ke tabel users (password di-hash dan disimpan di sini)
+        // Email guru bisa dibuat dari NIP
+        $email_guru = $nip . '@sman1sukabumi.sch.id';
+        $user_type = 'guru';
+        $user_status = 1; // Aktif
+        $user_picture = 'default_profile.png'; // Gambar profil default
+
+        $query_users = "INSERT INTO users (fullname, email, password, status, picture, type) VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt_users = mysqli_prepare($conn, $query_users);
+        if ($stmt_users === false) {
+            throw new Exception("Gagal menyiapkan query users: " . mysqli_error($conn));
+        }
+        // Parameter binding: sssiss (6 parameter: string, string, string, int, string, string)
+        mysqli_stmt_bind_param($stmt_users, "sssiss", $nama, $email_guru, $hashed_password, $user_status, $user_picture, $user_type);
+        if (!mysqli_stmt_execute($stmt_users)) {
+            throw new Exception("Gagal menambahkan data user: " . mysqli_stmt_error($stmt_users));
+        }
+        mysqli_stmt_close($stmt_users);
+
+        // Commit transaksi jika semua berhasil
+        mysqli_commit($conn);
+        redirectWithSuccess('Data guru dan akun user berhasil ditambahkan!', 'index.php');
+
+    } catch (Exception $e) {
+        // Rollback transaksi jika ada error
+        mysqli_rollback($conn);
+        error_log("Error adding teacher: " . $e->getMessage());
+        redirectWithError('Terjadi kesalahan: ' . $e->getMessage());
+    }
 }
 
-mysqli_stmt_close($stmt);
-
-// Notifikasi
+// Notifikasi (sama seperti di index.php)
 $jumlah_notif = 0;
 $daftar_notif = [];
 $notif_query = mysqli_query($conn, "SELECT * FROM notifikasi ORDER BY waktu DESC LIMIT 5");
@@ -82,12 +127,13 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
 
 <head>
     <meta charset="UTF-8">
-    <title>Manajemen Guru - SMAN 1 Kota Sukabumi</title>
+    <title>Tambah Guru Baru - SMAN 1 Kota Sukabumi</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../vendors/typicons.font/font/typicons.css">
     <link rel="stylesheet" href="../../css/vertical-layout-light/style.css">
     <link rel="shortcut icon" href="../../images/sma.png">
     <style>
+        /* Gaya CSS yang sama seperti di index.php */
         .bg-gradient-primary {
             background: linear-gradient(90deg, rgb(2, 40, 122), rgb(27, 127, 219));
         }
@@ -252,7 +298,7 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
                     </li>
                 </ul>
             </div>
-        </nav>
+        </div>
 
         <div class="container-fluid page-body-wrapper">
             <?php include '../sidesbar.php'; ?>
@@ -263,74 +309,51 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
                         <div class="col-lg-12 grid-margin stretch-card">
                             <div class="card">
                                 <div class="card-body">
-                                    <h4 class="card-title">Data Guru</h4>
+                                    <h4 class="card-title">Tambah Guru Baru</h4>
                                     <p class="card-description">
-                                        Daftar semua guru yang terdaftar di SMAN 1 Sukabumi.
+                                        Isi formulir di bawah untuk menambahkan data guru baru.
                                     </p>
-                                    <div class="d-flex justify-content-start align-items-center mb-4">
-                                        <a href="tambah_guru.php" class="btn btn-primary mr-2">
-                                            <i class="typcn typcn-plus"></i> Tambah Guru
-                                        </a>
-                                        <a href="agenda.php" class="btn btn-info mr-2">
-                                            <i class="typcn typcn-calendar-outline"></i> Kelola Agenda
-                                        </a>
-                                        <a href="penilaian.php" class="btn btn-success">
-                                            <i class="typcn typcn-clipboard"></i> Kelola Penilaian
-                                        </a>
-                                    </div>
-                                    <form method="GET" class="mb-3">
-                                        <div class="form-group row">
-                                            <label for="search" class="col-sm-2 col-form-label">Cari Nama Guru</label>
-                                            <div class="col-sm-6">
-                                                <input type="text" class="form-control" id="search" name="search" value="<?= htmlspecialchars($search_query) ?>" placeholder="Masukkan nama guru...">
-                                            </div>
-                                            <div class="col-sm-4">
-                                                <button type="submit" class="btn btn-info">Cari</button>
-                                                <a href="index.php" class="btn btn-secondary ml-2">Reset</a>
-                                            </div>
+                                    <form class="forms-sample" method="POST">
+                                        <div class="form-group">
+                                            <label for="nip">NIP</label>
+                                            <input type="text" class="form-control" id="nip" name="nip" placeholder="Nomor Induk Pegawai" required>
                                         </div>
+                                        <div class="form-group">
+                                            <label for="nama">Nama Guru</label>
+                                            <input type="text" class="form-control" id="nama" name="nama" placeholder="Nama Lengkap Guru" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="jenis_kelamin">Jenis Kelamin</label>
+                                            <select class="form-control" id="jenis_kelamin" name="jenis_kelamin" required>
+                                                <option value="">Pilih Jenis Kelamin</option>
+                                                <option value="L">Laki-laki</option>
+                                                <option value="P">Perempuan</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="tempat_lahir">Tempat Lahir</label>
+                                            <input type="text" class="form-control" id="tempat_lahir" name="tempat_lahir" placeholder="Tempat Lahir" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="tanggal_lahir">Tanggal Lahir</label>
+                                            <input type="date" class="form-control" id="tanggal_lahir" name="tanggal_lahir" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="kelas">Kelas Mengajar</label>
+                                            <select class="form-control" id="kelas" name="kelas" required>
+                                                <option value="">Pilih Kelas</option>
+                                                <?php foreach ($data_kelas as $kelas_option) : ?>
+                                                    <option value="<?= htmlspecialchars($kelas_option); ?>"><?= htmlspecialchars($kelas_option); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="password">Password (untuk login)</label>
+                                            <input type="password" class="form-control" id="password" name="password" placeholder="Password untuk akun login guru" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary mr-2">Simpan</button>
+                                        <a href="index.php" class="btn btn-light">Batal</a>
                                     </form>
-
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>No.</th>
-                                                    <th>NIP</th>
-                                                    <th>Nama Guru</th>
-                                                    <th>Jenis Kelamin</th>
-                                                    <th>Tempat Lahir</th>
-                                                    <th>Tanggal Lahir</th>
-                                                    <th>Kelas Mengajar</th>
-                                                    <th>Aksi</th> <!-- Kolom baru untuk aksi -->
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php if (!empty($data_guru)) : ?>
-                                                    <?php $no = 1;
-                                                    foreach ($data_guru as $guru) : ?>
-                                                        <tr>
-                                                            <td><?= $no++; ?></td>
-                                                            <td><?= htmlspecialchars($guru['nip']); ?></td>
-                                                            <td><?= htmlspecialchars($guru['nama']); ?></td>
-                                                            <td><?= htmlspecialchars($guru['jenis_kelamin']); ?></td>
-                                                            <td><?= htmlspecialchars($guru['tempat_lahir']); ?></td>
-                                                            <td><?= htmlspecialchars($guru['tanggal_lahir']); ?></td>
-                                                            <td><?= htmlspecialchars($guru['kelas']); ?></td>
-                                                            <td>
-                                                                <a href="edit_guru.php?id=<?= htmlspecialchars($guru['id']); ?>" class="btn btn-warning btn-sm">Edit</a>
-                                                                <a href="hapus_guru.php?id=<?= htmlspecialchars($guru['id']); ?>" class="btn btn-danger btn-sm" onclick="return confirm('Apakah Anda yakin ingin menghapus guru ini? Data guru dan akun login akan dihapus.')">Hapus</a>
-                                                            </td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
-                                                <?php else : ?>
-                                                    <tr>
-                                                        <td colspan="8" class="text-center text-muted">Tidak ada data guru yang ditemukan.</td>
-                                                    </tr>
-                                                <?php endif; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
                                 </div>
                             </div>
                         </div>

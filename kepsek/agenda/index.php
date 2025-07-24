@@ -20,20 +20,22 @@ if (!$data) {
 
 $kepsek_id = $data['id'];
 
-// Notifikasi
-$jumlah_notif = 0;
-$daftar_notif = [];
-$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi ORDER BY waktu DESC LIMIT 5");
-$jumlah_notif = mysqli_num_rows($notif_query);
-while ($row = mysqli_fetch_assoc($notif_query)) {
-  $daftar_notif[] = $row;
-}
+
 
 // Ambil daftar agenda
 $agenda_query = mysqli_query($conn, "SELECT * FROM agenda_kegiatan ORDER BY tanggal_mulai ASC");
 $daftar_agenda = [];
 while ($row = mysqli_fetch_assoc($agenda_query)) {
   $daftar_agenda[] = $row;
+}
+
+// Notifikasi
+$jumlah_notif = 0;
+$daftar_notif = [];
+$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi ORDER BY waktu DESC LIMIT 5");
+$jumlah_notif = mysqli_num_rows($notif_query);
+while ($row = mysqli_fetch_assoc($notif_query)) {
+    $daftar_notif[] = $row;
 }
 ?>
 

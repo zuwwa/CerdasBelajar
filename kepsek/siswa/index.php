@@ -73,126 +73,268 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
     <link rel="stylesheet" href="../../css/bootstrap.min.css">
     <link rel="shortcut icon" href="../../images/sma.png" />
     <style>
-        :root {
-            --primary-blue: #004080; /* Dark blue for navbar */
-            --gradient-start: rgb(2, 40, 122);
-            --gradient-end: rgb(27, 127, 219);
-        }
+       /* General Body and Container Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f6f9; /* A light grey background for the overall page */
+}
 
-        .content-wrapper {
-            padding: 2rem !important; /* Ensure consistent padding */
-            background-color: #f8f9fa; /* Light background for content area */
-        }
+.container-scroller {
+    overflow: hidden; /* Prevent horizontal scroll issues */
+}
 
-        .bg-gradient-primary-custom {
-            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
-            color: white;
-        }
+/* Primary Color Variables for Consistency */
+:root {
+    --primary-blue: #004080; /* Dark blue for main elements */
+    --gradient-start: rgb(2, 40, 122); /* Start color for gradients */
+    --gradient-end: rgb(27, 127, 219); /* End color for gradients */
+    --text-light: white; /* For text on dark backgrounds */
+    --text-dark: #333; /* For general text */
+    --border-light: #e0e0e0; /* Light border color */
+    --card-shadow: 0 4px 15px rgba(0,0,0,0.08); /* Consistent card shadow */
+}
 
-        .navbar-brand-wrapper {
-            background-color: var(--primary-blue) !important;
-            border-bottom: 1px solid #003366 !important;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            padding-left: 1.5rem;
-        }
+.notification-icon {
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      position: relative;
+    }
+    .notification-icon img {
+      width: 90%;
+    }
+    .notification-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: red;
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 50%;
+    }
+    .notification-dropdown {
+      position: absolute;
+      top: 38px;
+      right: 0;
+      background: #fff;
+      width: 280px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      border-radius: 6px;
+      display: none;
+      z-index: 999;
+    }
+    .notification-dropdown.d-block {
+      display: block;
+    }
+    .notification-dropdown h6,
+    .notif-item,
+    .notif-footer {
+      padding: 10px 15px;
+      font-size: 14px;
+    }
+    .notif-footer {
+      text-align: center;
+      font-weight: bold;
+      color: crimson;
+    }
+    .nav-profile-icon img {
+      width: 23px;
+      margin-right: 15px;
+    }
+    .navbar-menu-wrapper {
+      background-color: #004080 !important;
+      border-bottom: 1px solid #003366 !important;
+    }
+    .table th, .table td {
+      vertical-align: middle !important;
+    }
+    .sidebar .nav,
+    .sidebar .nav-item,
+    .sidebar .nav-link {
+      background-color: transparent !important;
+      color: white !important;
+    }
 
-        .navbar-brand img {
-            height: 50px; /* Adjust logo size */
-            object-fit: contain;
-            margin-right: 10px;
-        }
+    .sidebar .nav-item:hover .nav-link {
+      background-color: rgba(255, 255, 255, 0.15) !important;
+    }
 
-        .navbar-menu-wrapper {
-            background-color: var(--primary-blue) !important;
-            border-bottom: 1px solid #003366 !important;
-        }
+    .sidebar .nav-item a.nav-link.text-danger,
+    .sidebar .nav-item a.nav-link.text-danger .menu-icon {
+      color: #ff4d4d !important;
+    }
 
-        .navbar .nav-item .nav-link {
-            color: white !important;
-        }
+/* Main Content Area */
+.main-panel {
+    background-color: #f8f9fa; /* Light background for main content */
+}
 
-        .navbar .nav-item .nav-link .typcn {
-            color: white !important;
-        }
+.content-wrapper {
+    padding: 2.5rem !important; /* Generous padding for content */
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 120px); /* Adjust based on header/footer height */
+}
 
-        .notification-icon {
-            position: relative;
-        }
+/* Header Banner (e.g., "Manajemen Siswa" banner) */
+.bg-gradient-primary-custom {
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+    color: var(--text-light);
+    padding: 2.5rem; /* Larger padding for a more prominent banner */
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+}
 
-        .notification-icon img, .nav-profile-icon img {
-            width: 24px;
-            height: 24px;
-            object-fit: contain;
-            filter: brightness(0) invert(1); /* Makes icons white */
-        }
-        
-        .notification-icon .badge {
-            position: absolute;
-            top: 0px;
-            right: -8px;
-            font-size: 0.7rem;
-            padding: .3em .6em;
-        }
+.bg-gradient-primary-custom h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
 
-        .btn-kelas {
-            margin: 0.25rem;
-            border-radius: 0.5rem; /* Slightly rounded buttons */
-            transition: all 0.3s ease;
-        }
+.bg-gradient-primary-custom p.lead {
+    font-size: 1.15rem;
+    opacity: 0.9;
+}
 
-        .btn-kelas:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
+/* Card Styles (used for content blocks like "Pilih Kelas" and "Daftar Siswa") */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 1.5rem;
+    background-color: var(--text-light);
+}
 
-        .table-siswa th, .table-siswa td {
-            vertical-align: middle;
-            text-align: center;
-        }
-        
-        .table-siswa thead th {
-            background-color: var(--primary-blue);
-            color: white;
-            border-color: var(--primary-blue);
-        }
+.card-header {
+    background-color: var(--text-light);
+    border-bottom: 1px solid var(--border-light);
+    padding: 1.5rem;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--primary-blue);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
 
-        .table-siswa tbody tr:nth-child(even) {
-            background-color: #f2f2f2; /* Zebra striping */
-        }
+.card-body {
+    padding: 2rem;
+}
 
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            margin-bottom: 1.5rem;
-        }
+/* Class Selection Buttons */
+.btn-kelas {
+    margin: 0.35rem; /* Slightly more margin for buttons */
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1.25rem; /* More comfortable button size */
+    font-weight: 600;
+}
 
-        .card-header {
-            background-color: white;
-            border-bottom: 1px solid #e9ecef;
-            padding: 1.5rem;
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: var(--primary-blue);
-        }
+.btn-kelas:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
 
-        .form-inline .form-control {
-            border-radius: 0.5rem;
-        }
+.btn-outline-primary {
+    color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
 
-        .form-inline .btn {
-            border-radius: 0.5rem;
-        }
+.btn-outline-primary:hover {
+    background-color: var(--primary-blue);
+    color: var(--text-light);
+}
 
-        .footer {
-            background-color: #f8f9fa;
-            padding: 1.5rem;
-            text-align: center;
-            border-top: 1px solid #e9ecef;
-            color: #6c757d;
-        }
+/* Table Styling */
+.table-responsive {
+    overflow-x: auto; /* Ensures table is scrollable on smaller screens */
+}
+
+.table-siswa th, .table-siswa td {
+    vertical-align: middle;
+    text-align: center;
+    padding: 12px 10px; /* Adjust cell padding */
+    font-size: 0.95rem;
+}
+
+.table-siswa thead th {
+    background-color: var(--primary-blue);
+    color: var(--text-light);
+    border-color: var(--primary-blue);
+    font-weight: 600;
+}
+
+.table-siswa tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Lighter zebra striping */
+}
+
+.table-siswa tbody tr:hover {
+    background-color: #f0f0f0; /* Hover effect */
+}
+
+/* Action Buttons in Table */
+.table-siswa .btn-sm {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 0.3rem;
+    margin: 0 3px;
+}
+
+/* Search Form */
+.form-inline .form-control {
+    border-radius: 0.5rem;
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--border-light);
+}
+
+.form-inline .btn {
+    border-radius: 0.5rem;
+    padding: 0.65rem 1.2rem;
+}
+
+.input-group .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: var(--text-light);
+}
+
+.input-group .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+/* Alert Messages */
+.alert {
+    border-radius: 8px;
+    padding: 1.25rem;
+    font-size: 1rem;
+}
+
+.alert-info {
+    background-color: #e2f2ff;
+    color: #0056b3;
+    border-color: #b3d7ff;
+}
+
+/* Footer Styling */
+.footer {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    text-align: center;
+    border-top: 1px solid var(--border-light);
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-top: auto; /* Push footer to the bottom */
+}
     </style>
 </head>
 <body>
@@ -204,37 +346,37 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
         </a>
       </div>
       <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
-        <ul class="navbar-nav navbar-nav-right d-flex align-items-center">
-          <li class="nav-item d-flex align-items-center position-relative">
-            <div class="notification-icon" onclick="toggleDropdown()">
-              <img src="../../images/bell-icon.png" alt="Notifikasi">
-              <?php if ($jumlah_notif > 0): ?>
-                <div class="notification-badge"><?= $jumlah_notif ?></div>
-              <?php endif; ?>
-            </div>
-            <div class="notification-dropdown" id="notifDropdown">
-              <h6>Notifikasi</h6>
-              <?php if ($daftar_notif): ?>
-                <?php foreach ($daftar_notif as $notif): ?>
-                  <div class="notif-item"><?= htmlspecialchars($notif['judul']) ?></div>
-                <?php endforeach; ?>
-              <?php else: ?>
-                <div class="notif-item text-muted">Belum ada notifikasi</div>
-              <?php endif; ?>
-              <a href="../notifikasi.php" class="notif-footer">Lihat Semua</a>
-            </div>
-          </li>
-          <li class="nav-item d-flex align-items-center">
-            <a class="nav-link nav-profile-icon" href="../profil/index.php">
-              <img src="../../images/profile.png?v=2" alt="Profil">
-            </a>
-          </li>
-          <li class="nav-item d-flex align-items-center">
-            <a class="nav-link nav-profile-icon" href="../../logout.php" onclick="return confirm('Yakin ingin logout?')">
-              <img src="../../images/logout.png" alt="Logout">
-            </a>
-          </li>
-        </ul>
+      <ul class="navbar-nav navbar-nav-right d-flex align-items-center">
+        <li class="nav-item d-flex align-items-center position-relative">
+          <div class="notification-icon" onclick="toggleDropdown()">
+            <img src="../../images/bell-icon.png" alt="Notifikasi">
+            <?php if ($jumlah_notif > 0): ?>
+              <div class="notification-badge"><?= $jumlah_notif ?></div>
+            <?php endif; ?>
+          </div>
+          <div class="notification-dropdown" id="notifDropdown">
+            <h6>Notifikasi</h6>
+            <?php if ($daftar_notif): ?>
+              <?php foreach ($daftar_notif as $notif): ?>
+                <div class="notif-item"><?= htmlspecialchars($notif['judul']) ?></div>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <div class="notif-item text-muted">Belum ada notifikasi</div>
+            <?php endif; ?>
+            <a href="../notifikasi.php" class="notif-footer">Lihat Semua</a>
+          </div>
+        </li>
+        <li class="nav-item d-flex align-items-center">
+          <a class="nav-link nav-profile-icon" href="../profil/index.php">
+            <img src="../../images/profile.png?v=2" alt="Profil">
+          </a>
+        </li>
+        <li class="nav-item d-flex align-items-center">
+          <a class="nav-link nav-profile-icon" href="../../logout.php" onclick="return confirm('Yakin ingin logout?')">
+            <img src="../../images/logout.png" alt="Logout">
+          </a>
+        </li>
+      </ul>
       </div>
     </nav>
 
