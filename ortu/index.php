@@ -1,222 +1,276 @@
 <?php 
-session_start();
-include '../koneksi.php';
-
-// Cek login orang tua
-if (!isset($_SESSION['email']) || $_SESSION['role'] != 'ortu') {
-    echo "<script>alert('⛔ Akses ditolak! Halaman ini hanya untuk orang tua siswa.'); window.location='../logout.php';</script>";
-    exit;
-}
-
-// Ambil data orang tua
-$email = $_SESSION['email'];
-$query = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email'");
-$data_ortu = mysqli_fetch_assoc($query);
-
-if (!$data_ortu) {
-    echo "<script>alert('Data orang tua tidak ditemukan.'); window.location='../logout.php';</script>";
-    exit;
-}
-
-$ortu_id = $data_ortu['id'];
-
-// Ambil data anak
-$anak_query = mysqli_query($conn, "SELECT * FROM t_siswa WHERE id_ortu = '$ortu_id'");
-$anak = mysqli_fetch_assoc($anak_query);
-
-// Notifikasi untuk orang tua
-$jumlah_notif = 0;
-$daftar_notif = [];
-$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi WHERE untuk_role = 'ortu' ORDER BY waktu DESC LIMIT 5");
-$jumlah_notif = mysqli_num_rows($notif_query);
-while ($row = mysqli_fetch_assoc($notif_query)) {
-    $daftar_notif[] = $row;
-}
+include 'includes/sidebar.php';
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard Orang Tua - SMAN 1 Sukabumi</title>
-  <link rel="stylesheet" href="vendors/typicons.font/font/typicons.css" />
-  <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css" />
-  <link rel="stylesheet" href="css/vertical-layout-light/style.css" />
-  <link rel="shortcut icon" href="images/sma.png" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal Orang Tua - Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-    .navbar-menu-wrapper { background-color: #004080 !important; }
-    .notification-badge {
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      background: red;
+    :root {
+      --primary-color: rgb(2, 40, 122);
+      --secondary-color: rgb(27, 127, 219);
+      --navbar-height: 70px;
+      --sidebar-width: 250px;
+    }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+      overflow-x: hidden;
+      padding-top: var(--navbar-height);
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: var(--navbar-height);
+      background-color: #252531;
       color: white;
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 50%;
-    }
-    .notification-dropdown {
-      position: absolute;
-      top: 38px;
-      right: 0;
-      background-color: white;
-      width: 280px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-      border-radius: 6px;
-      display: none;
       z-index: 1000;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     }
-    .notification-dropdown.active { display: block; }
-    .notification-dropdown h6, .notif-item, .notif-footer {
-      padding: 10px 15px;
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 20px;
+      padding-top: calc(var(--navbar-height) + 20px);
     }
-    .notif-footer {
+
+    .header {
+      background-color: white;
+      padding: 15px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card {
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      transition: transform 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card-header {
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 10px 10px 0 0 !important;
+      padding: 15px;
+      font-weight: 600;
+    }
+
+    footer.footer {
+      margin-left: var(--sidebar-width);
+      background-color: #252531;
+      color: white;
+      padding: 20px;
       text-align: center;
-      font-weight: bold;
-      color: crimson;
-      cursor: pointer;
+    }
+
+    .bg-pink {
+      background-color: #ff66b2 !important;
+    }
+
+    @keyframes pulse {
+      0% { background-color: rgba(231, 76, 60, 0.1); }
+      50% { background-color: rgba(231, 76, 60, 0.2); }
+      100% { background-color: rgba(231, 76, 60, 0.1); }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+      }
+
+      .main-content,
+      footer.footer {
+        margin-left: 0;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container-scroller">
-    <!-- NAVBAR -->
-    <nav class="navbar fixed-top d-flex flex-row">
-      <div class="navbar-brand-wrapper d-flex align-items-center justify-content-start" style="background-color: #004080;">
-        <a class="navbar-brand brand-logo text-white font-weight-bold h5 mb-0" href="#">SMAN 1 Kota Sukabumi</a>
+
+  <!-- Sidebar dan Navbar di sini (placeholder) -->
+  <?php include 'includes/navbar.php';?>
+
+  <main>
+    <div class="main-content pt-5 ps-5">
+      <div class="header">
+        <h4>Selamat Datang<br><span>Nama Orang Tua</span></h4>
       </div>
-      <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
-        <ul class="navbar-nav">
-          <!-- NOTIFIKASI -->
-          <li class="notification-wrapper position-relative">
-            <div class="notification-icon" onclick="toggleDropdown()">
-              <img src="images/bell-icon.png" alt="Notifikasi" style="width:28px">
-              <?php if ($jumlah_notif > 0): ?>
-                <div class="notification-badge"><?= $jumlah_notif ?></div>
-              <?php endif; ?>
-            </div>
-            <div class="notification-dropdown" id="notifDropdown">
-              <h6>Notifikasi</h6>
-              <?php if (count($daftar_notif) > 0): ?>
-                <?php foreach ($daftar_notif as $notif): ?>
-                  <div class="notif-item"><?= htmlspecialchars($notif['judul']) ?></div>
-                <?php endforeach; ?>
-              <?php else: ?>
-                <div class="notif-item text-muted">Belum ada notifikasi</div>
-              <?php endif; ?>
-              <a href="notifikasi.php" class="notif-footer">Lihat Semua</a>
-            </div>
-          </li>
 
-          <!-- LOGOUT -->
-          <li class="nav-item nav-profile-icon">
-            <a class="nav-link" href="logout.php" onclick="return confirm('Yakin ingin logout?')">
-              <img src="images/logout.png" alt="Logout" style="width:24px;height:24px">
-            </a>
-          </li>
-        </ul>
-      </div>
-    </nav>
-
-    <div class="container-fluid page-body-wrapper">
-      <!-- SIDEBAR -->
-      <?php include "sidebar.php"; ?>
-
-      <!-- MAIN PANEL -->
-      <div class="main-panel">
-        <div class="content-wrapper">
-          <div class="row mb-4">
-            <div class="col-md-12">
-              <div class="text-white p-4 rounded shadow" style="background: linear-gradient(90deg, rgb(2, 40, 122), rgb(27, 127, 219));">
-                <h4>Selamat Datang Orang Tua 👨‍👩‍👧</h4>
-                <h5 class="mb-0"><?= $_SESSION['username'] ?></h5>
+      <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+          <div class="card bg-dark text-white">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="card-title">Jumlah Anak</h5>
+                  <h2 class="mb-0">3</h2>
+                </div>
+                <i class="fas fa-child fa-3x opacity-50"></i>
               </div>
             </div>
           </div>
-
-          <!-- INFO ANAK -->
-          <?php if ($anak): ?>
-            <div class="row">
-              <div class="col-md-4 mb-3">
-                <div class="card shadow-sm p-3">
-                  <h6>👦 Nama Anak</h6>
-                  <p class="mb-0"><?= $anak['nama'] ?></p>
-                </div>
-              </div>
-              <div class="col-md-4 mb-3">
-                <div class="card shadow-sm p-3">
-                  <h6>🏫 Kelas</h6>
-                  <p class="mb-0"><?= $anak['kelas'] ?></p>
-                </div>
-              </div>
-              <div class="col-md-4 mb-3">
-                <div class="card shadow-sm p-3">
-                  <h6>📊 Status Kehadiran</h6>
-                  <p class="mb-0">Lihat detail di bawah</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <!-- Nilai -->
-              <div class="col-md-4 mb-4">
-                <a href="nilai.php?id=<?= $anak['id'] ?>" class="text-decoration-none text-dark">
-                  <div class="card text-center p-3 shadow-sm">
-                    <i class="typcn typcn-chart-bar display-4 text-success"></i>
-                    <h6>Nilai Akademik</h6>
-                  </div>
-                </a>
-              </div>
-
-              <!-- Absensi -->
-              <div class="col-md-4 mb-4">
-                <a href="absensi.php?id=<?= $anak['id'] ?>" class="text-decoration-none text-dark">
-                  <div class="card text-center p-3 shadow-sm">
-                    <i class="typcn typcn-calendar display-4 text-warning"></i>
-                    <h6>Kehadiran</h6>
-                  </div>
-                </a>
-              </div>
-
-              <!-- Detail Anak -->
-              <div class="col-md-4 mb-4">
-                <a href="profil-anak.php?id=<?= $anak['id'] ?>" class="text-decoration-none text-dark">
-                  <div class="card text-center p-3 shadow-sm">
-                    <i class="typcn typcn-user display-4 text-primary"></i>
-                    <h6>Profil Anak</h6>
-                  </div>
-                </a>
-              </div>
-            </div>
-          <?php else: ?>
-            <div class="alert alert-warning">Belum ada data anak terhubung dengan akun ini.</div>
-          <?php endif; ?>
         </div>
 
-        <!-- FOOTER -->
-        <footer class="footer mt-4">
-          <div class="text-center">Copyright © SMAN 1 Kota Sukabumi 2025</div>
-        </footer>
+        <div class="col-md-4 mb-3">
+          <div class="card bg-success text-white">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="card-title">Tagihan Lunas</h5>
+                  <h2 class="mb-0">5</h2>
+                </div>
+                <i class="fas fa-check-circle fa-3x opacity-50"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card bg-warning text-dark">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h5 class="card-title">Tagihan Belum Lunas</h5>
+                  <h2 class="mb-0">2</h2>
+                </div>
+                <i class="fas fa-exclamation-circle fa-3x opacity-50"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Anak -->
+      <section class="mb-5">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="mb-0"><i class="fas fa-users me-2"></i>Data Anak</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>NIS</th>
+                    <th>Nama</th>
+                    <th>Kelas</th>
+                    <th>Jenis Kelamin</th>
+                    <th>Umur</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>12345</td>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="me-3">
+                          <img src="assets/img/default-avatar.png" class="rounded-circle" width="40" height="40" alt="Foto siswa">
+                        </div>
+                        <div>Rama Putra</div>
+                      </div>
+                    </td>
+                    <td>X IPA 1</td>
+                    <td><span class="badge bg-primary">Laki-laki</span></td>
+                    <td>16 tahun</td>
+                    <td>
+                      <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-sm btn-success"><i class="fas fa-book-open me-1"></i>Nilai</a>
+                        <a href="#" class="btn btn-sm btn-warning"><i class="fas fa-calendar-check me-1"></i>Absensi</a>
+                      </div>
+                    </td>
+                  </tr>
+                  <!-- Tambahkan lebih banyak siswa di sini -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tagihan Terbaru -->
+      <section>
+        <div class="card">
+          <div class="card-header bg-danger">
+            <h3 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Tagihan Terbaru</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Anak</th>
+                    <th>Jenis Tagihan</th>
+                    <th>Jumlah</th>
+                    <th>Jatuh Tempo</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="table-danger">
+                    <td>Rama Putra</td>
+                    <td>SPP Juli</td>
+                    <td>Rp 150.000</td>
+                    <td>10 Jul 2025 <span class="badge bg-danger ms-2">Terlambat</span></td>
+                    <td><span class="badge bg-warning text-dark">Belum Lunas</span></td>
+                    <td><a href="#" class="btn btn-sm btn-primary"><i class="fas fa-money-bill-wave me-1"></i>Bayar</a></td>
+                  </tr>
+                  <!-- Tambahkan tagihan lainnya di sini -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card-footer text-end">
+            <a href="#" class="btn btn-outline-danger">
+              <i class="fas fa-list me-1"></i> Lihat Semua Tagihan
+            </a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="copyright">
+        &copy; 2025 SMAN 1 Kota Sukabumi. All rights reserved.
+      </div>
+      <div class="footer-links">
+        <a href="#"><i class="fas fa-info-circle"></i> About</a>
+        <a href="#"><i class="fas fa-envelope"></i> Contact</a>
+        <a href="#"><i class="fas fa-shield-alt"></i> Privacy Policy</a>
       </div>
     </div>
-  </div>
+  </footer>
 
-  <!-- JS -->
-  <script src="vendors/js/vendor.bundle.base.js"></script>
-  <script src="js/off-canvas.js"></script>
-  <script src="js/template.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    function toggleDropdown() {
-      document.getElementById('notifDropdown').classList.toggle('active');
-    }
-
-    window.addEventListener('click', function(e) {
-      const dropdown = document.getElementById('notifDropdown');
-      const icon = document.querySelector('.notification-icon');
-      if (!icon.contains(e.target) && !dropdown.contains(e.target)) {
-        dropdown.classList.remove('active');
-      }
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.table-danger').forEach(function(row) {
+        row.style.animation = 'pulse 2s infinite';
+      });
     });
   </script>
 </body>

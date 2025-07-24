@@ -5,7 +5,7 @@
     <li class="nav-item">
       <div class="d-flex flex-column align-items-center sidebar-profile" style="padding: 20px 0;">
         <!-- Foto -->
-        <img src="../images/sma.png" alt="Foto Sekolah" style="width: 70px; height: 70px; border-radius: 8px; object-fit: cover;">
+        <img src="/CerdasBelajar/images/sma.png" alt="Foto Sekolah" style="width: 70px; height: 70px; border-radius: 8px; object-fit: cover;">
 
         <?php
         $email = $_SESSION['email'] ?? '';
