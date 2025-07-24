@@ -4,13 +4,13 @@ include '../koneksi.php';
 
 // Cek login kepala sekolah
 if (!isset($_SESSION['email']) || $_SESSION['role'] != 'kepsek') {
-    echo "<script>alert('⛔ Akses ditolak! Halaman ini hanya untuk admin.'); window.location='../logout.php';</script>";
+    echo "<script>alert('⛔ Akses ditolak! Halaman ini hanya untuk kepsek'); window.location='../logout.php';</script>";
     exit;
 }
 
 // Ambil data kepala sekolah
 $email = $_SESSION['email'];
-$query = mysqli_query($conn, "SELECT * FROM t_guru WHERE email = '$email'");
+$query = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email'");
 $data = mysqli_fetch_assoc($query);
 
 if (!$data) {
@@ -23,7 +23,7 @@ $kepsek_id = $data['id'];
 // Notifikasi
 $jumlah_notif = 0;
 $daftar_notif = [];
-$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi WHERE untuk_role = 'kepsek' ORDER BY waktu DESC LIMIT 5");
+$notif_query = mysqli_query($conn, "SELECT * FROM notifikasi ORDER BY waktu DESC LIMIT 5");
 $jumlah_notif = mysqli_num_rows($notif_query);
 while ($row = mysqli_fetch_assoc($notif_query)) {
     $daftar_notif[] = $row;
@@ -31,17 +31,85 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
 ?>
 
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dashboard Kepala Sekolah - SMAN 1 Sukabumi</title>
-  <link rel="stylesheet" href="vendors/typicons.font/font/typicons.css" />
-  <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css" />
-  <link rel="stylesheet" href="css/vertical-layout-light/style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <title>SMAN 1 SUKABUMI</title>
+  <link rel="stylesheet" href="../vendors/typicons.font/font/typicons.css" />
+  <link rel="stylesheet" href="../vendors/css/vendor.bundle.base.css" />
+  <link rel="stylesheet" href="../css/vertical-layout-light/style.css" />
   <link rel="shortcut icon" href="images/sma.png" />
   <style>
-    .navbar-menu-wrapper { background-color: #004080 !important; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container-scroller {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .card {
+    pointer-events: auto; /* <-- jangan none */
+    cursor: pointer;
+  }
+
+
+    .page-body-wrapper {
+      height: 100%;
+      display: flex;
+    }
+
+    .main-panel {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .content-wrapper {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 2rem;
+    }
+
+    .navbar-menu-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      background-color: #004080 !important;
+      padding: 0 20px;
+      height: 70px;
+    }
+
+    .navbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .notification-wrapper {
+      position: relative;
+    }
+
+    .notification-icon {
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .notification-icon img {
+      width: 90%;
+      height: auto;
+      display: block;
+    }
+
     .notification-badge {
       position: absolute;
       top: -6px;
@@ -52,6 +120,7 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
       padding: 2px 6px;
       border-radius: 50%;
     }
+
     .notification-dropdown {
       position: absolute;
       top: 38px;
@@ -63,31 +132,80 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
       display: none;
       z-index: 1000;
     }
-    .notification-dropdown.active { display: block; }
-    .notification-dropdown h6, .notif-item, .notif-footer {
-      padding: 10px 15px;
+
+    .notification-dropdown.active {
+      display: block;
     }
-    .notif-footer {
+
+    .notification-dropdown h6 {
+      padding: 10px 15px;
+      margin: 0;
+      border-bottom: 1px solid #ddd;
+      font-weight: bold;
+    }
+
+    .notification-dropdown .notif-item {
+      padding: 10px 15px;
+      font-size: 14px;
+      border-bottom: 1px solid #eee;
+      color: #333;
+    }
+
+    .notification-dropdown .notif-item:hover {
+      background-color: #f5f5f5;
+    }
+
+    .notification-dropdown .notif-footer {
       text-align: center;
+      padding: 10px;
       font-weight: bold;
       color: crimson;
       cursor: pointer;
+    }
+
+    .nav-profile-icon img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .nav-profile-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar .nav,
+    .sidebar .nav-item,
+    .sidebar .nav-link {
+      background-color: transparent !important;
+      color: white !important;
+    }
+
+    .sidebar .nav-item:hover .nav-link {
+      background-color: rgba(255, 255, 255, 0.15) !important;
+      color: white !important;
+    }
+    .sidebar .nav-item a.nav-link.text-danger,
+    .sidebar .nav-item a.nav-link.text-danger .menu-icon {
+      color: #ff4d4d !important;
     }
   </style>
 </head>
 <body>
   <div class="container-scroller">
     <!-- NAVBAR -->
-    <nav class="navbar fixed-top d-flex flex-row">
-      <div class="navbar-brand-wrapper d-flex align-items-center justify-content-start" style="background-color: #004080;">
-        <a class="navbar-brand brand-logo text-white font-weight-bold h5 mb-0" href="#">SMAN 1 Kota Sukabumi</a>
+    <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+      <div class="navbar-brand-wrapper d-flex align-items-center justify-content-start pl-3" style="background-color: #004080;">
+        <a class="navbar-brand brand-logo d-flex align-items-center" href="#">
+          <span class="text-white font-weight-bold h5 mb-0">SMAN 1 Kota Sukabumi</span>
+        </a>
       </div>
       <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
         <ul class="navbar-nav">
           <!-- NOTIFIKASI -->
-          <li class="notification-wrapper position-relative">
+          <li class="notification-wrapper">
             <div class="notification-icon" onclick="toggleDropdown()">
-              <img src="images/bell-icon.png" alt="Notifikasi" style="width:28px">
+              <img src="../images/bell-icon.png" alt="Notifikasi">
               <?php if ($jumlah_notif > 0): ?>
                 <div class="notification-badge"><?= $jumlah_notif ?></div>
               <?php endif; ?>
@@ -96,7 +214,9 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
               <h6>Notifikasi</h6>
               <?php if (count($daftar_notif) > 0): ?>
                 <?php foreach ($daftar_notif as $notif): ?>
-                  <div class="notif-item"><?= htmlspecialchars($notif['judul']) ?></div>
+                  <div class="notif-item">
+                    <?= htmlspecialchars($notif['judul']) ?>
+                  </div>
                 <?php endforeach; ?>
               <?php else: ?>
                 <div class="notif-item text-muted">Belum ada notifikasi</div>
@@ -108,14 +228,14 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
           <!-- PROFIL -->
           <li class="nav-item nav-profile-icon">
             <a class="nav-link" href="profil/index.php">
-              <img src="images/profile.png?v=2" alt="Profil" style="width:24px;height:24px">
+              <img src="../images/profile.png?v=2" alt="Profil">
             </a>
           </li>
 
           <!-- LOGOUT -->
           <li class="nav-item nav-profile-icon">
             <a class="nav-link" href="logout.php" onclick="return confirm('Yakin ingin logout?')">
-              <img src="images/logout.png" alt="Logout" style="width:24px;height:24px">
+              <img src="../images/logout.png" alt="Logout">
             </a>
           </li>
         </ul>
@@ -124,7 +244,7 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
 
     <div class="container-fluid page-body-wrapper">
       <!-- SIDEBAR -->
-      <?php include "sidebar.php"; ?>
+      <?php include "sidesbar.php"; ?>
 
       <!-- MAIN PANEL -->
       <div class="main-panel">
@@ -161,10 +281,10 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
 
             <!-- LAPORAN NILAI -->
             <div class="col-md-3 mb-4">
-              <a href="laporan-nilai/" class="text-decoration-none text-dark">
+              <a href="nilai/" class="text-decoration-none text-dark">
                 <div class="card text-center p-3 shadow-sm">
                   <i class="typcn typcn-chart-bar display-4 text-warning"></i>
-                  <h6>Laporan Nilai</h6>
+                  <h6>Grafik Nilai</h6>
                 </div>
               </a>
             </div>

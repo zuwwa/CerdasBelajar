@@ -18,16 +18,17 @@ if (!$siswa) {
 $nisn = $siswa['nisn'];
 
 // Fungsi untuk mendapatkan sisa pembayaran berdasarkan nis
-function getSisaBayar($conn, $nis, $jenis_tagihan) {
+function getSisaBayar($conn, $nis, $jenis_tagihan)
+{
   // Ambil total tagihan dari t_keuangan_daftar
   $tagihan = mysqli_fetch_assoc(mysqli_query(
-      $conn, 
-      "SELECT total_tagihan FROM t_keuangan_daftar WHERE nama_tagihan = '$jenis_tagihan'"
+    $conn,
+    "SELECT total_tagihan FROM t_keuangan_daftar WHERE nama_tagihan = '$jenis_tagihan'"
   ));
 
   $total_tagihan = 0;
   if ($tagihan) {
-      $total_tagihan = (int) preg_replace('/[^0-9]/', '', $tagihan['total_tagihan']); // Hilangkan Rp. dan titik
+    $total_tagihan = (int) preg_replace('/[^0-9]/', '', $tagihan['total_tagihan']); // Hilangkan Rp. dan titik
   }
 
   // Ambil total bayar dari t_keuangan_pembayaran
@@ -93,7 +94,7 @@ while ($row = mysqli_fetch_assoc($pembayaran_query)) {
 // Fungsi generate Virtual Account Number (VA)
 function generateVA($id_tagihan)
 {
-    return "888201" . str_pad((string)$id_tagihan, 8, "0", STR_PAD_LEFT);
+  return "888201" . str_pad((string)$id_tagihan, 8, "0", STR_PAD_LEFT);
 }
 
 ?>
@@ -246,64 +247,64 @@ function generateVA($id_tagihan)
       <?php include '../sidebar.php'; ?>
 
       <div class="main-panel">
-  <div class="content-wrapper">
-    <div class="row mb-4">
-      <div class="col-md-12">
-        <div class="bg-gradient-primary text-white p-4 rounded shadow">
-          <h4>Tagihan & Riwayat Pembayaran</h4>
-          <h2 class="mb-0"><?= $siswa['nama'] ?></h2>
-        </div>
-      </div>
-    </div>
+        <div class="content-wrapper">
+          <div class="row mb-4">
+            <div class="col-md-12">
+              <div class="bg-gradient-primary text-white p-4 rounded shadow">
+                <h4>Tagihan & Riwayat Pembayaran</h4>
+                <h2 class="mb-0"><?= $siswa['nama'] ?></h2>
+              </div>
+            </div>
+          </div>
 
-    <div class="card p-4 mb-4">
-      <h5 class="mb-3">📌 Tagihan Aktif</h5>
-      <?php
-      $tagihan_aktif_siswa = [];
-      foreach ($daftar_tagihan as $tagihan) {
-        $sisa = getSisaBayar($conn, $nisn, $tagihan['nama_tagihan'], $tagihan['total_tagihan']);
-     
-        if ($sisa > 0) {
-          $tagihan['sisa_bayar'] = $sisa;
-          $tagihan_aktif_siswa[] = $tagihan;
-        }
-      }
-      ?>
-      <?php if ($tagihan_aktif_siswa): ?>
-        <div class="table-responsive">
-          <table class="table table-bordered">
-            <thead class="thead-light">
-              <tr>
-                <th>Nama Tagihan</th>
-                <th>Total Tagihan</th>
-                <th>Sisa Bayar</th>
-                <th>VA Number</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php foreach ($tagihan_aktif_siswa as $row): ?>
-                <tr>
-                  <td><?= htmlspecialchars($row['nama_tagihan']) ?></td>
-                  <td>Rp<?= number_format($row['total_tagihan'], 0, ',', '.') ?></td>
-                  <td>Rp<?= number_format($row['sisa_bayar'], 0, ',', '.') ?></td>
-                  <td><?= generateVA($row['id_tagihan']) ?></td>
-                  <td><a href="konfirmasi.php?id_tagihan=<?= $row['id_tagihan'] ?>" class="btn btn-primary btn-sm">Bayar Sekarang</a></td>
+          <div class="card p-4 mb-4">
+            <h5 class="mb-3">📌 Tagihan Aktif</h5>
+            <?php
+            $tagihan_aktif_siswa = [];
+            foreach ($daftar_tagihan as $tagihan) {
+              $sisa = getSisaBayar($conn, $nisn, $tagihan['nama_tagihan'], $tagihan['total_tagihan']);
 
-                </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-        </div>
-      <?php else: ?>
-        <div class="alert alert-success">🎉 Tidak ada tagihan aktif.</div>
-      <?php endif; ?>
-    </div>
+              if ($sisa > 0) {
+                $tagihan['sisa_bayar'] = $sisa;
+                $tagihan_aktif_siswa[] = $tagihan;
+              }
+            }
+            ?>
+            <?php if ($tagihan_aktif_siswa): ?>
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead class="thead-light">
+                    <tr>
+                      <th>Nama Tagihan</th>
+                      <th>Total Tagihan</th>
+                      <th>Sisa Bayar</th>
+                      <th>VA Number</th>
+                      <th>Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php foreach ($tagihan_aktif_siswa as $row): ?>
+                      <tr>
+                        <td><?= htmlspecialchars($row['nama_tagihan']) ?></td>
+                        <td>Rp<?= number_format($row['total_tagihan'], 0, ',', '.') ?></td>
+                        <td>Rp<?= number_format($row['sisa_bayar'], 0, ',', '.') ?></td>
+                        <td><?= generateVA($row['id_tagihan']) ?></td>
+                        <td><a href="konfirmasi.php?id_tagihan=<?= $row['id_tagihan'] ?>" class="btn btn-primary btn-sm">Bayar Sekarang</a></td>
 
-    <div class="card p-4 mb-4">
-      <h5 class="mb-3">💰 Riwayat Pembayaran</h5>
-      <?php
-$pembayaran_query = mysqli_query($conn, "
+                      </tr>
+                    <?php endforeach; ?>
+                  </tbody>
+                </table>
+              </div>
+            <?php else: ?>
+              <div class="alert alert-success">🎉 Tidak ada tagihan aktif.</div>
+            <?php endif; ?>
+          </div>
+
+          <div class="card p-4 mb-4">
+            <h5 class="mb-3">💰 Riwayat Pembayaran</h5>
+            <?php
+            $pembayaran_query = mysqli_query($conn, "
 SELECT p.*, d.total_tagihan
 FROM t_keuangan_pembayaran p
 LEFT JOIN t_keuangan_daftar d ON p.jenis_tagihan = d.nama_tagihan
@@ -311,82 +312,85 @@ WHERE p.nis = '$nisn'
 ORDER BY p.id DESC
 ");
 
-      $riwayat = [];
-      while ($row = mysqli_fetch_assoc($pembayaran_query)) {
-        $riwayat[] = $row;
-      }
-      ?>
-      <?php if ($riwayat): ?>
-        <div class="table-responsive">
-          <table class="table table-bordered">
-            <thead class="thead-light">
-              <tr>
-                <th>Tanggal Pembayaran</th>
-                <th>Nama Tagihan</th>
-                <th>Total Tagihan</th>
-                <th>Jumlah Dibayar</th>
-                <th>Sisa Pembayaran</th>
-                <th>Status</th>
-                <th>Metode</th>
-                <th>Bukti Pembayaran</th>
-              </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($riwayat as $row): 
-    $sisa_pembayaran_histori = getSisaBayar($conn, $nisn, $row['jenis_tagihan']);
-    $status_badge_class = '';
-    $status_display_text = '';
+            $riwayat = [];
+            while ($row = mysqli_fetch_assoc($pembayaran_query)) {
+              $riwayat[] = $row;
+            }
+            ?>
+            <?php if ($riwayat): ?>
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead class="thead-light">
+                    <tr>
+                      <th>Tanggal Pembayaran</th>
+                      <th>Nama Tagihan</th>
+                      <th>Total Tagihan</th>
+                      <th>Jumlah Dibayar</th>
+                      <th>Sisa Pembayaran</th>
+                      <th>Status</th>
+                      <th>Metode</th>
+                      <th>Bukti Pembayaran</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php foreach ($riwayat as $row):
+                      $sisa_pembayaran_histori = getSisaBayar($conn, $nisn, $row['jenis_tagihan']);
+                      $status_badge_class = '';
+                      $status_display_text = '';
 
-    if (strtolower($row['status']) === 'lunas') {
-        $status_badge_class = 'badge-success';
-        $status_display_text = 'Terkonfirmasi';
-    } elseif (strtolower($row['status']) === 'menunggu') {
-        $status_badge_class = 'badge-warning';
-        $status_display_text = 'Menunggu Konfirmasi';
-    } else {
-        $status_badge_class = 'badge-danger';
-        $status_display_text = ucfirst($row['status']);
-    }
-?>
+                      if (strtolower($row['status']) === 'lunas') {
+                        $status_badge_class = 'badge-success';
+                        $status_display_text = 'Terkonfirmasi';
+                      } elseif (strtolower($row['status']) === 'menunggu') {
+                        $status_badge_class = 'badge-warning';
+                        $status_display_text = 'Menunggu Konfirmasi';
+                      } else {
+                        $status_badge_class = 'badge-danger';
+                        $status_display_text = ucfirst($row['status']);
+                      }
+                    ?>
 
-                <tr>
-                  <td><?= date('d/m/Y', strtotime($row['tanggal'])) ?></td>
-                  <td><?= htmlspecialchars($row['nama_tagihan']) ?></td>
-                  <td>Rp<?= number_format($row['total_tagihan'], 0, ',', '.') ?></td>
-                  <td>Rp<?= number_format($row['jml_bayar'], 0, ',', '.') ?></td>
-                  <td>
-                    <span class="badge badge-<?= ($sisa_pembayaran_histori == 0 ? 'success' : 'warning') ?>">
-                      Rp<?= number_format($sisa_pembayaran_histori, 0, ',', '.') ?>
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge <?= $status_badge_class ?>">
-                      <?= $status_display_text ?>
-                    </span>
-                  </td>
-                  <td><?= htmlspecialchars($row['metode']) ?: '-' ?></td>
-                  <td>
-                    <?php if (!empty($row['bukti_pembayaran'])): ?>
-                      <a href="../../uploads/<?= htmlspecialchars($row['bukti_pembayaran']) ?>" target="_blank" class="btn btn-info btn-sm">Lihat Bukti</a>
-                    <?php else: ?>
-                      -
-                    <?php endif; ?>
-                  </td>
-                </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
+                      <tr>
+                        <td><?= date('d/m/Y', strtotime($row['tanggal_bayar'])) ?></td>
+                        <td><?= htmlspecialchars($row['jenis_tagihan']) ?></td>
+                        <td>
+                          Rp<?= number_format((int) str_replace(['Rp', '.', ' '], '', $row['total_tagihan']), 0, ',', '.') ?>
+                        </td>
+
+                        <td>Rp<?= number_format($row['jml_bayar'], 0, ',', '.') ?></td>
+                        <td>
+                          <span class="badge badge-<?= ($sisa_pembayaran_histori == 0 ? 'success' : 'warning') ?>">
+                            Rp<?= number_format($sisa_pembayaran_histori, 0, ',', '.') ?>
+                          </span>
+                        </td>
+                        <td>
+                          <span class="badge <?= $status_badge_class ?>">
+                            <?= $status_display_text ?>
+                          </span>
+                        </td>
+                        <td><?= htmlspecialchars($row['metode']) ?: '-' ?></td>
+                        <td>
+                          <?php if (!empty($row['bukti_pembayaran'])): ?>
+                            <a href="../../uploads/bukti_pembayaran/<?= htmlspecialchars($row['bukti_pembayaran']) ?>" target="_blank" class="btn btn-info btn-sm">Lihat Bukti</a>
+                          <?php else: ?>
+                            -
+                          <?php endif; ?>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  </tbody>
+                </table>
+              </div>
+            <?php else: ?>
+              <div class="alert alert-info">Belum ada riwayat pembayaran.</div>
+            <?php endif; ?>
+          </div>
+
+          <footer class="footer mt-4">
+            <div class="text-center">© SMAN 1 Kota Sukabumi 2025</div>
+          </footer>
         </div>
-      <?php else: ?>
-        <div class="alert alert-info">Belum ada riwayat pembayaran.</div>
-      <?php endif; ?>
-    </div>
-
-    <footer class="footer mt-4">
-      <div class="text-center">© SMAN 1 Kota Sukabumi 2025</div>
-    </footer>
-  </div>
-</div>
+      </div>
 
     </div>
   </div>

@@ -3,6 +3,54 @@ session_start();
 include("configGoogle.php");
 include("koneksi.php");
 
+if (isset($_POST['login_manual'])) {
+  $username = trim($_POST['username']);
+  $password = trim($_POST['password']);
+  $role     = $_SESSION['dipilih'] ?? null;
+
+  if (!$role) {
+      echo "<script>alert('⚠️ Role belum dipilih.'); window.location='index.php';</script>";
+      exit;
+  }
+
+  $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND type = ?");
+  $stmt->bind_param("ss", $username, $role);
+  $stmt->execute();
+  $result = $stmt->get_result();
+
+  if ($result->num_rows === 1) {
+      $user = $result->fetch_assoc();
+
+      // Jika password cocok (pakai password_hash, tapi saat ini langsung cek saja)
+      if (password_verify($password, $user['password']) || md5($password) === $user['password'])
+      {
+        $_SESSION['email']    = $user['email'];
+        $_SESSION['username'] = $user['fullname'];
+        $_SESSION['picture']  = $user['picture'];
+        $_SESSION['role']     = $user['type'];
+        $_SESSION['id_user']  = $user['id'];
+    
+        // Redirect ke dashboard sesuai role
+        switch ($user['type']) {
+            case 'admin':   header("Location: administrator/index.php"); exit;
+            case 'siswa':   header("Location: siswa/index.php"); exit;
+            case 'guru':    header("Location: guru/index.php"); exit;
+            case 'ortu':    header("Location: ortu/index.php"); exit;
+            case 'kepsek':  header("Location: kepsek/index.php"); exit;
+            case 'perpus':  header("Location: perpus/index.php"); exit;
+            default:
+                echo "<script>alert('⚠️ Role tidak dikenali'); window.location='logout.php';</script>"; exit;
+        }
+    } else {
+        echo "<script>alert('❌ Password salah!');</script>";
+    }
+    
+  } else {
+      echo "<script>alert('❌ Username atau role tidak ditemukan!');</script>";
+  }
+}
+
+
 // Tangkap role dari URL (misal ?role=siswa)
 $role_dipilih = $_GET['role'] ?? null;
 if ($role_dipilih) {
@@ -230,13 +278,11 @@ $login_url = $google_client->createAuthUrl();
         Masuk menggunakan akun Google Anda atau metode lain yang terdaftar.
       </p>
 
-      <input type="text" placeholder="NIM / Username" style="width: 100%; padding: 10px; margin: 12px 0; border-radius: 6px; border: 1px solid #ccc; font-size: 14px;">
-      <input type="password" placeholder="Kata Sandi" style="width: 100%; padding: 10px; margin-bottom: 16px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px;">
-
-      <button style="width: 100%; background: #15264e; color: white; padding: 12px; border: none; border-radius: 6px; font-size: 14px; margin-bottom: 10px; cursor: pointer;">
-        Masuk
-      </button>
-
+      <form method="POST" action="">
+  <input type="text" name="username" placeholder="NIM / Username" style="width: 100%; padding: 10px; margin: 12px 0; border-radius: 6px; border: 1px solid #ccc; font-size: 14px;" required>
+  <input type="password" name="password" placeholder="Kata Sandi" style="width: 100%; padding: 10px; margin-bottom: 16px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px;" required>
+  <button type="submit" name="login_manual" style="width: 100%; background: #15264e; color: white; padding: 12px; border: none; border-radius: 6px; font-size: 14px; margin-bottom: 10px; cursor: pointer;">Masuk</button>
+</form>
       <div style="margin: 12px 0; font-size: 14px; color: #888;">Atau</div>
 
       <a href="<?= $login_url ?>">
