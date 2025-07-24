@@ -50,10 +50,10 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dashboard Guru - SMAN 1 Sukabumi</title>
-  <link rel="stylesheet" href="vendors/typicons.font/font/typicons.css" />
-  <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css" />
-  <link rel="stylesheet" href="css/vertical-layout-light/style.css" />
-  <link rel="shortcut icon" href="images/sma.png" />
+  <link rel="stylesheet" href="/CerdasBelajar/vendors/typicons.font/font/typicons.css" />
+  <link rel="stylesheet" href="/CerdasBelajar/vendors/css/vendor.bundle.base.css" />
+  <link rel="stylesheet" href="/CerdasBelajar/css/vertical-layout-light/style.css" />
+  <link rel="shortcut icon" href="/CerdasBelajar/images/sma.png" />
   <style>
     .navbar-menu-wrapper { background-color: #004080 !important; }
     .notification-badge {
@@ -87,21 +87,31 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
       color: crimson;
       cursor: pointer;
     }
+    .nama-sekolah {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff; /* Warna putih */
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+}
+    
   </style>
 </head>
 <body>
   <div class="container-scroller">
     <!-- NAVBAR -->
-    <nav class="navbar fixed-top d-flex flex-row">
+    <nav class="navbar fixed-top d-flex flex-row" style="margin: 0; left: 0; top: 0; width: 100%; z-index: 1001; background-color: #004080; border-radius: 0;">
+
       <div class="navbar-brand-wrapper d-flex align-items-center justify-content-start" style="background-color: #004080;">
-        <a class="navbar-brand brand-logo text-white font-weight-bold h5 mb-0" href="#">SMAN 1 Kota Sukabumi</a>
+        <h4 class="nama-sekolah">SMAN 1 Kota Sukabumi</h4>
       </div>
       <div class="navbar-menu-wrapper d-flex align-items-center justify-content-end">
         <ul class="navbar-nav">
           <!-- NOTIFIKASI -->
           <li class="notification-wrapper position-relative">
             <div class="notification-icon" onclick="toggleDropdown()">
-              <img src="images/bell-icon.png" alt="Notifikasi" style="width:28px">
+              <img src="/CerdasBelajar/images/bell-icon.png" alt="Notifikasi" style="width:28px">
               <?php if ($jumlah_notif > 0): ?>
                 <div class="notification-badge"><?= $jumlah_notif ?></div>
               <?php endif; ?>
@@ -122,7 +132,7 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
           <!-- PROFIL -->
           <li class="nav-item nav-profile-icon">
             <a class="nav-link" href="profil/index.php">
-              <img src="images/profile.png?v=2" alt="Profil" style="width:24px;height:24px">
+              <img src="/CerdasBelajar/images/profile.png?v=2" alt="Profil" style="width:24px;height:24px">
             </a>
           </li>
 
@@ -138,7 +148,7 @@ while ($row = mysqli_fetch_assoc($notif_query)) {
 
     <div class="container-fluid page-body-wrapper">
       <!-- SIDEBAR -->
-      <?php include "sidebar.php"; ?>
+      <?php include "sidesbar.php"; ?>
 
       <!-- MAIN PANEL -->
       <div class="main-panel">

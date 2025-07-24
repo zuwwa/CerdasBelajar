@@ -29,6 +29,7 @@ if (!$mapel) {
     echo "<script>alert('Mapel tidak ditemukan.'); window.location='index.php';</script>";
     exit;
 }
+
 // Ambil daftar tugas dari mapel ini
 $tugasQuery = mysqli_query($conn, "
   SELECT * FROM tugas
@@ -121,21 +122,40 @@ $tugasQuery = mysqli_query($conn, "
               </td>
               <td class="text-center">
                 <?php
-                  if ($tugas['deadline'] < $now) {
-                    echo '<span class="badge badge-danger">Terlambat</span>';
-                  } elseif ($tugas['deadline'] == $now) {
-                    echo '<span class="badge badge-warning">Hari Ini</span>';
+                  $status_badge = '';
+                  if ($file_jawaban) {
+                      $waktu_pengumpulan_query = mysqli_query($conn, "SELECT tanggal_upload FROM pengumpulan_tugas WHERE tugas_id = $tugas_id AND siswa_id = $siswa_id");
+                      $pengumpulan = mysqli_fetch_assoc($waktu_pengumpulan_query);
+                      $tanggal_pengumpulan = $pengumpulan ? substr($pengumpulan['tanggal_upload'], 0, 10) : null;
+
+                      if ($tanggal_pengumpulan > $tugas['deadline']) {
+                          $status_badge = '<span class="badge badge-danger">Terlambat</span>';
+                      } else {
+                          $status_badge = '<span class="badge badge-success">Tepat Waktu</span>';
+                      }
                   } else {
-                    echo '<span class="badge badge-success">Aktif</span>';
+                      if ($tugas['deadline'] < $now) {
+                          $status_badge = '<span class="badge badge-danger">Terlambat</span>';
+                      } elseif ($tugas['deadline'] == $now) {
+                          $status_badge = '<span class="badge badge-warning">Hari Ini</span>';
+                      } else {
+                          $status_badge = '<span class="badge badge-success">Aktif</span>';
+                      }
                   }
+
+                  echo $status_badge;
                 ?>
               </td>
               <td class="text-center">
                 <?= is_numeric($nilai) ? $nilai : '<span class="text-muted">Belum dinilai</span>'; ?>
               </td>
               <td class="text-center">
+              <?php if ($tugas['deadline'] < $now): ?>
+                <button class="btn btn-sm btn-secondary" disabled>Kumpulkan</button>
+              <?php else: ?>
                 <a href="kumpul_tugas.php?id=<?= $tugas['id']; ?>" class="btn btn-sm btn-success">Kumpulkan</a>
-              </td>
+              <?php endif; ?>
+            </td>
             </tr>
           <?php endwhile; ?>
           </tbody>
