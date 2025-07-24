@@ -74,11 +74,11 @@ $insert2 = mysqli_query($conn, "
         ('$siswa_id', NOW(), 'H')
 ");
 
-
-if ($insert && $insert2) {
+if ($insert1 && $insert2) {
     header("Location: materi.php?kode=" . urlencode($kode_mapel));
     exit;
 } else {
     echo "❌ Gagal menyimpan absensi. Periksa koneksi atau struktur tabel.";
 }
+
 ?>

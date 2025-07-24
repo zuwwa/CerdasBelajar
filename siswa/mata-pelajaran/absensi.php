@@ -15,11 +15,8 @@ $siswaQuery = mysqli_query($conn, "
     JOIN t_siswa ts ON s.nisn = ts.nis
     WHERE s.email = '$email'
 ");
-
-
 $siswa = mysqli_fetch_assoc($siswaQuery);
 $siswa_id = $siswa['id_ts'] ?? null;
-
 if (!$siswa_id) {
     die("❌ Data siswa tidak ditemukan.");
 }
@@ -46,13 +43,17 @@ if (!$mapel) {
 
 // Ambil data absensi siswa berdasarkan mapel
 $absensiQuery = mysqli_query($conn, "
-    SELECT a.*, tm.judul, tm.tanggal_upload
-    FROM t_absensi a
-    LEFT JOIN t_materi tm ON a.materi_id = tm.id
-    WHERE a.id_siswa = '$siswa_id' AND a.id_mapel = '{$mapel['id']}'
-    ORDER BY tm.tanggal_upload DESC
+    SELECT 
+        tm.judul,
+        tm.tanggal_upload,
+        tsa.kehadiran,
+        tsa.waktu_kehadiran
+    FROM t_siswa_absensi tsa
+    LEFT JOIN t_absensi ta ON ta.id_siswa = tsa.id_siswa AND DATE(ta.waktu_kehadiran) = DATE(tsa.waktu_kehadiran)
+    LEFT JOIN t_materi tm ON DATE(tm.tanggal_upload) = DATE(tsa.waktu_kehadiran)
+    WHERE tsa.id_siswa = '$siswa_id' AND tm.mapel_id = '{$mapel['id']}'
+    ORDER BY tsa.waktu_kehadiran DESC
 ");
-
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -71,6 +72,10 @@ $absensiQuery = mysqli_query($conn, "
     h3, h4 { font-weight: 600; }
     .badge { font-size: 0.85rem; padding: 6px 12px; border-radius: 10px; text-transform: uppercase; }
     .badge.H { background-color: #28a745; color: white; }
+    .badge.T { background-color: #ffc107; color: black; }
+    .badge.S { background-color: #17a2b8; color: white; }
+    .badge.I { background-color: #007bff; color: white; }
+    .badge.A { background-color: #dc3545; color: white; }
     .btn-secondary { border-radius: 10px; }
   </style>
 </head>
@@ -78,9 +83,9 @@ $absensiQuery = mysqli_query($conn, "
 <div class="container mt-5 mb-5">
   <div class="card shadow">
     <div class="d-flex justify-content-between align-items-center mb-3">
-  <h3 class="text-primary m-0">📅 Riwayat Absensi: <?= htmlspecialchars($mapel['nama_mapel']) ?></h3>
-  <a href="../index.php" class="btn btn-dark btn-sm">🏠 Beranda</a>
-</div>
+      <h3 class="text-primary m-0">📅 Riwayat Absensi: <?= htmlspecialchars($mapel['nama_mapel']) ?></h3>
+      <a href="../index.php" class="btn btn-dark btn-sm">🏠 Beranda</a>
+    </div>
     <p><strong>Guru Pengampu:</strong> <?= htmlspecialchars($mapel['nama_guru']) ?></p>
     <p><strong>Kelas:</strong> <?= htmlspecialchars($mapel['nama_kelas']) ?></p>
     <p><strong>Tanggal Hari Ini:</strong> <?= date('d M Y') ?></p>
@@ -101,12 +106,15 @@ $absensiQuery = mysqli_query($conn, "
             </tr>
           </thead>
           <tbody>
-          <?php $no = 1; while ($a = mysqli_fetch_assoc($absensiQuery)) : ?>
+          <?php $no = 1; while ($a = mysqli_fetch_assoc($absensiQuery)) : 
+              $status = strtoupper($a['kehadiran']);
+              $badgeClass = in_array($status, ['H','T','S','I','A']) ? $status : 'secondary';
+          ?>
             <tr>
               <td class="text-center"><?= $no++ ?></td>
               <td><?= htmlspecialchars($a['judul'] ?? '-') ?></td>
-              <td class="text-center"><?= date('d M Y', strtotime($a['tanggal_upload'])) ?></td>
-              <td class="text-center"><span class="badge H">H</span></td>
+              <td class="text-center"><?= date('d M Y', strtotime($a['waktu_kehadiran'])) ?></td>
+              <td class="text-center"><span class="badge <?= $badgeClass ?>"><?= $status ?></span></td>
             </tr>
           <?php endwhile; ?>
           </tbody>

@@ -88,41 +88,58 @@ $materiQuery = mysqli_query($conn, "
     <?php else: ?>
       <ul class="list-group">
         <?php while ($materi = mysqli_fetch_assoc($materiQuery)) :
-          $materi_id = $materi['id'];
-          $hari_ini = date('Y-m-d');
+  $materi_id = $materi['id'];
+  $tanggal_upload = $materi['tanggal_upload'];
+  $hari_ini = date('Y-m-d');
 
-          $cekAbsen = mysqli_query($conn, "
-            SELECT id FROM t_absensi 
-            WHERE id_siswa = '$siswa_id' 
-              AND id_mapel = '$mapel_id' 
-              AND materi_id = '$materi_id'
-              AND DATE(waktu_kehadiran) = '$hari_ini'
-          ");
-          $sudahAbsen = mysqli_num_rows($cekAbsen) > 0;
-        
-        ?>
-        
-        <li class="list-group-item">
-          <h5><?= htmlspecialchars($materi['judul']) ?></h5>
-          <p><?= nl2br(htmlspecialchars($materi['deskripsi'])) ?></p>
-          <small class="text-muted">Diunggah: <?= date('d M Y', strtotime($materi['tanggal_upload'])) ?></small><br>
+  // Cek apakah sudah absen
+  $cekAbsen = mysqli_query($conn, "
+    SELECT id FROM t_absensi 
+    WHERE id_siswa = '$siswa_id' 
+      AND id_mapel = '$mapel_id' 
+      AND materi_id = '$materi_id'
+  ");
+  $sudahAbsen = mysqli_num_rows($cekAbsen) > 0;
 
-          <?php if (!empty($materi['file'])): ?>
-            <a href="../uploads/<?= urlencode($materi['file']) ?>" class="btn btn-download mt-2" download>📥 Unduh</a>
-          <?php endif; ?>
+  // Jika belum absen dan sudah lewat hari upload ➜ catat sebagai Terlambat
+  if (!$sudahAbsen && $hari_ini > $tanggal_upload) {
+    $cekTerlambat = mysqli_query($conn, "
+      SELECT id FROM t_siswa_absensi 
+      WHERE id_siswa = '$siswa_id' 
+        AND DATE(waktu_kehadiran) = '$tanggal_upload' 
+        AND kehadiran = 'T'
+    ");
+    if (mysqli_num_rows($cekTerlambat) === 0) {
+      mysqli_query($conn, "
+        INSERT INTO t_siswa_absensi (id_siswa, waktu_kehadiran, kehadiran)
+        VALUES ('$siswa_id', '$tanggal_upload', 'T')
+      ");
+    }
+  }
+?>
+<li class="list-group-item">
+  <h5><?= htmlspecialchars($materi['judul']) ?></h5>
+  <p><?= nl2br(htmlspecialchars($materi['deskripsi'])) ?></p>
+  <small class="text-muted">Diunggah: <?= date('d M Y', strtotime($tanggal_upload)) ?></small><br>
 
-          <?php if (!$sudahAbsen): ?>
-          <form method="post" action="proses_absen.php?kode=<?= urlencode($kode); ?>" class="d-inline">
-            <input type="hidden" name="mapel_id" value="<?= $mapel_id ?>">
-            <input type="hidden" name="materi_id" value="<?= $materi_id ?>">
-            <button type="submit" class="btn btn-absen mt-2">📅 Absen Hari Ini</button>
-          </form>
-          <?php else: ?>
-          <button class="btn btn-success mt-2" disabled>✅ Anda telah absen hari ini</button>
-          <?php endif; ?>
+  <?php if (!empty($materi['file'])): ?>
+    <a href="../uploads/<?= urlencode($materi['file']) ?>" class="btn btn-download mt-2" download>📥 Unduh</a>
+  <?php endif; ?>
 
-        </li>
-        <?php endwhile; ?>
+  <?php if (!$sudahAbsen && $hari_ini === $tanggal_upload): ?>
+    <form method="post" action="proses_absen.php?kode=<?= urlencode($kode); ?>" class="d-inline">
+      <input type="hidden" name="mapel_id" value="<?= $mapel_id ?>">
+      <input type="hidden" name="materi_id" value="<?= $materi_id ?>">
+      <button type="submit" class="btn btn-absen mt-2">📅 Absen Hari Ini</button>
+    </form>
+  <?php elseif ($sudahAbsen): ?>
+    <button class="btn btn-success mt-2" disabled>✅ Anda telah absen</button>
+  <?php else: ?>
+    <button class="btn btn-secondary mt-2" disabled>⛔ Absen ditutup</button>
+  <?php endif; ?>
+</li>
+<?php endwhile; ?>
+
       </ul>
     <?php endif; ?>
 
