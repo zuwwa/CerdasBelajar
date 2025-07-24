@@ -1341,7 +1341,7 @@ INSERT INTO `users` (`id`, `fullname`, `email`, `password`, `status`, `picture`,
 (6, 'Alief', 'aliefhamzah652@gmail.com', '-', 1, 'https://lh3.googleusercontent.com/a/ACg8ocJJYfgyRCHnZs4S6JWzA9NaZPuFMtZlnc5bp37aKHylQ4VvSg=s96-c', 'admin', '2025-07-19 20:55:08', '2025-07-19 20:55:08'),
 (7, 'M. ALIEF BUDIMAN', 'aliefmasa@gmail.com', '202cb962ac59075b964b07152d234b70', 1, 'default.png', 'siswa', '2025-07-20 05:53:10', '2025-07-20 05:53:10'),
 (8, 'RIZAL HERDY ANJAY MABAR', 'rizal@gmail.com', '$2y$10$vGiHdnVKZXF0MrCqkuIXfOKvDN5WkG1WBi1urTds1gXwUiq8O8Goq', 1, 'default.png', 'siswa', '2025-07-23 20:05:57', '2025-07-23 20:05:57'),
-(9, 'LiefHax', 'halohopskings@gmail.com', '-', 1, 'https://lh3.googleusercontent.com/a/ACg8ocLflbWEol6olZ9yw5tLA13k0YiHEwhO3XQXVb1kKvKBS96NM_jg=s96-c', 'kepsek', '2025-07-23 20:20:00', '2025-07-23 20:20:00');
+(9, 'LiefHax', 'naufalatilah2005@gmail.com', '-', 1, 'https://lh3.googleusercontent.com/a/ACg8ocLflbWEol6olZ9yw5tLA13k0YiHEwhO3XQXVb1kKvKBS96NM_jg=s96-c', 'kepsek', '2025-07-23 20:20:00', '2025-07-23 20:20:00');
 
 --
 -- Indexes for dumped tables
